@@ -6,13 +6,13 @@
 # Alexander Granizo, 2013
 # dmentre <dmentre@linux-france.org>, 2013
 # Jeroen van Rijn <jvrnix@gmail.com>, 2013
-# Marco Antonio Frias Butrón <marcoantoniofrias@gmail.com>, 2014
+# Marco Antonio <marcoantoniofrias@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: 2014-09-11 05:27+0000\n"
-"Last-Translator: Marco Antonio Frias Butrón <marcoantoniofrias@gmail.com>\n"
+"Last-Translator: Marco Antonio <marcoantoniofrias@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/maposmatic/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
