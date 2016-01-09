@@ -490,8 +490,8 @@ SELECT ST_AsText(ST_LongestLine(
             def factory(w,h):
                 w_px = int(layoutlib.commons.convert_pt_to_dots(w, dpi))
                 h_px = int(layoutlib.commons.convert_pt_to_dots(h, dpi))
-                LOG.debug("Rendering PNG into %dpx x %dpx area..."
-                          % (w_px, h_px))
+                LOG.debug("Rendering PNG into %dpx x %dpx area at %ddpi ..."
+                          % (w_px, h_px, dpi))
                 return cairo.PDFSurface(None, w_px, h_px)
 
         elif output_format == 'svg':
