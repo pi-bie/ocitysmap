@@ -141,7 +141,8 @@ class SinglePageRenderer(Renderer):
         self._map_canvas = self._create_map_canvas(
             float(self._map_coords[2]),  # W
             float(self._map_coords[3]),  # H
-            dpi )
+            dpi,
+            rc.osmid > 0 )
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas)
