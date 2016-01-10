@@ -145,7 +145,7 @@ class SinglePageRenderer(Renderer):
             rc.osmid > 0 )
 
         # Prepare the grid
-        self.grid = self._create_grid(self._map_canvas)
+        self.grid = self._create_grid(self._map_canvas, dpi)
 
         # Update the street_index to reflect the grid's actual position
         if self.grid and self.street_index:
@@ -402,10 +402,11 @@ class SinglePageRenderer(Renderer):
 
         # Draw the rescaled Map
         ctx.save()
+        scale_factor = dpi / 72
         rendered_map = self._map_canvas.get_rendered_map()
         LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
         LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
-        mapnik.render(rendered_map, ctx)
+        mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
 
         # Draw a rectangle around the map
