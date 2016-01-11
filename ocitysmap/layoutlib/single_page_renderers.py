@@ -41,6 +41,7 @@ from ocitysmap.indexlib.renderer import StreetIndexRenderer
 from indexlib.indexer import StreetIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
+from ocitysmap.maplib.map_canvas import MapCanvas
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -144,6 +145,14 @@ class SinglePageRenderer(Renderer):
             dpi,
             rc.osmid > 0 )
 
+        # Prepare map overlay
+        if self.rc.overlay:
+            self._overlay_canvas = MapCanvas(self.rc.overlay,
+                                             self.rc.bounding_box,
+                                             float(self._map_coords[2]),  # W
+                                             float(self._map_coords[3]),  # H
+                                             dpi)
+
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
 
@@ -157,7 +166,8 @@ class SinglePageRenderer(Renderer):
 
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
-
+        if self.rc.overlay:
+           self._overlay_canvas.render()
 
     def _create_index_rendering(self, on_the_side):
         """
@@ -391,7 +401,6 @@ class SinglePageRenderer(Renderer):
             ctx.stroke()
             ctx.restore()
 
-
         ##
         ## Draw the map, scaled to fit the designated area
         ##
@@ -404,10 +413,22 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         scale_factor = dpi / 72
         rendered_map = self._map_canvas.get_rendered_map()
+        LOG.debug('Map:')
         LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
         LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
+
+        # Draw the rescaled Overlay
+        if self.rc.overlay:
+            ctx.save()
+            scale_factor = dpi / 72
+            rendered_overlay = self._overlay_canvas.get_rendered_map()
+            LOG.debug('Overlay:')
+            LOG.debug('Mapnik scale: 1/%f' % rendered_overlay.scale_denominator())
+            LOG.debug('Actual scale: 1/%f' % self._overlay_canvas.get_actual_scale())
+            mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
+            ctx.restore()
 
         # Draw a rectangle around the map
         ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
