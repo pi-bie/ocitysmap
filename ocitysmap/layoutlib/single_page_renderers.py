@@ -23,6 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
+import rsvg
 import datetime
 import locale
 import logging
@@ -468,8 +469,16 @@ class SinglePageRenderer(Renderer):
                                     osm_date=osm_date)
         ctx.restore()
 
+        # Draw compass rose
+        # TODO: proper positioning/scaling, move to abstract renderer
+        ctx.save();
+        ctx.translate(50, title_margin_dots + 50);
+        ctx.scale(0.33, 0.33)
+        svg = rsvg.Handle('images/compass-rose.svg')
+        svg.render_cairo(ctx)
+        ctx.restore();
+
         # TODO: map scale
-        # TODO: compass rose
 
         cairo_surface.flush()
 
