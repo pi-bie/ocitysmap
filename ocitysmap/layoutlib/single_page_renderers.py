@@ -474,7 +474,7 @@ class SinglePageRenderer(Renderer):
         ctx.save();
         ctx.translate(50, title_margin_dots + 50);
         ctx.scale(0.33, 0.33)
-        svg = rsvg.Handle('images/compass-rose.svg')
+        svg = rsvg.Handle('/home/vagrant/ocitysmap/images/compass-rose.svg')
         svg.render_cairo(ctx)
         ctx.restore();
 
