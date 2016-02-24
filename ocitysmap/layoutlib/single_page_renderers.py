@@ -22,6 +22,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import cairo
 import rsvg
 import datetime
@@ -474,7 +475,9 @@ class SinglePageRenderer(Renderer):
         ctx.save();
         ctx.translate(50, title_margin_dots + 50);
         ctx.scale(0.33, 0.33)
-        svg = rsvg.Handle('/home/vagrant/ocitysmap/images/compass-rose.svg')
+        compass_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
+        svg = rsvg.Handle(compass_path)
         svg.render_cairo(ctx)
         ctx.restore();
 
