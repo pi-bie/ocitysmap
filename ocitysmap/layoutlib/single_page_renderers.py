@@ -39,11 +39,18 @@ import pangocairo
 import commons
 import ocitysmap
 from abstract_renderer import Renderer
-from ocitysmap.indexlib.renderer import StreetIndexRenderer
-from indexlib.indexer import StreetIndex
+from ocitysmap.indexlib.renderer import StreetIndexRenderer, PoiIndexRenderer
+from indexlib.indexer import StreetIndex, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
+
+from colour import Color
+
+from geopy.geocoders import Nominatim
+
+import time
+
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -74,9 +81,14 @@ class SinglePageRenderer(Renderer):
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
         # Prepare the index
-        self.street_index = StreetIndex(db,
-                                        rc.polygon_wkt,
-                                        rc.i18n)
+
+        if rc.poi_file:
+            self.street_index = PoiIndex(rc.poi_file)
+        else:
+            self.street_index = StreetIndex(db,
+                                            rc.polygon_wkt,
+                                            rc.i18n)
+
         if not self.street_index.categories:
             LOG.warning("Designated area leads to an empty index")
             self.street_index = None
@@ -181,8 +193,12 @@ class SinglePageRenderer(Renderer):
         Return a couple (StreetIndexRenderer, StreetIndexRenderingArea).
         """
         # Now we determine the actual occupation of the index
-        index_renderer = StreetIndexRenderer(self.rc.i18n,
-                                             self.street_index.categories)
+        if self.rc.poi_file:
+            index_renderer = PoiIndexRenderer(self.rc.i18n,
+                                                 self.street_index.categories)
+        else:
+            index_renderer = StreetIndexRenderer(self.rc.i18n,
+                                                 self.street_index.categories)
 
         # We use a fake vector device to determine the actual
         # rendering characteristics
@@ -262,10 +278,22 @@ class SinglePageRenderer(Renderer):
             logo_width = 0
         ctx.restore()
 
+        # Retrieve and paint the extra logo
+        ctx.save()
+        grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
+        if grp:
+            ctx.translate(0.3*h_dots, 0.1*h_dots)
+            ctx.set_source(grp)
+            ctx.paint_with_alpha(0.5)
+        else:
+            LOG.warning("Extra Logo not available.")
+            logo_width = 0
+        ctx.restore()
+
         # Prepare the title
         pc = pangocairo.CairoContext(ctx)
         layout = pc.create_layout()
-        layout.set_width(int((w_dots - 0.1*w_dots - logo_width) * pango.SCALE))
+        layout.set_width(int((w_dots - 0.1*w_dots - logo_width -logo_width2) * pango.SCALE))
         if not self.rc.i18n.isrtl(): layout.set_alignment(pango.ALIGN_LEFT)
         else:                        layout.set_alignment(pango.ALIGN_RIGHT)
         fd = pango.FontDescription(font_face)
@@ -278,7 +306,7 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         ctx.rectangle(0, 0, w_dots, h_dots)
         ctx.stroke()
-        ctx.translate(0.1*h_dots,
+        ctx.translate(0.4*h_dots + logo_width2 ,
                       (h_dots -
                        (layout.get_size()[1] / pango.SCALE)) / 2.0)
         pc.show_layout(layout)
@@ -334,6 +362,71 @@ class SinglePageRenderer(Renderer):
         pc.show_layout(layout)
         ctx.restore()
 
+    def _latlon2xy(self, lat, lon, dpi):
+        bbox = self._map_canvas.get_actual_bounding_box()
+        vert_angle_span = abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1])
+        horiz_angle_span  = abs(bbox.get_top_left()[0] - bbox.get_bottom_right()[0])
+
+        y = bbox.get_top_left()[0] - lat
+        y*= self._map_coords[3] / horiz_angle_span
+        y+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt, dpi)
+
+        x = lon - bbox.get_top_left()[1]
+        x*= self._map_coords[2] / vert_angle_span
+        x+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
+
+        return x,y
+
+    def _marker(self, color, txt, lat, lon, ctx, dpi):
+
+        marker_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
+
+        fp = open(marker_path,'rb')
+        data = fp.read()
+        fp.close()
+
+        if color[0] != '#':
+            c = Color(color);
+            color = c.hex_l
+
+        data = data.replace('#000000', color)
+
+        svg = rsvg.Handle(data = data)
+
+        x,y = self._latlon2xy(lat, lon, dpi)
+
+        scale = 50.0 / svg.props.height;
+
+        x-= svg.props.width  * scale/2
+        y-= svg.props.height * scale
+
+        ctx.save()
+        ctx.translate(x, y)
+
+        ctx.scale(scale, scale)
+        svg.render_cairo(ctx)
+
+        pc = pangocairo.CairoContext(ctx)
+        fd = pango.FontDescription('DejaVu')
+        fd.set_size(pango.SCALE)
+        layout = pc.create_layout()
+        layout.set_font_description(fd)
+        layout.set_text(txt)
+        draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
+        ctx.translate(svg.props.width/3,svg.props.height/5)
+        pc.show_layout(layout)
+
+        ctx.restore()
+
+    def _geomarker(self, txt, color, ref, ctx, dpi):
+
+       geolocator = Nominatim()
+
+       time.sleep(1)
+       location = geolocator.geocode(ref)
+
+       self._marker(color, txt, location.latitude, location.longitude, ctx, dpi)
 
     def render(self, cairo_surface, dpi, osm_date):
         """Renders the map, the index and all other visual map features on the
@@ -420,7 +513,7 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         ctx.translate(safe_margin_dots, safe_margin_dots)
         self._draw_title(ctx, usable_area_width_dots,
-                         title_margin_dots, 'Georgia Bold')
+                         title_margin_dots, 'Droid Sans Bold')
         ctx.restore()
 
         ##
@@ -472,14 +565,22 @@ class SinglePageRenderer(Renderer):
 
         # Draw compass rose
         # TODO: proper positioning/scaling, move to abstract renderer
-        ctx.save();
-        ctx.translate(50, title_margin_dots + 50);
+        ctx.save()
+        ctx.translate(50, title_margin_dots + 50)
         ctx.scale(0.33, 0.33)
         compass_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
         svg = rsvg.Handle(compass_path)
         svg.render_cairo(ctx)
-        ctx.restore();
+        ctx.restore()
+
+        if self.rc.poi_file:
+            n = 0
+            for category in self.street_index.categories:
+                for poi in category.items:
+                    n = n + 1
+                    lat, lon = poi.endpoint1.get_latlong()
+                    self._marker(category.color, str(n), lat, lon, ctx, dpi)
 
         # TODO: map scale
 

@@ -102,6 +102,9 @@ def main():
                       help='set the output paper orientation. Either '
                             '"portrait" or "landscape". Defaults to portrait.',
                       default='portrait')
+    parser.add_option('--poi-file', metavar='FILE',
+                      help='provide a filecontaining POI information to '
+                           'create an index instead of auto-generating it.')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -242,6 +245,7 @@ def main():
     rc.language     = options.language
     rc.stylesheet   = stylesheet
     rc.overlay      = overlay
+    rc.poi_file     = options.poi_file
     if options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr[1]
         rc.paper_height_mm = paper_descr[2]

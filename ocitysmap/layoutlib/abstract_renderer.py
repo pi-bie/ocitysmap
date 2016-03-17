@@ -123,6 +123,43 @@ class Renderer:
         return ctx.pop_group(), svg.props.width * factor
 
     @staticmethod
+    def _get_extra_logo(ctx, height):
+        """
+        Read the Extra logo file and rescale it to fit within height.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           height (number): final height of the logo (cairo units).
+
+        Return a tuple (cairo group object for the logo, logo width in
+                        cairo units).
+        """
+        # TODO: read vector logo
+        logo_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'images', 'extra-logo.svg'))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(
+                sys.exec_prefix, 'share', 'images', 'ocitysmap',
+                'extra-logo.svg')
+
+        try:
+            with open(logo_path, 'rb') as f:
+                svg = rsvg.Handle(logo_path);
+                LOG.debug('Using extra logo: %s.' % logo_path)
+        except IOError:
+            LOG.warning('Cannot open logo from %s.' % logo_path)
+            return None, None
+
+        ctx.push_group()
+        ctx.save()
+        ctx.move_to(0, 0)
+        factor = height / svg.props.height
+        ctx.scale(factor, factor)
+        svg.render_cairo(ctx)
+        ctx.restore()
+        return ctx.pop_group(), svg.props.width * factor
+
+    @staticmethod
     def _draw_labels(ctx, map_grid,
                      map_area_width_dots, map_area_height_dots,
                      grid_legend_margin_dots):

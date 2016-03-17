@@ -122,6 +122,7 @@ class RenderingConfiguration:
         # Setup by OCitySMap::render() from language field:
         self.i18n            = None # i18n object
 
+        self.poi_file        = None
 
 class Stylesheet:
     """

@@ -259,11 +259,11 @@ if __name__ == '__main__':
                                                     string.ascii_uppercase),
                                             random.randint(1,19),
                                             ))]*random.randint(1, 20):
-            item              = commons.IndexItem(label, None, None)
+            item              = commons.StreetIndexItem(label, None, None)
             item.location_str = location_str
             item.page_number  = random.randint(1, 100)
             items.append(item)
-        streets.append(commons.IndexCategory(i, items))
+        streets.append(commons.StreetIndexCategory(i, items))
 
     ctxtmp = cairo.Context(surface)
 

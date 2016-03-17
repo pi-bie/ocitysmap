@@ -39,9 +39,87 @@ _sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
 import commons
 import ocitysmap
+import codecs
+
+from geopy.geocoders import Nominatim
+import time
+
 
 l = logging.getLogger('ocitysmap')
 
+
+class PoiIndex:
+
+    def __init__(self, filename):
+        geolocator = Nominatim()
+
+        self._categories = []
+        cat = None
+
+        f = codecs.open(filename, "r", "utf-8")
+
+        for line in iter(f):
+            parts = line.split(";")
+
+            print parts
+
+            if parts[0][0] != " ":
+                if cat != None:
+                    self._categories.append(cat)
+
+                name  = parts[0].strip()
+                color = parts[1].strip()
+                if len(parts) > 2:
+                    icon = parts[2].strip()
+                else:
+                    icon = None
+
+                cat = commons.PoiIndexCategory(name, color=color, icon=icon)
+            else:
+                name  = parts[0].strip()
+                loc   = parts[1].strip()
+                if len(parts) > 2:
+                    icon = parts[2].strip()
+                else:
+                    icon = None
+
+                geoloc = geolocator.geocode(loc, geometry="geojson")
+                time.sleep(1)
+
+                cat.items.append(
+                    commons.PoiIndexItem(name,
+                                         ocitysmap.coords.Point(geoloc.latitude,
+                                                                geoloc.longitude),
+                                         icon = icon));
+        f.close()
+
+        if cat != None:
+            self._categories.append(cat)
+
+        print self._categories
+
+    @property
+    def categories(self):
+        return self._categories
+
+    def write_to_csv(self, title, output_filename):
+        return
+
+    def apply_grid(self, grid):
+        """
+        Update the location_str field of the streets and amenities by
+        mapping them onto the given grid.
+
+        Args:
+           grid (ocitysmap.Grid): the Grid object from which we
+           compute the location strings
+
+        Returns:
+           Nothing, but self._categories has been modified!
+        """
+        for category in self._categories:
+            for item in category.items:
+                item.update_location_str(grid)
 
 class StreetIndex:
 
@@ -221,7 +299,7 @@ class StreetIndex:
                     cat_name = commons.NUMBER_CATEGORY_NAME
                 else:
                     cat_name = self._i18n.upper_unaccent_string(street_name[0])
-                current_category = commons.IndexCategory(cat_name)
+                current_category = commons.StreetIndexCategory(cat_name)
                 result.append(current_category)
 
             # Parse the WKT from the largest linestring in shape
@@ -234,10 +312,10 @@ class StreetIndex:
                 raise
             endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
             endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-            current_category.items.append(commons.IndexItem(street_name,
-                                                            endpoint1,
-                                                            endpoint2,
-                                                            self._page_number))
+            current_category.items.append(commons.StreetIndexItem(street_name,
+                                                                  endpoint1,
+                                                                  endpoint2,
+                                                                  self._page_number))
 
         return result
 
@@ -316,7 +394,7 @@ from
             # Get the current IndexCategory object, or create one if
             # different than previous
             if (not result or result[-1].name != catname):
-                current_category = commons.IndexCategory(catname,
+                current_category = commons.StreetIndexCategory(catname,
                                                          is_street=False)
                 result.append(current_category)
             else:
@@ -370,10 +448,10 @@ order by amenity_name""" \
                     ## raise
                 endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
                 endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-                current_category.items.append(commons.IndexItem(amenity_name,
-                                                                endpoint1,
-                                                                endpoint2,
-                                                                self._page_number))
+                current_category.items.append(commons.StreetIndexItem(amenity_name,
+                                                                      endpoint1,
+                                                                      endpoint2,
+                                                                      self._page_number))
 
             l.debug("Got %d amenities for %s/%s."
                     % (len(current_category.items), catname, db_amenity))
@@ -396,7 +474,7 @@ order by amenity_name""" \
         cursor = db.cursor()
 
         result = []
-        current_category = commons.IndexCategory(_(u"Villages"),
+        current_category = commons.StreetIndexCategory(_(u"Villages"),
                                                  is_street=False)
         result.append(current_category)
 
@@ -445,10 +523,10 @@ order by village_name""" \
                 ## raise
             endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
             endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-            current_category.items.append(commons.IndexItem(village_name,
-                                                            endpoint1,
-                                                            endpoint2,
-                                                            self._page_number))
+            current_category.items.append(commons.StreetIndexItem(village_name,
+                                                                  endpoint1,
+                                                                  endpoint2,
+                                                                  self._page_number))
 
         l.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))

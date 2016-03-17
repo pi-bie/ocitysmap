@@ -36,7 +36,7 @@ if __name__ == '__main__':
     from ocitysmap.maplib.grid import Grid
     from indexer  import StreetIndex
     from renderer import StreetIndexRenderer
-    from commons  import IndexCategory, IndexItem
+    from commons  import StreetIndexCategory, StreetIndexItem
 
 
     logging.basicConfig(level=logging.DEBUG)

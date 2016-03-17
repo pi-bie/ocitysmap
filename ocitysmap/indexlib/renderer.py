@@ -22,7 +22,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import cairo
+import rsvg
 import logging
 import math
 import pango
@@ -30,6 +32,11 @@ import pangocairo
 
 import commons
 import ocitysmap.layoutlib.commons as UTILS
+
+from colour import Color
+
+import draw_utils
+
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -94,6 +101,161 @@ class StreetIndexRenderingArea:
             % (self.rendering_style,
                self.w, self.h, self.x, self.y, self.n_cols)
 
+class PoiIndexRenderer:
+
+    def __init__(self, i18n, index_categories):
+        self._index_categories = index_categories;
+
+    def precompute_occupation_area(self, surface, x, y, w, h,
+                                   freedom_direction, alignment):
+
+        if (freedom_direction != 'width' or alignment != 'right'):
+            raise ValueError, 'Incompatible freedom direction and alignment!'
+
+        index_width  = w
+        index_height = h
+
+        area = StreetIndexRenderingArea("default_poi_style",
+                                         x, y, w, h, 1)
+
+        return area
+
+    def _render_header(self, ctx, area, dpi, color, label, logo = None):
+        ctx.save()
+        ctx.translate(10, 10)
+
+        c = Color(color);
+        ctx.set_source_rgb(c.red, c.green, c.blue)
+        ctx.rectangle( 0, 0, area.w - 20, dpi)
+        ctx.fill()
+
+        x = 5
+
+        if logo != None:
+            logo_path = os.path.abspath(os.path.join(
+                        os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
+
+            svg = rsvg.Handle(logo_path)
+
+            scale = dpi * 0.8 / svg.props.height;
+            x += svg.props.width * scale + 5
+
+            ctx.save()
+            ctx.translate(5, 5)
+
+            ctx.scale(scale, scale)
+            svg.render_cairo(ctx)
+            ctx.restore()
+
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.select_font_face("Droid Sans Bold",
+                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+
+        ctx.set_font_size(dpi -20)
+        x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
+        ctx.move_to(x, 10 + height)
+        ctx.show_text(label)
+        ctx.restore()
+
+        return dpi
+
+    def _render_item(self, ctx, area, dpi, color, number, label, gridlabel, logo = None):
+        x = 5
+
+        marker_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
+
+        fp = open(marker_path,'rb')
+        data = fp.read()
+        fp.close()
+
+        if color[0] != '#':
+            c = Color(color);
+            color = c.hex_l
+
+        data = data.replace('#000000', color)
+
+        svg = rsvg.Handle(data = data)
+
+        scale = 50.0 / svg.props.height;
+        x += 35
+
+        ctx.save()
+
+        ctx.scale(scale, scale)
+        svg.render_cairo(ctx)
+
+        ctx.set_source_rgb(0, 0, 0)
+        pc = pangocairo.CairoContext(ctx)
+        fd = pango.FontDescription('DejaVu')
+        fd.set_size(pango.SCALE)
+        layout = pc.create_layout()
+        layout.set_font_description(fd)
+        layout.set_text(number)
+        draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
+        ctx.translate(svg.props.width/3,svg.props.height/5)
+        pc.show_layout(layout)
+
+        ctx.restore()
+
+        if logo != None:
+            logo_path = os.path.abspath(os.path.join(
+                        os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
+
+            svg = rsvg.Handle(logo_path)
+
+            scale = dpi * 0.6 / svg.props.height;
+
+            ctx.save()
+            ctx.translate(x + 5, 5)
+
+            ctx.scale(scale, scale)
+            svg.render_cairo(ctx)
+            ctx.restore()
+
+            x += svg.props.width * scale + 5
+
+        ctx.save()
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.select_font_face("Droid Sans",
+                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+
+        ctx.set_font_size(dpi -30)
+        x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
+        ctx.move_to(x, 10 + height)
+        ctx.show_text(label)
+
+        ctx.select_font_face("Droid Sans Bold",
+                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+
+        x_bearing, y_bearing, width, height = ctx.text_extents(gridlabel)[:4]
+        ctx.move_to(area.w - width - 15, 10 + height)
+        ctx.show_text(gridlabel)
+
+        ctx.restore()
+
+        return dpi * 0.7
+
+    def render(self, ctx, area, dpi = UTILS.PT_PER_INCH):
+        ctx.save()
+        ctx.translate(area.x, area.y)
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle(0, 0, area.w, area.h)
+        ctx.fill()
+
+        n = 0
+
+        for category in self._index_categories:
+            dy = self._render_header(ctx, area, dpi, category.color, category.name, category.icon)
+            ctx.translate(0, dy + 20)
+
+            for poi in category.items:
+                n = n + 1
+                lat, lon = poi.endpoint1.get_latlong()
+                dy = self._render_item(ctx, area, dpi, category.color, str(n), poi.label, poi.location_str, poi.icon)
+                ctx.translate(0, dy + 10)
+
+        ctx.restore()
 
 class StreetIndexRenderer:
     """

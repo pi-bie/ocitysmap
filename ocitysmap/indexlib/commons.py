@@ -29,6 +29,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import draw_utils
 
+from colour import Color
 
 class IndexEmptyError(Exception):
     """This exception is raised when no data is to be rendered in the index."""
@@ -51,11 +52,10 @@ class IndexCategory:
     items = None
     is_street = False
 
-    def __init__(self, name, items=None, is_street=True):
+    def __init__(self, name, items=None):
         assert name is not None
         self.name = name
         self.items = items or list()
-        self.is_street = is_street
 
     def __str__(self):
         return '<%s (%s)>' % (self.name, map(str, self.items))
@@ -63,6 +63,23 @@ class IndexCategory:
     def __repr__(self):
         return 'IndexCategory(%s, %s)' % (repr(self.name),
                                           repr(self.items))
+
+    def get_all_item_labels(self):
+        return [x.label for x in self.items]
+
+    def get_all_item_squares(self):
+        return [x.squares for x in self.items]
+
+class StreetIndexCategory(IndexCategory):
+    """
+    The IndexCategory represents a set of index items that belong to the same
+    category (their first letter is the same or they are of the same amenity
+    type).
+    """
+
+    def __init__(self, name, items=None, is_street=True):
+        IndexCategory.__init__(self, name, items)
+        self.is_street = is_street
 
     def draw(self, rtl, ctx, pc, layout, fascent, fheight,
              baseline_x, baseline_y):
@@ -90,12 +107,35 @@ class IndexCategory:
                                     baseline_x, baseline_y, self.name)
         ctx.restore()
 
-    def get_all_item_labels(self):
-        return [x.label for x in self.items]
 
-    def get_all_item_squares(self):
-        return [x.squares for x in self.items]
+class PoiIndexCategory(IndexCategory):
+    name  = None
+    color = None
+    col_r = 0
+    col_g = 0
+    col_b = 0
+    icon  = None
+    items = None
 
+    def __init__(self, name, items=None, color=None, icon=None):
+        IndexCategory.__init__(self, name, items)
+        self.color = color
+
+        c = Color(color)
+        self.col_r = c.red
+        self.col_g = c.green
+        self.col_b = c.blue
+
+        self.icon  = icon
+
+
+    def draw(self, rtl, ctx, pc, layout, fascent, fheight,
+             baseline_x, baseline_y):
+        ctx.save()
+
+        ctx.set_source_rgb(self.col_r, self.col_g, self.col_b)
+
+        ctx.restore()
 
 class IndexItem:
     """
@@ -103,7 +143,7 @@ class IndexItem:
     contains the item label (street name, POI name or description) and the
     humanized squares description.
     """
-    __slots__    = ['label', 'endpoint1', 'endpoint2', 'location_str']
+    __slots__    = ['label', 'endpoint1', 'endpoint2', 'location_str','page_number']
     label        = None # str
     endpoint1    = None # coords.Point
     endpoint2    = None # coords.Point
@@ -125,6 +165,57 @@ class IndexItem:
         return ('IndexItem(%s, %s, %s, %s, %s)'
                 % (repr(self.label), self.endpoint1, self.endpoint2,
                    repr(self.location_str), repr(self.page_number)))
+
+    def update_location_str(self, grid):
+        """
+        Update the location_str field from the given Grid object.
+
+        Args:
+           grid (ocitysmap.Grid): the Grid object from which we
+           compute the location strings
+
+        Returns:
+           Nothing, but the location_str field will have been altered
+        """
+        if self.endpoint1 is not None:
+            ep1_label = grid.get_location_str( * self.endpoint1.get_latlong())
+        else:
+            ep1_label = None
+        if self.endpoint2 is not None:
+            ep2_label = grid.get_location_str( * self.endpoint2.get_latlong())
+        else:
+            ep2_label = None
+        if ep1_label is None:
+            ep1_label = ep2_label
+        if ep2_label is None:
+            ep2_label = ep1_label
+
+        if ep1_label == ep2_label:
+            if ep1_label is None:
+                self.location_str = "???"
+            self.location_str = ep1_label
+        elif grid.rtl:
+            self.location_str = "%s-%s" % (max(ep1_label, ep2_label),
+                                           min(ep1_label, ep2_label))
+        else:
+            self.location_str = "%s-%s" % (min(ep1_label, ep2_label),
+                                           max(ep1_label, ep2_label))
+
+        if self.page_number is not None:
+            if grid.rtl:
+                self.location_str = "%s, %d" % (self.location_str,
+                                                self.page_number)
+            else:
+                self.location_str = "%d, %s" % (self.page_number,
+                                                self.location_str)
+
+
+class StreetIndexItem(IndexItem):
+    """
+    An IndexItem represents one item in the index (a street or a POI). It
+    contains the item label (street name, POI name or description) and the
+    humanized squares description.
+    """
 
     def label_drawing_width(self, layout):
         layout.set_text(self.label)
@@ -203,48 +294,17 @@ class IndexItem:
                                         line_end - line_start - fheight/2)
         ctx.restore()
 
-    def update_location_str(self, grid):
-        """
-        Update the location_str field from the given Grid object.
 
-        Args:
-           grid (ocitysmap.Grid): the Grid object from which we
-           compute the location strings
+class PoiIndexItem(IndexItem):
 
-        Returns:
-           Nothing, but the location_str field will have been altered
-        """
-        if self.endpoint1 is not None:
-            ep1_label = grid.get_location_str( * self.endpoint1.get_latlong())
-        else:
-            ep1_label = None
-        if self.endpoint2 is not None:
-            ep2_label = grid.get_location_str( * self.endpoint2.get_latlong())
-        else:
-            ep2_label = None
-        if ep1_label is None:
-            ep1_label = ep2_label
-        if ep2_label is None:
-            ep2_label = ep1_label
+    __slots__    = ['icon']
+    icon = None
 
-        if ep1_label == ep2_label:
-            if ep1_label is None:
-                self.location_str = "???"
-            self.location_str = ep1_label
-        elif grid.rtl:
-            self.location_str = "%s-%s" % (max(ep1_label, ep2_label),
-                                           min(ep1_label, ep2_label))
-        else:
-            self.location_str = "%s-%s" % (min(ep1_label, ep2_label),
-                                           max(ep1_label, ep2_label))
+    def __init__(self, label, coords, icon=None):
+        IndexItem.__init__(self, label, coords, None)
+        self.icon = icon
 
-        if self.page_number is not None:
-            if grid.rtl:
-                self.location_str = "%s, %d" % (self.location_str,
-                                                self.page_number)
-            else:
-                self.location_str = "%d, %s" % (self.page_number,
-                                                self.location_str)
+
 
 if __name__ == "__main__":
     import cairo
@@ -269,9 +329,9 @@ if __name__ == "__main__":
     fheight = ((font_metric.get_ascent() + font_metric.get_descent())
                / pango.SCALE)
 
-    first_item  = IndexItem('First Item', None, None)
-    second_item = IndexItem('Second Item', None, None)
-    category    = IndexCategory('Hello world !', [first_item, second_item])
+    first_item  = StreetIndexItem('First Item', None, None)
+    second_item = StreetIndexItem('Second Item', None, None)
+    category    = StreetIndexCategory('Hello world !', [first_item, second_item])
 
     category.draw(False, ctx, pc, layout, fascent, fheight,
                   72, 80)
