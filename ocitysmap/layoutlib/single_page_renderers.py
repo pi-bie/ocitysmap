@@ -408,13 +408,14 @@ class SinglePageRenderer(Renderer):
         svg.render_cairo(ctx)
 
         pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('DejaVu')
+        fd = pango.FontDescription('Droid Sans')
         fd.set_size(pango.SCALE)
         layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(txt)
         draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
-        ctx.translate(svg.props.width/3,svg.props.height/5)
+        text_x, text_y, text_w, text_h = layout.get_extents()[1]
+        ctx.translate(svg.props.width/2 - text_w * scale/50, svg.props.height/5)
         pc.show_layout(layout)
 
         ctx.restore()
@@ -575,12 +576,26 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         if self.rc.poi_file:
+            # place POI markers on map canvas
             n = 0
             for category in self.street_index.categories:
                 for poi in category.items:
                     n = n + 1
                     lat, lon = poi.endpoint1.get_latlong()
                     self._marker(category.color, str(n), lat, lon, ctx, dpi)
+
+            # place "you are here" circle if coordinates are given
+            if self.street_index.lat != False:
+                x,y = self._latlon2xy(self.street_index.lat, self.street_index.lon, dpi)
+                ctx.save()
+                ctx.translate(x, y)
+                ctx.set_source_rgba(1, 0, 0, 0.8)
+                ctx.set_line_width(10)
+                ctx.arc(0, 0, 50, 0, 2*math.pi)
+                ctx.stroke_preserve()
+                ctx.set_source_rgba(1, 0, 0, 0.2)
+                ctx.fill()
+                ctx.restore()
 
         # TODO: map scale
 
