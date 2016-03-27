@@ -29,6 +29,7 @@ import logging
 import math
 import pango
 import pangocairo
+import re
 
 import commons
 import ocitysmap.layoutlib.commons as UTILS
@@ -112,8 +113,8 @@ class PoiIndexRenderer:
         if (freedom_direction != 'width' or alignment != 'right'):
             raise ValueError, 'Incompatible freedom direction and alignment!'
 
-        index_width  = w
-        index_height = h
+        x+= w * 0.2
+        w = w * 0.8
 
         area = StreetIndexRenderingArea("default_poi_style",
                                          x, y, w, h, 1)
@@ -126,38 +127,40 @@ class PoiIndexRenderer:
 
         c = Color(color);
         ctx.set_source_rgb(c.red, c.green, c.blue)
-        ctx.rectangle( 0, 0, area.w - 20, dpi)
+        ctx.rectangle( 0, 0, area.w - 20, dpi * 0.8)
         ctx.fill()
 
         x = 5
 
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
-                        os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
+                os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
 
-            svg = rsvg.Handle(logo_path)
+            if os.path.isfile(logo_path):
+                svg = rsvg.Handle(logo_path)
 
-            scale = dpi * 0.8 / svg.props.height;
-            x += svg.props.width * scale + 5
+                scale = dpi * 0.6 / svg.props.height;
+                x += svg.props.width * scale + 5
 
-            ctx.save()
-            ctx.translate(5, 5)
-
-            ctx.scale(scale, scale)
-            svg.render_cairo(ctx)
-            ctx.restore()
+                ctx.save()
+                ctx.translate(5, 5)
+                ctx.scale(scale, scale)
+                svg.render_cairo(ctx)
+                ctx.restore()
+            else:
+                LOG.debug("icon not found %s" % logo_path)
 
         ctx.set_source_rgb(1, 1, 1)
         ctx.select_font_face("Droid Sans Bold",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 
-        ctx.set_font_size(dpi -20)
+        ctx.set_font_size(dpi - 30)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
         ctx.move_to(x, 10 + height)
         ctx.show_text(label)
         ctx.restore()
 
-        return dpi
+        return dpi * 0.8
 
     def _render_item(self, ctx, area, dpi, color, number, label, gridlabel, logo = None):
         x = 5
@@ -187,13 +190,14 @@ class PoiIndexRenderer:
 
         ctx.set_source_rgb(0, 0, 0)
         pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('DejaVu')
+        fd = pango.FontDescription('Droid Sans')
         fd.set_size(pango.SCALE)
         layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(number)
         draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
-        ctx.translate(svg.props.width/3,svg.props.height/5)
+        text_x, text_y, text_w, text_h = layout.get_extents()[1]
+        ctx.translate(svg.props.width/2 - text_w * scale/50, svg.props.height/5)
         pc.show_layout(layout)
 
         ctx.restore()
@@ -202,31 +206,36 @@ class PoiIndexRenderer:
             logo_path = os.path.abspath(os.path.join(
                         os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
 
-            svg = rsvg.Handle(logo_path)
+            if os.path.isfile(logo_path):
+                svg = rsvg.Handle(logo_path)
 
-            scale = dpi * 0.6 / svg.props.height;
+                scale = min(dpi * 0.6 / svg.props.height, dpi * 0.6 / svg.props.width);
 
-            ctx.save()
-            ctx.translate(x + 5, 5)
-
-            ctx.scale(scale, scale)
-            svg.render_cairo(ctx)
-            ctx.restore()
-
-            x += svg.props.width * scale + 5
+                ctx.save()
+                ctx.translate(x + 5, 5)
+                ctx.scale(scale, scale)
+                svg.render_cairo(ctx)
+                ctx.restore()
+                
+                x += svg.props.width * scale + 5
+            else:
+                LOG.debug("icon not found %s" % logo_path)
 
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Droid Sans",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
-        ctx.set_font_size(dpi -30)
+        ctx.set_font_size(dpi - 30)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
-        ctx.move_to(x, 10 + height)
+        ctx.move_to(x, 10 - y_bearing)
         ctx.show_text(label)
 
-        ctx.select_font_face("Droid Sans Bold",
+        ctx.select_font_face("Droid Sans Mono",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+
+        gridParts = re.match('^([A-Z]+)([0-9]+)$', gridlabel)
+        gridlabel = gridParts.group(1) + '-' + gridParts.group(2)
 
         x_bearing, y_bearing, width, height = ctx.text_extents(gridlabel)[:4]
         ctx.move_to(area.w - width - 15, 10 + height)
