@@ -176,6 +176,8 @@ class Renderer:
         """
         ctx.save()
 
+        ctx.set_source_rgba(0, 0, 0, 0.7);
+
         step_horiz = map_area_width_dots / map_grid.horiz_count
         last_horiz_portion = math.modf(map_grid.horiz_count)[0]
 
