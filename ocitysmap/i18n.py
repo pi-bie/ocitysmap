@@ -847,13 +847,16 @@ class i18n_de_generic(i18n):
     #
     # German streets are often named after people and include a title.
     # The title will be captured as part of the <prefix>
-	# Covering airport names and "New"/"Old" as prefixes as well
+    # Covering airport names and "New"/"Old" as prefixes as well
     #
-    APPELLATIONS = [ u"Alte", u"Alter", u"Doktor", u"Dr.",
-                     u"Flughafen", u"Flugplatz", u"Gen.,", u"General",
-                     u"Neue", u"Neuer", u"Platz",
-                     u"Prinz", u"Prinzessin", u"Prof.",
-                     u"Professor" ]
+    # APPELLATIONS = [ u"Alte", u"Alter", u"Doktor", u"Dr.",
+    #                 u"Flughafen", u"Flugplatz", u"Gen.,", u"General",
+    #                 u"Neue", u"Neuer", u"Platz",
+    #                 u"Prinz", u"Prinzessin", u"Prof.",
+    #                 u"Professor" ]
+
+    APPELLATIONS = [ ]
+
     #
     # Surnames in german streets named after people tend to have the middle name
     # listed after the rest of the surname,
@@ -861,9 +864,11 @@ class i18n_de_generic(i18n):
     # Likewise, articles are captured as part of the prefix,
     # e.g. "An der Märchenwiese" => "Märchenwiese (An der)"
     #
-    DETERMINANTS = [ u"\s?An den", u"\s?An der", u"\s?Am",
-                     u"\s?Auf den" , u"\s?Auf der"
-                     u" an", u" des", u" der", u" von", u" vor"]
+    # DETERMINANTS = [ u"\s?An den", u"\s?An der", u"\s?Am",
+    #                  u"\s?Auf den" , u"\s?Auf der"
+    #                  u" an", u" des", u" der", u" von", u" vor"]
+
+    DETERMINANTS = [ ]
 
     SPACE_REDUCE = re.compile(r"\s+")
     PREFIX_REGEXP = re.compile(r"^(?P<prefix>(%s)(%s)?)\s?\b(?P<name>.+)" %
