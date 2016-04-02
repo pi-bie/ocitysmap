@@ -279,21 +279,23 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Retrieve and paint the extra logo
-        ctx.save()
-        grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
-        if grp:
-            ctx.translate(0.3*h_dots, 0.1*h_dots)
-            ctx.set_source(grp)
-            ctx.paint_with_alpha(0.5)
-        else:
-            LOG.warning("Extra Logo not available.")
-            logo_width = 0
-        ctx.restore()
+        logo_width2 = 0
+        if self.rc.poi_file:
+            ctx.save()
+            grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
+            if grp:
+                ctx.translate(0.3*h_dots, 0.1*h_dots)
+                ctx.set_source(grp)
+                ctx.paint_with_alpha(0.5)
+            else:
+                LOG.warning("Extra Logo not available.")
+                logo_width = 0
+            ctx.restore()
 
         # Prepare the title
         pc = pangocairo.CairoContext(ctx)
         layout = pc.create_layout()
-        layout.set_width(int((w_dots - 0.1*w_dots - logo_width -logo_width2) * pango.SCALE))
+        layout.set_width(int((w_dots - 0.1*w_dots - logo_width - logo_width2) * pango.SCALE))
         if not self.rc.i18n.isrtl(): layout.set_alignment(pango.ALIGN_LEFT)
         else:                        layout.set_alignment(pango.ALIGN_RIGHT)
         fd = pango.FontDescription(font_face)
@@ -306,7 +308,7 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         ctx.rectangle(0, 0, w_dots, h_dots)
         ctx.stroke()
-        ctx.translate(0.4*h_dots + logo_width2 ,
+        ctx.translate(0.4*h_dots + logo_width2,
                       (h_dots -
                        (layout.get_size()[1] / pango.SCALE)) / 2.0)
         pc.show_layout(layout)
