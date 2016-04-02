@@ -569,11 +569,13 @@ class SinglePageRenderer(Renderer):
         # Draw compass rose
         # TODO: proper positioning/scaling, move to abstract renderer
         ctx.save()
-        ctx.translate(50, title_margin_dots + 50)
-        ctx.scale(0.33, 0.33)
+        ctx.translate(safe_margin_dots + title_margin_dots * 0.5 , 
+                      safe_margin_dots + title_margin_dots * 1.5)
         compass_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
         svg = rsvg.Handle(compass_path)
+        factor = title_margin_dots / svg.props.height
+        ctx.scale(factor, factor)
         svg.render_cairo(ctx)
         ctx.restore()
 
