@@ -908,7 +908,7 @@ class i18n_de_generic(i18n):
 
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
-        name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
+        # name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
         return name
 
     def first_letter_equal(self, a, b):
