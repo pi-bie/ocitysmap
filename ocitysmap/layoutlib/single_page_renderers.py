@@ -163,6 +163,14 @@ class SinglePageRenderer(Renderer):
                                              float(self._map_coords[3]),  # H
                                              dpi)
 
+        # Prepare map overlay
+        if self.rc.overlay:
+            self._overlay_canvas = MapCanvas(self.rc.overlay,
+                                             self.rc.bounding_box,
+                                             float(self._map_coords[2]),  # W
+                                             float(self._map_coords[3]),  # H
+                                             dpi)
+
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
 
