@@ -40,7 +40,7 @@ import ocitysmap
 import coords
 import commons
 from abstract_renderer import Renderer
-from indexlib.commons import IndexCategory
+from indexlib.commons import StreetIndexCategory
 from indexlib.indexer import StreetIndex
 from indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
 from ocitysmap import draw_utils, maplib
@@ -360,7 +360,7 @@ class MultiPageRenderer(Renderer):
             # Rebuild a IndexCategory object with the list of merged
             # and sorted IndexItem
             categories_merged.append(
-                IndexCategory(category_name, grouped_items_sorted, is_street))
+                StreetIndexCategory(category_name, grouped_items_sorted, is_street))
 
         return categories_merged
 

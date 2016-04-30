@@ -157,7 +157,7 @@ class SinglePageRenderer(Renderer):
             float(self._map_coords[2]),  # W
             float(self._map_coords[3]),  # H
             dpi,
-            rc.osmid > 0 )
+            rc.osmid != 0 )
 
         # Prepare map overlay
         if self.rc.overlay:
@@ -352,6 +352,32 @@ class SinglePageRenderer(Renderer):
                                'osmdate': osm_date_str}
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
+
+        ctx.save()
+        pc = pangocairo.CairoContext(ctx)
+        fd = pango.FontDescription('DejaVu')
+        fd.set_size(pango.SCALE)
+        layout = pc.create_layout()
+        layout.set_font_description(fd)
+        layout.set_text(notice)
+        draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
+        pc.show_layout(layout)
+        ctx.restore()
+
+    def _draw_creator_notice(self, ctx, w_dots, h_dots, notice=None,
+                               osm_date=None):
+        """
+        Args:
+           ctx (cairo.Context): The Cairo context to use to draw.
+           w_dots,h_dots (number): Rectangle dimension (ciaro units).
+           font_face (str): Pango font specification.
+           notice (str): Optional notice to replace the default.
+        """
+
+        today = datetime.date.today()
+        notice = notice or \
+            _(u'Created with http://php-groupies.de/map-edit/ - '
+                    u'Contact: Hartmut Holzgraefe (hartmut@php.net)')
 
         ctx.save()
         pc = pangocairo.CairoContext(ctx)
@@ -565,6 +591,25 @@ class SinglePageRenderer(Renderer):
                                     copyright_margin_dots,
                                     osm_date=osm_date)
         ctx.restore()
+
+        ##
+        ## Draw the creator notice
+        ##
+	if self.rc.poi_file:
+            ctx.save()
+
+            # Move to the right position
+            ctx.translate(safe_margin_dots + usable_area_width_dots/2.2,
+                          ( safe_margin_dots + title_margin_dots
+                            + usable_area_height_dots
+                            + copyright_margin_dots/4. ) )
+    
+            # Draw the copyright notice
+            self._draw_creator_notice(ctx, usable_area_width_dots,
+                                        copyright_margin_dots,
+                                        osm_date=osm_date)
+            ctx.restore()
+
 
         # Draw compass rose
         # TODO: proper positioning/scaling, move to abstract renderer
