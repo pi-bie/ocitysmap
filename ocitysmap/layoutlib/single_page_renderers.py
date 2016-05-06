@@ -622,15 +622,8 @@ class SinglePageRenderer(Renderer):
         ctx.paint_with_alpha(0.75)
         ctx.restore()
 
-        if self.rc.poi_file:
-            # place POI markers on map canvas
-            n = 0
-            for category in self.street_index.categories:
-                for poi in category.items:
-                    n = n + 1
-                    lat, lon = poi.endpoint1.get_latlong()
-                    self._marker(category.color, str(n), lat, lon, ctx, dpi)
 
+        if self.rc.poi_file:
             # place "you are here" circle if coordinates are given
             if self.street_index.lat != False:
                 x,y = self._latlon2xy(self.street_index.lat, self.street_index.lon, dpi)
@@ -643,6 +636,14 @@ class SinglePageRenderer(Renderer):
                 ctx.set_source_rgba(1, 0, 0, 0.2)
                 ctx.fill()
                 ctx.restore()
+
+            # place POI markers on map canvas
+            n = 0
+            for category in self.street_index.categories:
+                for poi in category.items:
+                    n = n + 1
+                    lat, lon = poi.endpoint1.get_latlong()
+                    self._marker(category.color, str(n), lat, lon, ctx, dpi)
 
         # TODO: map scale
 
