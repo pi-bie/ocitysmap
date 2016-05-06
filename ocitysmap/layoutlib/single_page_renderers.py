@@ -157,7 +157,7 @@ class SinglePageRenderer(Renderer):
             float(self._map_coords[2]),  # W
             float(self._map_coords[3]),  # H
             dpi,
-            rc.osmid != 0 )
+            rc.osmid != None )
 
         # Prepare map overlay
         if self.rc.overlay:
