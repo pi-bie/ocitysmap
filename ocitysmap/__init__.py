@@ -182,11 +182,10 @@ class Stylesheet:
         return s
 
     @staticmethod
-    def create_all_from_config(parser):
-        styles = parser.get('rendering', 'available_stylesheets')
+    def create_all_from_config(parser, type='stylesheets'):
+        styles = parser.get('rendering', 'available_'+type)
         if not styles:
-            raise ValueError, \
-                    'OCitySMap configuration does not contain any stylesheet!'
+	    return []
 
         return [Stylesheet.create_from_config_section(parser, name.strip())
                 for name in styles.split(',')]
@@ -202,6 +201,8 @@ class OCitySMap:
     DEFAULT_RENDERING_PNG_DPI = 72
 
     STYLESHEET_REGISTRY = []
+
+    OVERLAY_REGISTRY = []
 
     def __init__(self, config_files=None):
         """Instanciate a new configured OCitySMap instance.
@@ -230,7 +231,13 @@ class OCitySMap:
 
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
+        if not self.STYLESHEET_REGISTRY:
+            raise ValueError, \
+                    'OCitySMap configuration does not contain any stylesheet!'
         LOG.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
+
+        self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
+        LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
 
     @property
     def _db(self):
@@ -391,6 +398,18 @@ SELECT ST_AsText(ST_LongestLine(
             if style.name == name:
                 return style
         raise LookupError, 'The requested stylesheet %s was not found!' % name
+
+    def get_all_overlay_configurations(self):
+        """Returns the list of all available overlay stylesheet configurations 
+           (list of overlay Stylesheet objects)."""
+        return self.OVERLAY_REGISTRY
+
+    def get_overlay_by_name(self, name):
+        """Returns a overlay stylesheet by its key name."""
+        for style in self.OVERLAY_REGISTRY:
+            if style.name == name:
+                return style
+        raise LookupError, 'The requested overlay stylesheet %s was not found!' % name
 
     def get_all_renderers(self):
         """Returns the list of all available layout renderers (list of
