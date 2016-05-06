@@ -180,8 +180,12 @@ class SinglePageRenderer(Renderer):
 
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
+
         if self.rc.overlay:
            self._overlay_canvas.render()
+
+
+
 
     def _create_index_rendering(self, on_the_side):
         """
@@ -516,11 +520,8 @@ class SinglePageRenderer(Renderer):
         # Draw the rescaled Overlay
         if self.rc.overlay:
             ctx.save()
-            scale_factor = dpi / 72
             rendered_overlay = self._overlay_canvas.get_rendered_map()
             LOG.debug('Overlay:')
-            LOG.debug('Mapnik scale: 1/%f' % rendered_overlay.scale_denominator())
-            LOG.debug('Actual scale: 1/%f' % self._overlay_canvas.get_actual_scale())
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 

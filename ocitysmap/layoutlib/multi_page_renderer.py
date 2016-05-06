@@ -265,6 +265,14 @@ class MultiPageRenderer(Renderer):
                                    self._usable_area_height_pt, dpi,
                                    extend_bbox_to_ratio=False)
 
+            # Create canvas for overlay on current page
+            overla_canvas = None
+            if self.rc.overlay:
+                overlay_canvas = MapCanvas(self.rc.overlay,
+                                           bb, self._usable_area_width_pt,
+                                           self._usable_area_height_pt, dpi,
+                                           extend_bbox_to_ratio=False)
+
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
             grid_shape = map_grid.generate_shape_file(
@@ -280,7 +288,11 @@ class MultiPageRenderer(Renderer):
                                       self.rc.stylesheet.grid_line_width)
 
             map_canvas.render()
-            self.pages.append((map_canvas, map_grid))
+
+            if overlay_canvas:
+		overlay_canvas.render()
+
+            self.pages.append((map_canvas, map_grid, overlay_canvas))
 
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
@@ -673,12 +685,16 @@ class MultiPageRenderer(Renderer):
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
-        for map_number, (canvas, grid) in enumerate(self.pages):
+        for map_number, (canvas, grid, overlay) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
             mapnik.render(rendered_map, ctx)
+
+            if overlay:
+		rendered_overlay = overlay.get_rendered_map()
+                mapnik.render(rendered_overlay, ctx)
 
             # Place the vertical and horizontal square labels
             ctx.save()
