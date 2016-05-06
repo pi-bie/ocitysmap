@@ -85,6 +85,38 @@ class Renderer:
         self.paper_height_pt = \
                 commons.convert_mm_to_pt(self.rc.paper_height_mm)
 
+
+    @staticmethod
+    def _get_svg(ctx, path, height):
+        """
+        Read SVG file and rescale it to fit within height.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           path (string): the SVG file path.
+           height (number): final height of the SVG (cairo units).
+
+        Return a tuple (cairo group object for the SVG, SVG width in
+                        cairo units).
+        """
+        try:
+            svg = rsvg.Handle(path);
+        except Exception:
+            LOG.warning("Cannot read SVG from '%s'." % path)
+            return None, None
+
+        scale_factor = height / svg.props.height
+
+        ctx.push_group()
+        ctx.save()
+        ctx.move_to(0, 0)
+        factor = height / svg.props.height
+        ctx.scale(factor, factor)
+        svg.render_cairo(ctx)
+        ctx.restore()
+        return ctx.pop_group(), svg.props.width * factor
+
+
     @staticmethod
     def _get_osm_logo(ctx, height):
         """
@@ -97,7 +129,6 @@ class Renderer:
         Return a tuple (cairo group object for the logo, logo width in
                         cairo units).
         """
-        # TODO: read vector logo
         logo_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.svg'))
         if not os.path.exists(logo_path):
@@ -105,22 +136,8 @@ class Renderer:
                 sys.exec_prefix, 'share', 'images', 'ocitysmap',
                 'osm-logo.svg')
 
-        try:
-            with open(logo_path, 'rb') as f:
-                svg = rsvg.Handle(logo_path);
-                LOG.debug('Using copyright logo: %s.' % logo_path)
-        except IOError:
-            LOG.warning('Cannot open logo from %s.' % logo_path)
-            return None, None
+        return Renderer._get_svg(ctx, logo_path, height)
 
-        ctx.push_group()
-        ctx.save()
-        ctx.move_to(0, 0)
-        factor = height / svg.props.height
-        ctx.scale(factor, factor)
-        svg.render_cairo(ctx)
-        ctx.restore()
-        return ctx.pop_group(), svg.props.width * factor
 
     @staticmethod
     def _get_extra_logo(ctx, height):
@@ -134,7 +151,6 @@ class Renderer:
         Return a tuple (cairo group object for the logo, logo width in
                         cairo units).
         """
-        # TODO: read vector logo
         logo_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'extra-logo.svg'))
         if not os.path.exists(logo_path):
@@ -142,22 +158,30 @@ class Renderer:
                 sys.exec_prefix, 'share', 'images', 'ocitysmap',
                 'extra-logo.svg')
 
-        try:
-            with open(logo_path, 'rb') as f:
-                svg = rsvg.Handle(logo_path);
-                LOG.debug('Using extra logo: %s.' % logo_path)
-        except IOError:
-            LOG.warning('Cannot open logo from %s.' % logo_path)
-            return None, None
+        return Renderer._get_svg(ctx, logo_path, height)
 
-        ctx.push_group()
-        ctx.save()
-        ctx.move_to(0, 0)
-        factor = height / svg.props.height
-        ctx.scale(factor, factor)
-        svg.render_cairo(ctx)
-        ctx.restore()
-        return ctx.pop_group(), svg.props.width * factor
+
+    @staticmethod
+    def _get_compass_rose(ctx, height):
+        """
+        Read the compass rose image and rescale it to fit within height.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           height (number): final height of the image (cairo units).
+
+        Return a tuple (cairo group object for the image, image width in
+                        cairo units).
+        """
+        logo_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.join(
+                sys.exec_prefix, 'share', 'images', 'ocitysmap',
+                'compass-rose.svg')
+
+        return Renderer._get_svg(ctx, logo_path, height)
+
 
     @staticmethod
     def _draw_labels(ctx, map_grid,
