@@ -165,11 +165,11 @@ def main():
         overlay = None
     else:
         try:
-            overlay = mapper.get_stylesheet_by_name(options.overlay)
+            overlay = mapper.get_overlay_by_name(options.overlay)
         except LookupError, ex:
-            parser.error("%s. Available stylesheets: %s."
+            parser.error("%s. Available overlay stylesheets: %s."
                  % (ex, ', '.join(map(lambda s: s.name,
-                      mapper.STYLESHEET_REGISTRY))))
+                      mapper.OVERLAY_REGISTRY))))
 
     # Parse rendering layout
     if options.layout is None:
