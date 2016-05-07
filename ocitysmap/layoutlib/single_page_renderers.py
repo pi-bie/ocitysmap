@@ -396,6 +396,10 @@ class SinglePageRenderer(Renderer):
         ##
         ctx.save()
 
+        # prevent map background from filling the full canvas
+        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.clip()
+
         # Prepare to draw the map at the right location
         ctx.translate(map_coords_dots[0], map_coords_dots[1])
 

@@ -435,6 +435,10 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
 
+        # prevent map background from filling the full canvas
+        ctx.rectangle(0, 0, w, h / 2)
+        ctx.clip()
+
         # Render the map !
         mapnik.render(self._front_page_map.get_rendered_map(), ctx)
         ctx.restore()
