@@ -183,9 +183,10 @@ class Stylesheet:
 
     @staticmethod
     def create_all_from_config(parser, type='stylesheets'):
-        styles = parser.get('rendering', 'available_'+type)
-        if not styles:
-	    return []
+        try:
+            styles = parser.get('rendering', 'available_'+type)
+        except (ConfigParser.NoOptionError, ValueError):
+            return []
 
         return [Stylesheet.create_from_config_section(parser, name.strip())
                 for name in styles.split(',')]
