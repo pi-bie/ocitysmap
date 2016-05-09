@@ -155,6 +155,14 @@ class SinglePageRenderer(Renderer):
                                              float(self._map_coords[3]),  # H
                                              dpi)
 
+        # Prepare map overlay
+        if self.rc.overlay:
+            self._overlay_canvas = MapCanvas(self.rc.overlay,
+                                             self.rc.bounding_box,
+                                             float(self._map_coords[2]),  # W
+                                             float(self._map_coords[3]),  # H
+                                             dpi)
+
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
 
@@ -393,12 +401,10 @@ class SinglePageRenderer(Renderer):
 
         # Draw the rescaled Overlay
         if self.rc.overlay:
+            LOG.debug('Overlay:')
             ctx.save()
             scale_factor = dpi / 72
             rendered_overlay = self._overlay_canvas.get_rendered_map()
-            LOG.debug('Overlay:')
-            LOG.debug('Mapnik scale: 1/%f' % rendered_overlay.scale_denominator())
-            LOG.debug('Actual scale: 1/%f' % self._overlay_canvas.get_actual_scale())
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
