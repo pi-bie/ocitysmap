@@ -288,12 +288,13 @@ class SinglePageRenderer(Renderer):
             ctx.save()
             grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
             if grp:
-                ctx.translate(0.3*h_dots, 0.1*h_dots)
+                ctx.translate(0.4*h_dots, 0.1*h_dots)
                 ctx.set_source(grp)
                 ctx.paint_with_alpha(0.5)
+                logo_width2 += 0.4*h_dots
             else:
                 LOG.warning("Extra Logo not available.")
-                logo_width = 0
+                logo_width2 = 0
             ctx.restore()
 
         # Prepare the title
