@@ -140,7 +140,7 @@ class PoiIndexRenderer:
                 svg = rsvg.Handle(logo_path)
 
                 scale = dpi * 0.6 / svg.props.height;
-                x += svg.props.width * scale + 5
+                x += svg.props.width * scale + 10
 
                 ctx.save()
                 ctx.translate(5, 5)
@@ -217,7 +217,7 @@ class PoiIndexRenderer:
                 svg.render_cairo(ctx)
                 ctx.restore()
                 
-                x += svg.props.width * scale + 5
+                x += svg.props.width * scale + 10
             else:
                 LOG.debug("icon not found %s" % logo_path)
 
