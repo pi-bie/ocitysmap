@@ -50,25 +50,30 @@ l = logging.getLogger('ocitysmap')
 
 
 iconReplacements = {
-    "bus"             : "bus_stop.12",
-    "subway"          : "bus_stop.12",
-    "hospital-o"      : "hospital.16",
-    "medkit"          : "pharmacy.16",
-    "shopping-cart"   : "shop_supermarket",
-    "shopping-basket" : "shop_convenience",
-    "percent"         : "shop_supermarket",
-    "cutlery"         : "restaurant.16",
-    "info"            : "community_centre-14",
-    "plus-square"     : "christian.16",
-    "moon-o"          : "muslim.16",
+    ## shopping
+    #"shopping-cart"   : "shop_supermarket",
+    #"shopping-basket" : "shop_convenience",
+    #"percent"         : "shop_supermarket",
+    ## public transportation
+    #"bus"             : "bus_stop.12",
+    #"subway"          : "bus_stop.12",
+    #"hospital-o"      : "hospital.16",
+    #"user-md"         : "doctors.16",
+    #"medkit"          : "pharmacy.16",
+    #"percent"         : "shop_clothes.16",
+    #"cutlery"         : "restaurant.16",
+    #"info"            : "community_centre-14",
+    #"plus-square"     : "christian.16",
+    #"moon-o"          : "muslim.16",
+    #"money"           : "atm.16"
 }
 
 def resolveIcon(icon):
 
-    try:
-        resultIcon = iconReplacements[icon]
-    except KeyError:
-        resultIcon = icon
+    #try:
+    #    resultIcon = iconReplacements[icon]
+    #except KeyError:
+    resultIcon = icon
 
     return resultIcon
 

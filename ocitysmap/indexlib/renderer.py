@@ -134,7 +134,7 @@ class PoiIndexRenderer:
 
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
+                os.path.dirname(__file__), '..', '..', '..', 'Font-Awesome-SVG-PNG', 'white', 'svg', logo + '.svg'))
 
             if os.path.isfile(logo_path):
                 svg = rsvg.Handle(logo_path)
@@ -204,7 +204,7 @@ class PoiIndexRenderer:
 
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
-                        os.path.dirname(__file__), '..', '..', '..', 'openstreetmap-carto', 'symbols', logo + '.svg'))
+                os.path.dirname(__file__), '..', '..', '..', 'Font-Awesome-SVG-PNG', 'black', 'svg', logo + '.svg'))
 
             if os.path.isfile(logo_path):
                 svg = rsvg.Handle(logo_path)
