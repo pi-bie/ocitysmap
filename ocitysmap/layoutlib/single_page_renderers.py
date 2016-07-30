@@ -336,11 +336,9 @@ class SinglePageRenderer(Renderer):
         notice = notice or \
             _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
               u'Map data © %(year)d OpenStreetMap.org '
-              u'and contributors (cc-by-sa).\n'
+              u'and contributors. http://osm.org/\n'
               u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. '
-              u'The map may be incomplete or inaccurate. '
-              u'You can contribute to improve this map. '
-              u'See http://wiki.openstreetmap.org')
+              u'The map may be incomplete or inaccurate.')
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)
@@ -380,8 +378,8 @@ class SinglePageRenderer(Renderer):
 
         today = datetime.date.today()
         notice = notice or \
-            _(u'Created with http://php-groupies.de/map-edit/ - '
-                    u'Contact: Hartmut Holzgraefe (hartmut@php.net)')
+            _(u'Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  '
+                    u'Kontakt: Hartmut Holzgraefe (hartmut@php.net)')
 
         ctx.save()
         pc = pangocairo.CairoContext(ctx)
@@ -604,7 +602,7 @@ class SinglePageRenderer(Renderer):
             ctx.save()
 
             # Move to the right position
-            ctx.translate(safe_margin_dots + usable_area_width_dots/2.2,
+            ctx.translate(safe_margin_dots + usable_area_width_dots/2.3,
                           ( safe_margin_dots + title_margin_dots
                             + usable_area_height_dots
                             + copyright_margin_dots/4. ) )
