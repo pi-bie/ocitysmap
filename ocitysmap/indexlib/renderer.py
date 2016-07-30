@@ -156,7 +156,7 @@ class PoiIndexRenderer:
 
         ctx.set_font_size(dpi - 30)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
-        ctx.move_to(x, 10 + height)
+        ctx.move_to(x, 10 - y_bearing)
         ctx.show_text(label)
         ctx.restore()
 
