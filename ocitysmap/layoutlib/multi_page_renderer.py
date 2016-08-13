@@ -266,7 +266,7 @@ class MultiPageRenderer(Renderer):
                                    extend_bbox_to_ratio=False)
 
             # Create canvas for overlay on current page
-            overla_canvas = None
+            overlay_canvas = None
             if self.rc.overlay:
                 overlay_canvas = MapCanvas(self.rc.overlay,
                                            bb, self._usable_area_width_pt,
