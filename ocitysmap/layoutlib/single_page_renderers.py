@@ -51,6 +51,11 @@ from geopy.geocoders import Nominatim
 
 import time
 
+import qrcode
+import qrcode.image.svg
+import sys
+import StringIO
+
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -64,6 +69,7 @@ class SinglePageRenderer(Renderer):
 
     name = 'generic_single_page'
     description = 'A generic full-page layout with or without index.'
+    qrcode_text = ''
 
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
@@ -625,7 +631,23 @@ class SinglePageRenderer(Renderer):
         ctx.paint_with_alpha(0.75)
         ctx.restore()
 
+        # Draw QR code
+        if qrcode_text:
+          ctx.save()
+          ctx.translate(safe_margin_dots + title_margin_dots * 0.5, usable_area_height_dots) 
+          img = qrcode.make(qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
+          svgstr = StringIO.StringIO()
+          img.save(svgstr);
+          svg = rsvg.Handle(data=svgstr.getvalue())
+          svgstr.close()
+          ctx.move_to(0, 0)
+          factor = 200 / svg.props.height
+          ctx.scale(factor, factor)
+          svg.render_cairo(ctx)
+          ctx.restore()
 
+
+        # Place "you are here" circle and markers from POI file
         if self.rc.poi_file:
             # place "you are here" circle if coordinates are given
             if self.street_index.lat != False:
