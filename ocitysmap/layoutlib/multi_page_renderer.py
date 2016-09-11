@@ -74,7 +74,7 @@ class MultiPageRenderer(Renderer):
         self._usable_area_height_pt = (self.paper_height_pt -
                                        (2 * Renderer.PRINT_SAFE_MARGIN_PT))
 
-        scale_denom = Renderer.DEFAULT_SCALE
+        scale_denom = Renderer.DEFAULT_MULTIPAGE_SCALE
 
         # the mapnik scale depends on the latitude. However we are
         # always using Mapnik conversion functions (lat,lon <->
@@ -748,7 +748,7 @@ class MultiPageRenderer(Renderer):
     # The default paper size is A4 portrait
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
-                                   scale=Renderer.DEFAULT_SCALE,
+                                   scale=Renderer.DEFAULT_MULTIPAGE_SCALE,
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
         acceptable_formats = [ 'A5', 'A4', 'US letter' ]
