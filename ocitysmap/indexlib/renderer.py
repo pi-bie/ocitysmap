@@ -188,18 +188,17 @@ class PoiIndexRenderer:
         ctx.scale(scale, scale)
         svg.render_cairo(ctx)
 
-        ctx.set_source_rgb(0, 0, 0)
-        pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('Droid Sans')
-        fd.set_size(pango.SCALE)
-        layout = pc.create_layout()
-        layout.set_font_description(fd)
-        layout.set_text(number)
-        draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
-        text_x, text_y, text_w, text_h = layout.get_extents()[1]
-        ctx.translate(svg.props.width/2 - text_w * scale/50, svg.props.height/5)
-        pc.show_layout(layout)
+        ctx.restore()
 
+        ctx.save()
+        ctx.set_source_rgb(0, 0, 0)
+        ctx.select_font_face("Droid Sans Mono",
+                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+
+        x_bearing, y_bearing, width, height = ctx.text_extents(number)[:4]
+        ctx.set_font_size((dpi - 30)/(len(number)+1))
+        ctx.move_to(20 - width/2, 25)
+        ctx.show_text(number)
         ctx.restore()
 
         if logo != None:
