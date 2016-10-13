@@ -31,6 +31,7 @@ import logging
 import os
 import psycopg2
 import re
+import json
 
 import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
@@ -81,6 +82,51 @@ def resolveIcon(icon):
 class PoiIndex:
 
     def __init__(self, filename):
+        f = codecs.open(filename, "r", "utf-8")
+
+	if not self._read_json(f):
+	    f.seek(0)
+	    self._read_old_format(f)
+
+        f.close()
+
+    @property
+    def categories(self):
+        return self._categories
+
+    @property
+    def lat(self):
+        return self._center_lat
+
+    @property
+    def lon(self):
+        return self._center_lon
+
+    def _read_json(self, f):
+	self._categories = []
+
+        try:
+	    j = json.load(f)
+        except ValueError, e:
+            return False
+
+        title = j['title']	
+        self._center_lat = float(j['center_lat'])
+        self._center_lon = float(j['center_lon'])
+
+        for cat in j['nodes']:
+            c = commons.PoiIndexCategory(cat['text'], color=cat['color'], icon=cat['icon'])
+            for node in cat['nodes']:
+		c.items.append(
+                    commons.PoiIndexItem(node['text'],
+                                         ocitysmap.coords.Point(float(node['lat']),
+                                                                float(node['lon'])),
+                                         icon = node['icon']));
+            self._categories.append(c)
+
+	return True	
+
+    def _read_old_format(self, f):
         geolocator = Nominatim()
 
         self._categories = []
@@ -89,12 +135,10 @@ class PoiIndex:
         self._center_lat = False
         self._center_lon = False
 
-        f = codecs.open(filename, "r", "utf-8")
-
         for line in iter(f):
             parts = line.split(";")
 
-            if parts[0][0] == "@":
+            if parts[0] and parts[0][0] == "@":
                 title = parts[0][1:].strip()
                 loc   = parts[1].strip()
                 latLon = re.match(r'^\s*([+-]?\d+(\.\d*)?)\s*,\s*([+-]?\d+(\.\d*)?)\s*$', loc)
@@ -102,7 +146,7 @@ class PoiIndex:
                     self._center_lat  = float(latLon.group(1))
                     self._center_lon  = float(latLon.group(3))
 
-            elif parts[0][0] != " ":
+            elif 0==len(parts[0]) or parts[0][0] != " ":
                 if cat != None:
                     self._categories.append(cat)
 
@@ -138,22 +182,10 @@ class PoiIndex:
                                          ocitysmap.coords.Point(latitude,
                                                                 longitude),
                                          icon = icon));
-        f.close()
 
         if cat != None:
             self._categories.append(cat)
 
-    @property
-    def categories(self):
-        return self._categories
-
-    @property
-    def lat(self):
-        return self._center_lat
-
-    @property
-    def lon(self):
-        return self._center_lon
 
     def write_to_csv(self, title, output_filename):
         return
