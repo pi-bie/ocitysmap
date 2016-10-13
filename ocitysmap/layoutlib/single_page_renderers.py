@@ -632,10 +632,10 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Draw QR code
-        if qrcode_text:
+        if self.qrcode_text:
           ctx.save()
           ctx.translate(safe_margin_dots + title_margin_dots * 0.5, usable_area_height_dots) 
-          img = qrcode.make(qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
+          img = qrcode.make(self.qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
           svgstr = StringIO.StringIO()
           img.save(svgstr);
           svg = rsvg.Handle(data=svgstr.getvalue())
