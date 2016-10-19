@@ -183,7 +183,7 @@ class MapCanvas:
             r.symbols.append(poly_sym)
             line_sym = mapnik.LineSymbolizer()
             line_sym.stroke = color
-            line_sym.stroke_width = line_width
+            line_sym.stroke_width = float(line_width)
             r.symbols.append(line_sym)
             s.rules.append(r)
 
