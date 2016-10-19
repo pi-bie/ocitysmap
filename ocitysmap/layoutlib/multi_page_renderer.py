@@ -420,8 +420,9 @@ class MultiPageRenderer(Renderer):
         return front_page_map
 
     def _render_front_page_header(self, ctx, w, h):
-        # Draw a light blue block which will contain the name of the
+        # Draw a grey blue block which will contain the name of the
         # city being rendered.
+        ctx.save()
         blue_w = w
         blue_h = 0.3 * h
         ctx.set_source_rgb(.80,.80,.80)
@@ -429,6 +430,7 @@ class MultiPageRenderer(Renderer):
         ctx.fill()
         draw_utils.draw_text_adjusted(ctx, self.rc.title, blue_w/2, blue_h/2,
                  blue_w, blue_h)
+        ctx.restore()
 
     def _render_front_page_map(self, ctx, dpi, w, h):
         # We will render the map slightly below the title
@@ -516,8 +518,8 @@ class MultiPageRenderer(Renderer):
         w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
 
-        self._render_front_page_header(ctx, w, h)
         self._render_front_page_map(ctx, dpi, w, h)
+        self._render_front_page_header(ctx, w, h)
         self._render_front_page_footer(ctx, w, h, osm_date)
 
         ctx.restore()
