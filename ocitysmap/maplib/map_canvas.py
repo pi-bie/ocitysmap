@@ -173,9 +173,19 @@ class MapCanvas:
 
         shpid = os.path.basename(shape_file.get_filepath())
         s,r = mapnik.Style(), mapnik.Rule()
-        r.symbols.append(mapnik.PolygonSymbolizer(color))
-        r.symbols.append(mapnik.LineSymbolizer(color, line_width))
-        s.rules.append(r)
+
+        if ocitysmap.get_mapnik_major_version() == 2:
+            r.symbols.append(mapnik.PolygonSymbolizer(color))
+            r.symbols.append(mapnik.LineSymbolizer(color, line_width))
+        else:
+            poly_sym = mapnik.PolygonSymbolizer()
+            poly_sym.fill = color
+            r.symbols.append(poly_sym)
+            line_sym = mapnik.LineSymbolizer()
+            line_sym.stroke = color
+            line_sym.stroke_width = line_width
+            r.symbols.append(line_sym)
+            s.rules.append(r)
 
         self._map.append_style('style_%s' % shpid, s)
         layer = mapnik.Layer(shpid)

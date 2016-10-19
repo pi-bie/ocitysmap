@@ -80,6 +80,7 @@ import ConfigParser
 import gzip
 import logging
 import os
+import mapnik
 import psycopg2
 import re
 import tempfile
@@ -95,6 +96,11 @@ from layoutlib import PAPER_SIZES, renderers
 import layoutlib.commons
 
 LOG = logging.getLogger('ocitysmap')
+
+
+def get_mapnik_major_version():
+    return int(mapnik.mapnik_version_string().split('.')[0])
+
 
 class RenderingConfiguration:
     """
