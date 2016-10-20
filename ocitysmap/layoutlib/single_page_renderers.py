@@ -361,6 +361,34 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         ##
+        ## Draw the map, scaled to fit the designated area
+        ##
+        ctx.save()
+
+        # Prepare to draw the map at the right location
+        ctx.translate(map_coords_dots[0], map_coords_dots[1])
+
+        # Draw the rescaled Map
+        ctx.save()
+        rendered_map = self._map_canvas.get_rendered_map()
+        LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+        LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
+        mapnik.render(rendered_map, ctx)
+        ctx.restore()
+
+        # Draw a rectangle around the map
+        ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
+        ctx.stroke()
+
+        # Place the vertical and horizontal square labels
+        self._draw_labels(ctx, self.grid,
+                          map_coords_dots[2],
+                          map_coords_dots[3],
+                          commons.convert_pt_to_dots(self._grid_legend_margin_pt,
+                                                   dpi))
+        ctx.restore()
+
+        ##
         ## Draw the index, when applicable
         ##
         if self._index_renderer and self._index_area:
@@ -389,35 +417,6 @@ class SinglePageRenderer(Renderer):
                           commons.convert_pt_to_dots(self._index_area.h, dpi))
             ctx.stroke()
             ctx.restore()
-
-
-        ##
-        ## Draw the map, scaled to fit the designated area
-        ##
-        ctx.save()
-
-        # Prepare to draw the map at the right location
-        ctx.translate(map_coords_dots[0], map_coords_dots[1])
-
-        # Draw the rescaled Map
-        ctx.save()
-        rendered_map = self._map_canvas.get_rendered_map()
-        LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
-        LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
-        mapnik.render(rendered_map, ctx)
-        ctx.restore()
-
-        # Draw a rectangle around the map
-        ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
-        ctx.stroke()
-
-        # Place the vertical and horizontal square labels
-        self._draw_labels(ctx, self.grid,
-                          map_coords_dots[2],
-                          map_coords_dots[3],
-                          commons.convert_pt_to_dots(self._grid_legend_margin_pt,
-                                                   dpi))
-        ctx.restore()
 
         ##
         ## Draw the title
