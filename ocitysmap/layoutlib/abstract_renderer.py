@@ -147,6 +147,7 @@ class Renderer:
 
         ctx.set_font_size(min(0.75 * grid_legend_margin_dots,
                               0.5 * step_horiz))
+        ctx.set_source_rgba(0, 0, 0, 1)
 
         for i, label in enumerate(map_grid.horizontal_labels):
             x = i * step_horiz
