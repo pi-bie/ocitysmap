@@ -359,8 +359,12 @@ class MultiPageRenderer(Renderer):
             # the street name.
 
             prev_locale = locale.getlocale(locale.LC_COLLATE)
-            locale.setlocale(locale.LC_COLLATE, self.rc.i18n.language_code())
             try:
+                locale.setlocale(locale.LC_COLLATE, self.rc.i18n.language_code())
+            except Exception:
+                l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+
+	    try:
                 grouped_items_sorted = \
                     sorted(grouped_items,
                            lambda x,y: locale.strcoll(x.label, y.label))

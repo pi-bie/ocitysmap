@@ -361,7 +361,11 @@ class StreetIndex:
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
         prev_locale = locale.getlocale(locale.LC_COLLATE)
-        locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
+	try:
+            locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
+	except Exception:
+            l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+
         try:
             sorted_sl = sorted([(self._i18n.user_readable_street(name),
                                  linestring) for name,linestring in sl],

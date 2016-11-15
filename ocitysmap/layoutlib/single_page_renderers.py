@@ -349,7 +349,11 @@ class SinglePageRenderer(Renderer):
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)
-        locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
+	try:
+            locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
+        except Exception:
+            l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+
         try:
             if osm_date is None:
                 osm_date_str = _(u'unknown')
