@@ -190,9 +190,6 @@ class SinglePageRenderer(Renderer):
         if self.rc.overlay:
            self._overlay_canvas.render()
 
-
-
-
     def _create_index_rendering(self, on_the_side):
         """
         Prepare to render the Street index.

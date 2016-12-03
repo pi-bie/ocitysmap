@@ -3,15 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Konstantinos Stampoulis, 2015
 # Wasilis Mandratzis <inactive+Wasilis@transifex.com>, 2013
 # Γιάννης Ανθυμίδης <yannanth@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-11-20 09:54+0000\n"
-"Last-Translator: Γιάννης Ανθυμίδης <yannanth@gmail.com>\n"
-"Language-Team: Greek (http://www.transifex.com/projects/p/maposmatic/language/el/)\n"
+"PO-Revision-Date: 2015-01-04 17:33+0000\n"
+"Last-Translator: Konstantinos Stampoulis\n"
+"Language-Team: Greek (http://www.transifex.com/dittaeva/maposmatic/language/el/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,7 +31,7 @@ msgstr "Τόπος λατρείας"
 #: ocitysmap/indexlib/indexer.py:167 ocitysmap/indexlib/indexer.py:168
 #: ocitysmap/indexlib/indexer.py:169
 msgid "Education"
-msgstr "Μάθηση"
+msgstr "Εκπαίδευση"
 
 #: ocitysmap/indexlib/indexer.py:165
 msgid "Kindergarten"
@@ -59,7 +60,7 @@ msgstr "Δημοσιά κτίρια"
 
 #: ocitysmap/indexlib/indexer.py:170
 msgid "Town hall"
-msgstr "Κέντρο"
+msgstr "Δημαρχείο"
 
 #: ocitysmap/indexlib/indexer.py:171
 msgid "Post office"
@@ -89,7 +90,7 @@ msgid ""
 "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n"
 "The map may be incomplete or inaccurate. You can contribute to improve this map.\n"
 "See http://wiki.openstreetmap.org"
-msgstr "Copyright © %(year)d δημιουργοί MapOSMatic/OCitySMap.\nhttp://www.maposmatic.org\n\nΔεδομένα χάρτη © %(year)d OpenStreetMap.org και συνεισφέροντες (cc-by-sa).\nhttp://www.openstreetmap.org\n\nΟ χάρτης δημιουργήθηκε στις: %(date)s. Δεδομένα OSM ενημερώθηκαν στις: %(osmdate)s.\nΟ χάρτης μπορεί να είναι ατελής ή ανακριβής. Μπορείτε να συνεισφέρεται για να βελτιώσετε τον χάρτη.\nΒλέπετε http://wiki.openstreetmap.org"
+msgstr "Copyright © %(year)d δημιουργοί MapOSMatic/OCitySMap.\nhttp://www.maposmatic.org\n\nΔεδομένα χάρτη © %(year)d OpenStreetMap.org και συνεισφέροντες (cc-by-sa).\nhttp://www.openstreetmap.org\n\nΟ χάρτης δημιουργήθηκε στις: %(date)s. Τα δεδομένα OSM ενημερώθηκαν στις: %(osmdate)s.\nΟ χάρτης μπορεί να είναι ατελής ή ανακριβής. Μπορείτε να συνεισφέρετε για να βελτιώσετε τον χάρτη.\nΔείτε http://wiki.openstreetmap.org"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:485
 #: ocitysmap/layoutlib/single_page_renderers.py:303
@@ -105,7 +106,7 @@ msgstr "Αυτή η σελίδα είναι σκόπιμα κενή."
 msgid ""
 "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
 "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr "Copyright © %(year)d δημιουργοί MapOSMatic/OCitySMap. Δεδομένα χάρτη © %(year)d OpenStreetMap.org και συνεισφέροντες (cc-by-sa).\nΟ χάρτης δημιουργήθηκε στις: %(date)s. Δεδομένα OSM ενημερώθηκαν στις: %(osmdate)s. Ο χάρτης μπορεί να είναι ατελής ή ανακριβής. Μπορείτε να συνεισφέρεται για να βελτιώσετε τον χάρτη. Βλέπετε http://wiki.openstreetmap.org"
+msgstr "Copyright © %(year)d δημιουργοί MapOSMatic/OCitySMap. Δεδομένα χάρτη © %(year)d OpenStreetMap.org και συνεισφέροντες (cc-by-sa).\nΟ χάρτης δημιουργήθηκε στις: %(date)s. Τα δεδομένα OSM ενημερώθηκαν στις: %(osmdate)s. Ο χάρτης μπορεί να είναι ατελής ή ανακριβής. Μπορείτε να συνεισφέρετε για να βελτιώσετε τον χάρτη. Βλέπετε http://wiki.openstreetmap.org"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:643
 msgid "Test gettext"
