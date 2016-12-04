@@ -266,12 +266,12 @@ class MultiPageRenderer(Renderer):
                                    extend_bbox_to_ratio=False)
 
             # Create canvas for overlay on current page
-            overlay_canvas = None
-            if self.rc.overlay:
-                overlay_canvas = MapCanvas(self.rc.overlay,
+            overlay_canvases = []
+            for overlay in self.rc.overlays:
+                overlay_canvases.append(MapCanvas(overlay,
                                            bb, self._usable_area_width_pt,
                                            self._usable_area_height_pt, dpi,
-                                           extend_bbox_to_ratio=False)
+                                           extend_bbox_to_ratio=False))
 
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
@@ -289,10 +289,10 @@ class MultiPageRenderer(Renderer):
 
             map_canvas.render()
 
-            if overlay_canvas:
+            for overlay_canvas in overlay_canvases:
 		overlay_canvas.render()
 
-            self.pages.append((map_canvas, map_grid, overlay_canvas))
+            self.pages.append((map_canvas, map_grid, overlay_canvases))
 
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
@@ -695,15 +695,15 @@ class MultiPageRenderer(Renderer):
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
-        for map_number, (canvas, grid, overlay) in enumerate(self.pages):
+        for map_number, (canvas, grid, overlay_canvases) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
             mapnik.render(rendered_map, ctx)
 
-            if overlay:
-		rendered_overlay = overlay.get_rendered_map()
+            for overlay_canvas in overlay_canvases:
+		rendered_overlay = overlay_canvas.get_rendered_map()
                 mapnik.render(rendered_overlay, ctx)
 
             # Place the vertical and horizontal square labels

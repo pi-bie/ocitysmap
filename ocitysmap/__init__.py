@@ -117,7 +117,7 @@ class RenderingConfiguration:
         self.language        = None # str (locale)
 
         self.stylesheet      = None # Obj Stylesheet
-        self.overlay         = None # Obj Stylesheet
+        self.verlays        = [] # Array of Obj Stylesheet
 
         self.paper_width_mm  = None
         self.paper_height_mm = None

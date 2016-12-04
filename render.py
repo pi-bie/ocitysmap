@@ -83,9 +83,9 @@ def main():
                       metavar='NAME',
                       help='specify which stylesheet to use. Defaults to the '
                       'first specified in the configuration file.')
-    parser.add_option('--overlay', dest='overlay',
+    parser.add_option('--overlay', dest='overlays',
                       metavar='NAME',
-                      help='specify which overlay stylesheet to use. '
+                      help='comma separated list of overlay stylesheets to use. '
                       'Defaults to none')
     parser.add_option('-l', '--layout', dest='layout',
                       metavar='NAME',
@@ -164,15 +164,15 @@ def main():
                       mapper.STYLESHEET_REGISTRY))))
 
     # Parse overlay stylesheet (defaults to none)
-    if options.overlay is None:
-        overlay = None
-    else:
-        try:
-            overlay = mapper.get_overlay_by_name(options.overlay)
-        except LookupError, ex:
-            parser.error("%s. Available overlay stylesheets: %s."
-                 % (ex, ', '.join(map(lambda s: s.name,
-                      mapper.OVERLAY_REGISTRY))))
+    overlays = []
+    if options.overlays is not None:
+        for overlay_name in options.overlays.split(","): 
+            try:
+                overlays.append(mapper.get_overlay_by_name(overlay_name))
+            except LookupError, ex:
+                parser.error("%s. Available overlay stylesheets: %s."
+                     % (ex, ', '.join(map(lambda s: s.name,
+                          mapper.OVERLAY_REGISTRY))))
 
     # Parse rendering layout
     if options.layout is None:
@@ -244,7 +244,7 @@ def main():
     rc.bounding_box = bbox
     rc.language     = options.language
     rc.stylesheet   = stylesheet
-    rc.overlay      = overlay
+    rc.overlays     = overlays
     rc.poi_file     = options.poi_file
     if options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr[1]
