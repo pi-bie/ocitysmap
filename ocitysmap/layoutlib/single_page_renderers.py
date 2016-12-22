@@ -167,12 +167,17 @@ class SinglePageRenderer(Renderer):
 
         # Prepare map overlay
         self._overlay_canvases = []
+        self._overlay_effects  = []
         for overlay in self.rc.overlays:
-            self._overlay_canvases.append(MapCanvas(overlay,
-                                             self.rc.bounding_box,
-                                             float(self._map_coords[2]),  # W
-                                             float(self._map_coords[3]),  # H
-                                             dpi))
+            path = overlay.path.strip()
+            if path.startswith('internal:'):
+                self._overlay_effects.append(path.lstrip('internal:'))
+            else:
+                self._overlay_canvases.append(MapCanvas(overlay,
+                                              self.rc.bounding_box,
+                                              float(self._map_coords[2]),  # W
+                                              float(self._map_coords[3]),  # H
+                                              dpi))
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
@@ -673,6 +678,10 @@ class SinglePageRenderer(Renderer):
                 ctx.set_source_rgba(1, 0, 0, 0.2)
                 ctx.fill()
                 ctx.restore()
+
+        # apply effect overlays
+        for effect in self._overlay_effects:
+          self.render_plugin(effect, ctx)
 
         # TODO: map scale
 

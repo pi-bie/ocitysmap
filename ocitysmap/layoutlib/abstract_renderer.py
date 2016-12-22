@@ -36,6 +36,7 @@ import os
 import re
 import shapely.wkt
 import sys
+from pluginbase import PluginBase
 
 import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -86,6 +87,11 @@ class Renderer:
                 commons.convert_mm_to_pt(self.rc.paper_width_mm)
         self.paper_height_pt = \
                 commons.convert_mm_to_pt(self.rc.paper_height_mm)
+        self.dpi = dpi
+
+        plugin_path = os.path.abspath(os.path.join(os.path.dirname(__file__), './render_plugins'))
+        self.plugin_base = PluginBase(package='ocitysmap.layout_plugins')
+        self.plugin_source = self.plugin_base.make_plugin_source(searchpath=[plugin_path])
 
 
     @staticmethod
@@ -324,6 +330,11 @@ class Renderer:
                               self.rc.stylesheet.grid_line_width)
 
         return map_grid
+
+    def render_plugin(self, plugin_name, ctx):
+        my_plugin = self.plugin_source.load_plugin(plugin_name)
+        my_plugin.render(self, ctx)
+
 
     # The next two methods are to be overloaded by the actual renderer.
     def render(self, cairo_surface, dpi):

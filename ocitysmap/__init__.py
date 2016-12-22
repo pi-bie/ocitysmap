@@ -172,7 +172,7 @@ class Stylesheet:
 
         s.name = parser.get(section_name, 'name')
         s.path = parser.get(section_name, 'path')
-        if not os.path.exists(s.path):
+        if not s.path.startswith('internal:') and not os.path.exists(s.path):
             raise ValueError, \
                 'Could not find stylesheet file for stylesheet %s!' % s.name
         assign_if_present('description')
