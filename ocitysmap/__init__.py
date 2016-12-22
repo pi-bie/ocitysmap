@@ -503,6 +503,8 @@ SELECT ST_AsText(ST_LongestLine(
         factory = None
         dpi = layoutlib.commons.PT_PER_INCH
 
+        config.output_format = output_format
+
         if output_format == 'png':
             try:
                 dpi = int(self._parser.get('rendering', 'png_dpi'))

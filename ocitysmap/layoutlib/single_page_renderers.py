@@ -477,8 +477,8 @@ class SinglePageRenderer(Renderer):
             cairo_surface (Cairo.Surface): the destination Cairo device.
             dpi (int): dots per inch of the device.
         """
-        LOG.info('SinglePageRenderer rendering on %dx%dmm paper at %d dpi.' %
-                 (self.rc.paper_width_mm, self.rc.paper_height_mm, dpi))
+        LOG.info('SinglePageRenderer rendering -%s- on %dx%dmm paper at %d dpi.' %
+                 (self.rc.output_format, self.rc.paper_width_mm, self.rc.paper_height_mm, dpi))
 
         # First determine some useful drawing parameters
         safe_margin_dots \
