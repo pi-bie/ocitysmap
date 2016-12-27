@@ -43,7 +43,6 @@ import commons
 import ocitysmap
 import codecs
 
-from geopy.geocoders import Nominatim
 import time
 
 
@@ -83,11 +82,7 @@ class PoiIndex:
 
     def __init__(self, filename):
         f = codecs.open(filename, "r", "utf-8")
-
-	if not self._read_json(f):
-	    f.seek(0)
-	    self._read_old_format(f)
-
+        self._read_json(f)
         f.close()
 
     @property
@@ -125,67 +120,6 @@ class PoiIndex:
             self._categories.append(c)
 
 	return True	
-
-    def _read_old_format(self, f):
-        geolocator = Nominatim()
-
-        self._categories = []
-        cat = None
-
-        self._center_lat = False
-        self._center_lon = False
-
-        for line in iter(f):
-            parts = line.split(";")
-
-            if parts[0] and parts[0][0] == "@":
-                title = parts[0][1:].strip()
-                loc   = parts[1].strip()
-                latLon = re.match(r'^\s*([+-]?\d+(\.\d*)?)\s*,\s*([+-]?\d+(\.\d*)?)\s*$', loc)
-                if latLon:
-                    self._center_lat  = float(latLon.group(1))
-                    self._center_lon  = float(latLon.group(3))
-
-            elif 0==len(parts[0]) or parts[0][0] != " ":
-                if cat != None:
-                    self._categories.append(cat)
-
-                name  = parts[0].strip()
-                color = parts[1].strip()
-                if len(parts) > 2:
-                    icon = resolveIcon(parts[2].strip())
-                else:
-                    icon = None
-
-                cat = commons.PoiIndexCategory(name, color=color, icon=icon)
-            else:
-                name  = parts[0].strip()
-                loc   = parts[1].strip()
-                if len(parts) > 2:
-                    icon = resolveIcon(parts[2].strip())
-                else:
-                    icon = None
-
-                latLon = re.match(r'^\s*([+-]?\d+(\.\d*)?)\s*,\s*([+-]?\d+(\.\d*)?)\s*$', loc)
-
-                if latLon:
-                    latitude  = float(latLon.group(1))
-                    longitude = float(latLon.group(3))
-                else:
-                    geoloc    = geolocator.geocode(loc, geometry="geojson")
-                    latitude  = geoloc.latitude
-                    longitude = geoloc.longitude
-                    time.sleep(1)
-
-                cat.items.append(
-                    commons.PoiIndexItem(name,
-                                         ocitysmap.coords.Point(latitude,
-                                                                longitude),
-                                         icon = icon));
-
-        if cat != None:
-            self._categories.append(cat)
-
 
     def write_to_csv(self, title, output_filename):
         return

@@ -47,8 +47,6 @@ from ocitysmap.maplib.map_canvas import MapCanvas
 
 from colour import Color
 
-from geopy.geocoders import Nominatim
-
 import time
 
 import qrcode
@@ -464,15 +462,6 @@ class SinglePageRenderer(Renderer):
         pc.show_layout(layout)
 
         ctx.restore()
-
-    def _geomarker(self, txt, color, ref, ctx, dpi):
-
-       geolocator = Nominatim()
-
-       time.sleep(1)
-       location = geolocator.geocode(ref)
-
-       self._marker(color, txt, location.latitude, location.longitude, ctx, dpi)
 
     def render(self, cairo_surface, dpi, osm_date):
         """Renders the map, the index and all other visual map features on the
