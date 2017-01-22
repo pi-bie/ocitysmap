@@ -404,22 +404,6 @@ class SinglePageRenderer(Renderer):
         pc.show_layout(layout)
         ctx.restore()
 
-    def _latlon2xy(self, lat, lon, dpi):
-        bbox = self._map_canvas.get_actual_bounding_box()
-
-        vert_angle_span  = abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1])
-        horiz_angle_span = abs(bbox.get_top_left()[0] - bbox.get_bottom_right()[0])
-
-        y = bbox.get_top_left()[0] - lat
-        y*= (dpi/72.0) * self._map_coords[3] / horiz_angle_span 
-        y+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt, dpi)
-
-        x = lon - bbox.get_top_left()[1]
-        x*= (dpi/72.0) * self._map_coords[2] / vert_angle_span
-        x+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
-
-        return x,y
-
     def _marker(self, color, txt, lat, lon, ctx, dpi):
 
         marker_path = os.path.abspath(os.path.join(

@@ -74,6 +74,11 @@ class MultiPageRenderer(Renderer):
         self._usable_area_height_pt = (self.paper_height_pt -
                                        (2 * Renderer.PRINT_SAFE_MARGIN_PT))
 
+        self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
+                             Renderer.PRINT_SAFE_MARGIN_PT,
+                             self._usable_area_width_pt,
+                             self._usable_area_height_pt ) 
+
         scale_denom = Renderer.DEFAULT_MULTIPAGE_SCALE
 
         # the mapnik scale depends on the latitude. However we are
@@ -267,11 +272,16 @@ class MultiPageRenderer(Renderer):
 
             # Create canvas for overlay on current page
             overlay_canvases = []
+            overlay_effects  = []
             for overlay in self.rc.overlays:
-                overlay_canvases.append(MapCanvas(overlay,
-                                           bb, self._usable_area_width_pt,
-                                           self._usable_area_height_pt, dpi,
-                                           extend_bbox_to_ratio=False))
+                path = overlay.path.strip()
+                if path.startswith('internal:'):
+                    overlay_effects.append(path.lstrip('internal:'))
+                else:
+                    overlay_canvases.append(MapCanvas(overlay,
+                                               bb, self._usable_area_width_pt,
+                                               self._usable_area_height_pt, dpi,
+                                               extend_bbox_to_ratio=False))
 
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
@@ -292,7 +302,7 @@ class MultiPageRenderer(Renderer):
             for overlay_canvas in overlay_canvases:
 		overlay_canvas.render()
 
-            self.pages.append((map_canvas, map_grid, overlay_canvases))
+            self.pages.append((map_canvas, map_grid, overlay_canvases, overlay_effects))
 
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
@@ -695,7 +705,7 @@ class MultiPageRenderer(Renderer):
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
-        for map_number, (canvas, grid, overlay_canvases) in enumerate(self.pages):
+        for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
 
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
@@ -716,8 +726,19 @@ class MultiPageRenderer(Renderer):
                   commons.convert_pt_to_dots(self._usable_area_height_pt) \
                         - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
                   commons.convert_pt_to_dots(self._grid_legend_margin_pt))
-
             ctx.restore()
+
+
+            # apply effect overlays
+            ctx.save()
+            # we have to undo border adjustments here
+            ctx.translate(-commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                      -commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+            self._map_canvas = canvas;
+            for effect in overlay_effects:
+                self.render_plugin(effect, ctx)
+            ctx.restore()
+
 
             # Render the page number
             draw_utils.render_page_number(ctx, map_number+4,
@@ -807,3 +828,4 @@ class MultiPageRenderer(Renderer):
                  text_color=(0, 0, 0, 0.6))
 
         ctx.restore()
+
