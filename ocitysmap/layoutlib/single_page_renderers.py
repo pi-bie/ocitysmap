@@ -344,7 +344,7 @@ class SinglePageRenderer(Renderer):
         notice = notice or \
             _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
               u'Map data © %(year)d OpenStreetMap.org '
-              u'and contributors. http://osm.org/\n'
+              u'and contributors. http://osm.org/copyright\n'
               u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. '
               u'The map may be incomplete or inaccurate.')
 
