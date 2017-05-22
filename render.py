@@ -103,8 +103,10 @@ def main():
                             '"portrait" or "landscape". Defaults to portrait.',
                       default='portrait')
     parser.add_option('--poi-file', metavar='FILE',
-                      help='provide a filecontaining POI information to '
+                      help='provide a file containing POI information to '
                            'create an index instead of auto-generating it.')
+    parser.add_option('--gpx-file', metavar='FILE',
+                      help='a GPX track to be put on top of the rendered mapr.')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -246,6 +248,7 @@ def main():
     rc.stylesheet   = stylesheet
     rc.overlays     = overlays
     rc.poi_file     = options.poi_file
+    rc.gpx_file     = options.gpx_file
     if options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr[1]
         rc.paper_height_mm = paper_descr[2]

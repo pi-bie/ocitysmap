@@ -129,6 +129,7 @@ class RenderingConfiguration:
         self.i18n            = None # i18n object
 
         self.poi_file        = None
+        self.gpx_file        = None
 
 class Stylesheet:
     """

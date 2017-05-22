@@ -23,6 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import tempfile
 import cairo
 import rsvg
 import datetime
@@ -56,6 +57,11 @@ import StringIO
 
 
 LOG = logging.getLogger('ocitysmap')
+
+class SimpleStylesheet:
+    def __init__(self, path):
+        self.path = os.path.abspath(os.path.join('/home/maposmatic/maposmatic/media', path))
+
 
 
 class SinglePageRenderer(Renderer):
@@ -653,8 +659,44 @@ class SinglePageRenderer(Renderer):
                 ctx.restore()
 
         # apply effect overlays
+        ctx.save()
+        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.clip()
+        
         for effect in self._overlay_effects:
           self.render_plugin(effect, ctx)
+        ctx.restore()
+
+        # apply GPX track
+        if self.rc.gpx_file:
+	   tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+           filename = tmpfile.name
+
+           tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
+           tmpfile.write("<!DOCTYPE Map[\n")
+           tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
+           tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
+           tmpfile.write("]>\n")
+           tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
+           tmpfile.write(" &body;\n");
+           tmpfile.write("</Map>\n");
+
+           tmpfile.close()
+           
+           gpx_canvas = MapCanvas(SimpleStylesheet(filename),
+                                  self.rc.bounding_box,
+                                  float(self._map_coords[2]),  # W
+                                  float(self._map_coords[3]),  # H
+                                  dpi)
+
+           ctx.save()
+           ctx.translate(map_coords_dots[0], map_coords_dots[1])
+           gpx_overlay = gpx_canvas.get_rendered_map()
+           gpx_overlay.base = '/home/maposmatic/gpx-test'
+           mapnik.render(gpx_overlay, ctx, scale_factor, 0, 0)
+           ctx.restore()
+
+           os.unlink(filename)
 
         # TODO: map scale
 
