@@ -39,7 +39,7 @@ def _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, height, dir
     sx = x - svg.props.width  * scale/2
     sy = y - svg.props.height * scale/2
 
-    if type(direction) == float:
+    if type(direction) == float and surveillance != 'indoor':
         if angle == 360:
             ctx.arc(x, y, renderer.dpi, 0, 6.28)
         else:
