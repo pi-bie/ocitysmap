@@ -8,7 +8,6 @@ def _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, height, dir
     if camera_type == 'dome':
         symbol = 'dome-camera.svg'
         direction = '0'
-        angle = '360'
     else:
         symbol = 'camera.svg'
 
@@ -39,14 +38,38 @@ def _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, height, dir
     sx = x - svg.props.width  * scale/2
     sy = y - svg.props.height * scale/2
 
-    if type(direction) == float and surveillance != 'indoor':
-        if angle == 360:
-            ctx.arc(x, y, renderer.dpi, 0, 6.28)
-        else:
-            a1 = (direction - angle/2 - 90) * 3.14 / 180
-            a2 = (direction + angle/2 - 90) * 3.14 / 180
 
-            ctx.arc(x, y, renderer.dpi, a1, a2)
+    if type(direction) == float and surveillance != 'indoor':
+        if type(height) != float:
+           height = 5
+        elif height < 3:
+           height = 3
+        elif height > 12:
+           height = 12
+
+        if type(angle) != float:
+            angle = 1
+        else:
+            if angle < 0:
+               angle = - angle
+            if angle <= 15:
+               angle = 1
+            else:
+               angle = math.cos(((angle - 15) * 207986.0) / 11916720)
+
+        radius = 0.1 * renderer.dpi * height * angle
+
+        if camera_type == 'dome':
+            ctx.arc(x, y, radius, 0, 6.28)
+        else:
+            a1 = direction - 120
+            a2 = direction -  60
+
+            if a1 < 0:
+              a1 += 360
+              a2 += 360
+
+            ctx.arc(x, y, radius, a1*3.14/180, a2*3.14/180)
             ctx.line_to(x, y)
 
         ctx.close_path()
