@@ -4,12 +4,28 @@ import math
 import os
 import psycopg2
 
-def _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, height, direction, angle):
-    if camera_type == 'dome':
-        symbol = 'dome-camera.svg'
-        direction = '0'
+def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camera_type, direction, angle, height):
+    if surveillance_type == 'camera':
+        if camera_type == 'dome':
+            symbol = 'dome-camera.svg'
+            direction = '0'
+        elif camera_type == 'fixed':
+            symbol = 'camera-fixed.svg'
+        elif camera_type == 'panning':
+            symbol = 'camera-panning.svg'
+        elif camera_type == 'guard':
+            symbol = 'guard-shield.svg'
+        elif camera_type == 'ALPR':
+            symbol = 'speed-camera.svg'
+        else:
+            symbol = 'camera.svg'
+    elif surveillance_type == 'guard':
+        symbol = 'guard-shield.svg'
+    elif surveillance_type == 'ALPR':
+        symbol = 'speed-camera.svg'
     else:
-        symbol = 'camera.svg'
+        return
+
 
     if surveillance != 'public' and surveillance != 'outdoor' and surveillance != 'indoor':
         surveillance = 'public'
@@ -90,10 +106,12 @@ def _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, height, dir
 def render(renderer, ctx):
     query = """SELECT ST_Y(ST_TRANSFORM(way, 4002)) AS lat
                     , ST_X(ST_TRANSFORM(way, 4002)) AS lon
-                    , tags->'surveillance'     AS surveillance
-                    , tags->'camera:direction' AS direction
-                    , tags->'camera:angle' AS angle
-                    , tags->'camera:type'  AS type
+                    , tags->'surveillance'      AS surveillance
+                    , tags->'surveillance:type' AS type
+                    , tags->'camera:direction'  AS camera_direction
+                    , tags->'camera:angle'      AS camera_angle
+                    , tags->'camera:type'       AS camera_type
+                    , tags->'height'            AS camera_height
                  FROM planet_osm_point
                 WHERE tags->'man_made' = 'surveillance'
                   AND ST_CONTAINS(ST_TRANSFORM(ST_GeomFromText('%s', 4002), 3857), way)""" % renderer.rc.polygon_wkt
@@ -101,6 +119,6 @@ def render(renderer, ctx):
     cursor = renderer.db.cursor()
     cursor.execute(query)
 
-    for lat, lon, surveillance, direction, angle, camera_type in cursor.fetchall():
-        _camera_view(renderer, ctx, surveillance, camera_type, lat, lon, 10, direction, angle)
+    for lat, lon, surveillance, surveillance_type, direction, angle, camera_type, height in cursor.fetchall():
+        _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camera_type, direction, angle, height)
 
