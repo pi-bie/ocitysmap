@@ -71,7 +71,7 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
             if angle <= 15:
                angle = 1
             else:
-               angle = math.cos(((angle - 15) * 207986.0) / 11916720)
+               angle = math.cos((angle - 15) * math.pi / 180)
 
         radius = 0.1 * renderer.dpi * height * angle
 
@@ -85,7 +85,7 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
               a1 += 360
               a2 += 360
 
-            ctx.arc(x, y, radius, a1*3.14/180, a2*3.14/180)
+            ctx.arc(x, y, radius, a1*math.pi/180, a2*math.pi/180)
             ctx.line_to(x, y)
 
         ctx.close_path()
