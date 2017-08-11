@@ -96,7 +96,7 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
         ctx.fill()
 
     ctx.translate(sx, sy)
-    ctx.scale(scale, scale)
+    ctx.scale(svg_scale, svg_scale)
     svg.render_cairo(ctx)
 
     ctx.restore()
