@@ -4,31 +4,16 @@ import math
 import os
 import psycopg2
 
-def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camera_type, direction, angle, height):
-    if surveillance_type == 'camera':
-        if camera_type == 'dome':
-            symbol = 'dome-camera.svg'
-            direction = '0'
-        elif camera_type == 'fixed':
-            symbol = 'camera-fixed.svg'
-        elif camera_type == 'panning':
-            symbol = 'camera-panning.svg'
-        elif camera_type == 'guard':
-            symbol = 'guard-shield.svg'
-        elif camera_type == 'ALPR':
-            symbol = 'speed-camera.svg'
-        else:
-            symbol = 'camera.svg'
-    elif surveillance_type == 'guard':
-        symbol = 'guard-shield.svg'
-    elif surveillance_type == 'ALPR':
-        symbol = 'speed-camera.svg'
+def _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, direction, angle, height):
+    if camera_type == 'dome':
+        symbol = 'dome-camera'
+        direction = '0'
+    elif camera_type == 'fixed':
+        symbol = 'camera-fixed'
+    elif camera_type == 'panning':
+        symbol = 'camera-panning'
     else:
-        return
-
-
-    if surveillance != 'public' and surveillance != 'outdoor' and surveillance != 'indoor':
-        surveillance = 'public'
+        symbol = 'camera'
 
     if direction:
       if direction.isdigit():
@@ -60,22 +45,9 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
     else:
         angle=60
 
-    symbol_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images', surveillance, symbol))
-
-    fp = open(symbol_path,'rb')
-    data = fp.read()
-    fp.close()
-
-    svg = rsvg.Handle(data=data)
-
     ctx.save()
 
     x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
-
-    svg_scale = renderer.dpi / (4 * svg.props.height);
-    sx = x - svg.props.width  * svg_scale/2
-    sy = y - svg.props.height * svg_scale/2
-
 
     if type(direction) == float and surveillance != 'indoor':
         if type(height) != float:
@@ -95,7 +67,7 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
             else:
                angle = math.cos((angle - 15) * math.pi / 180)
 
-        radius = 0.1 * renderer.dpi * height * angle
+        radius = 20000 * height * angle / map_scale
 
         if camera_type == 'dome':
             ctx.arc(x, y, radius, 0, 6.28)
@@ -117,11 +89,37 @@ def _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camer
         ctx.set_source_rgba(1, 0.5, 0.5, 0.5)
         ctx.fill()
 
+    ctx.restore()
+
+    return symbol
+
+
+
+def _show_symbol(renderer, ctx, lat, lon, surveillance, symbol):
+    if surveillance != 'public' and surveillance != 'outdoor' and surveillance != 'indoor':
+        surveillance = 'public'
+
+    symbol_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images', surveillance, (symbol+'.svg')))
+
+    fp = open(symbol_path,'rb')
+    data = fp.read()
+    fp.close()
+
+    svg = rsvg.Handle(data=data)
+
+    x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
+
+    svg_scale = renderer.dpi / (4 * svg.props.height);
+    sx = x - svg.props.width  * svg_scale/2
+    sy = y - svg.props.height * svg_scale/2
+
+    ctx.save()
     ctx.translate(sx, sy)
     ctx.scale(svg_scale, svg_scale)
     svg.render_cairo(ctx)
-
     ctx.restore()
+
+
 
 
 
@@ -141,6 +139,17 @@ def render(renderer, ctx):
     cursor = renderer.db.cursor()
     cursor.execute(query)
 
+    map_scale = renderer._map_canvas.get_actual_scale()
+
     for lat, lon, surveillance, surveillance_type, direction, angle, camera_type, height in cursor.fetchall():
-        _camera_view(renderer, ctx, surveillance, surveillance_type, lat, lon, camera_type, direction, angle, height)
+        if surveillance_type == 'camera':
+            symbol = _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, direction, angle, height)
+        elif surveillance_type == 'guard':
+            symbol = 'guard-shield'
+        elif surveillance_type == 'ALPR':
+            symbol = 'speed-camera'
+        else:
+            continue
+
+        _show_symbol(renderer, ctx, lat, lon, surveillance, symbol) 
 
