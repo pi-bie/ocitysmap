@@ -1,4 +1,5 @@
 *~
+.*.swp
 *.mo
 /ocitysmap.conf
 /support/shoreline-update.sh
