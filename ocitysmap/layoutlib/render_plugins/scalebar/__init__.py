@@ -5,6 +5,8 @@ import os
 import psycopg2
 import logging
 import mapnik
+from ocitysmap.draw_utils import draw_simpletext_center
+from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from math import floor, log10
 
@@ -17,33 +19,35 @@ LOG = logging.getLogger('ocitysmap')
 def render(renderer, ctx):
     m = renderer._map_canvas.get_rendered_map()
 
- 
     # get the m per pixel on the map
     mPerPx = m.scale()
 
-    # how many metres is 20% of the width of the map?
-    twentyPc = m.width * 0.2 * mPerPx
-
-    # get the order of magnitude
-    oom = 10 ** floor(log10(twentyPc))
-
     # get the desired width of the scalebar in m
-    mScaleBar = round(twentyPc / oom) * oom
+    meter = renderer.grid.grid_size_m
+    oom   = 10 ** floor(log10(meter))
 
-    # get the desired width of the scalebar in px
-    pxScaleBar = round(mScaleBar/mPerPx)
+    # get the desired width of the scalebar in dots
+    map_coords_dots = map(lambda l: convert_pt_to_dots(l, renderer.dpi),
+                          renderer._map_coords)
+
+    dots = map_coords_dots[2]
+
+    step_horiz = dots / renderer.grid.horiz_count
+
 
     # make some text for the scalebar (sort units)
     if oom >= 1000:
-        scaleText = str(int(mScaleBar/1000)) + "km"
+        scaleText = str(int(meter/1000)) + "km"
     else:
-        scaleText = str(int(mScaleBar)) + "m"
+        scaleText = str(int(meter)) + "m"
+
+    pxScaleBar = dots / renderer.grid.horiz_count
 
     LOG.warning("plugin scale: %s" % scaleText )
 
-    barBuffer  = 5	# distance from scale bar to edge of image
-    lBuffer    = 5	# distance from the line to the end of the background
-    tickHeight = 12	# height of the tick marks
+    barBuffer  = 20	# distance from scale bar to edge of image
+    lBuffer    = 5      # distance from the line to the end of the background
+    tickHeight = 20	# height of the tick marks
 
     x = barBuffer
     x+= Renderer.PRINT_SAFE_MARGIN_PT * renderer.dpi / 72.0
@@ -71,11 +75,6 @@ def render(renderer, ctx):
     ctx.set_source_rgb(0, 0, 0)
     ctx.stroke()
 
-    ctx.set_source_rgb(0, 0, 0)
-    ctx.select_font_face("Georgia", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-    ctx.set_font_size(1.2)
-    ctx.move_to(x + 3*lBuffer, y)
-    ctx.show_text(scaleText)
-
+    draw_simpletext_center(ctx, scaleText, x+w/2, y+h/2)
     
     ctx.restore()
