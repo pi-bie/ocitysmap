@@ -10,30 +10,22 @@ from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from math import floor, log10
 
-LOG = logging.getLogger('ocitysmap')
-
-#    x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
-#    map_scale = renderer._map_canvas.get_actual_scale()
-
-
 def render(renderer, ctx):
-    m = renderer._map_canvas.get_rendered_map()
+    def pt2px(dot):
+        return dot * renderer.dpi / 72.0
 
-    # get the m per pixel on the map
-    mPerPx = m.scale()
+    m = renderer._map_canvas.get_rendered_map()
 
     # get the desired width of the scalebar in m
     meter = renderer.grid.grid_size_m
     oom   = 10 ** floor(log10(meter))
 
     # get the desired width of the scalebar in dots
-    map_coords_dots = map(lambda l: convert_pt_to_dots(l, renderer.dpi),
-                          renderer._map_coords)
+    map_coords_dots = map(lambda l: pt2px(l), renderer._map_coords)
 
     dots = map_coords_dots[2]
 
     step_horiz = dots / renderer.grid.horiz_count
-
 
     # make some text for the scalebar (sort units)
     if oom >= 1000:
@@ -43,38 +35,37 @@ def render(renderer, ctx):
 
     pxScaleBar = dots / renderer.grid.horiz_count
 
-    LOG.warning("plugin scale: %s" % scaleText )
-
-    barBuffer  = 20	# distance from scale bar to edge of image
-    lBuffer    = 5      # distance from the line to the end of the background
-    tickHeight = 20	# height of the tick marks
+    barBuffer  = pt2px(5) 	# distance from scale bar to edge of image
+    lBuffer    = pt2px(5)      # distance from the line to the end of the background
+    tickHeight = pt2px(15)	# height of the tick marks
 
     x = barBuffer
-    x+= Renderer.PRINT_SAFE_MARGIN_PT * renderer.dpi / 72.0
-    y = m.height-barBuffer-lBuffer-lBuffer-tickHeight
-    y+= (Renderer.PRINT_SAFE_MARGIN_PT + renderer._title_margin_pt) * renderer.dpi / 72.0
-    w = pxScaleBar+lBuffer+lBuffer
-    h = lBuffer+lBuffer+tickHeight
+    x+= pt2px(Renderer.PRINT_SAFE_MARGIN_PT)
 
-    LOG.warning("plugin box %d %d %d %d" % (x,y,w,h)) 
-    LOG.warning("plugin img %d %d" % (m.width, m.height)) 
+    y = m.height
+    y+= pt2px(Renderer.PRINT_SAFE_MARGIN_PT + renderer._title_margin_pt)
+    y-= barBuffer+lBuffer+lBuffer+tickHeight
+
+    w = pxScaleBar + 2*lBuffer
+    h = lBuffer+lBuffer+tickHeight
 
     ctx.save()
 
     ctx.rectangle(x,y,w,h)
-    ctx.set_source_rgb(0, 0, 0)
-    ctx.set_line_width(1)
+    ctx.set_source_rgba(0, 0, 0, 0.5)
+    ctx.set_line_width(pt2px(1))
     ctx.stroke_preserve()
-    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_source_rgba(1, 1, 1, 0.5)
     ctx.fill()
 
     ctx.move_to(x + lBuffer, y + lBuffer)
     ctx.rel_line_to(0, tickHeight)
     ctx.rel_line_to(w-lBuffer-lBuffer, 0)
     ctx.rel_line_to(0, -tickHeight)
-    ctx.set_source_rgb(0, 0, 0)
+    ctx.set_source_rgba(0, 0, 0, 0.5)
     ctx.stroke()
 
+    ctx.set_font_size(pt2px(10))
     draw_simpletext_center(ctx, scaleText, x+w/2, y+h/2)
     
     ctx.restore()
