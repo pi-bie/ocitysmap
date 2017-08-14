@@ -78,12 +78,26 @@ class Grid:
         self.horiz_count = self._width_m / size
         self.vert_count = self._height_m / size
 
-        # we don't want to have 2 digit numbers, so we make sure
-        # to not have more than 9 vertical grid squares
-        while self.vert_count > 9:
-            self.grid_size_m *= 1.05
-            self.horiz_count /= 1.05
-            self.vert_count  /= 1.05
+        # we don't want to have too long grid identifiers, so we make sure
+        # to not have more than 26 (A-Z) horizontal grid squares
+        while self.horiz_count > 25 :
+            if significand == 1:
+                significand = 2
+            elif significand == 2:
+                significand = 2.5
+            elif significand == 2.5:
+                significand = 5
+            elif significand == 5:
+                significand = 10
+            else:
+                significand = 2
+                exponent += 1
+
+            size = significand * 10 ** int(exponent)
+            self.grid_size_m = size
+            self.horiz_count = self._width_m / size
+            self.vert_count = self._height_m / size
+
 
         self._horiz_angle_span = abs(self._bbox.get_top_left()[1] -
                                      self._bbox.get_bottom_right()[1])
