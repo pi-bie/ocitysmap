@@ -5,9 +5,9 @@ import multi_page_renderer
 
 # The renderers registry
 _RENDERERS = [
+    single_page_renderers.SinglePageRendererNoIndex,
     single_page_renderers.SinglePageRendererIndexBottom,
     single_page_renderers.SinglePageRendererIndexOnSide,
-    single_page_renderers.SinglePageRendererNoIndex,
     multi_page_renderer.MultiPageRenderer,
     ]
 
