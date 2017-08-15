@@ -59,13 +59,16 @@ def render(renderer, ctx):
     ctx.fill()
 
     ctx.move_to(x + lBuffer, y + lBuffer)
-    ctx.rel_line_to(0, tickHeight)
+    ctx.rel_line_to(0, tickHeight/2)
     ctx.rel_line_to(w-lBuffer-lBuffer, 0)
-    ctx.rel_line_to(0, -tickHeight)
-    ctx.set_source_rgba(0, 0, 0, 0.5)
+    ctx.rel_line_to(0, -tickHeight/2)
+    ctx.set_source_rgba(0, 0, 0, 0.85)
     ctx.stroke()
 
     ctx.set_font_size(pt2px(10))
-    draw_simpletext_center(ctx, scaleText, x+w/2, y+h/2)
+    draw_simpletext_center(ctx, scaleText, x+w/2, y+h*0.25)
+
+    ctx.set_font_size(pt2px(8))
+    draw_simpletext_center(ctx, "1:%d" % renderer._map_canvas.get_actual_scale(), x+w/2, y+h*0.75)
     
     ctx.restore()
