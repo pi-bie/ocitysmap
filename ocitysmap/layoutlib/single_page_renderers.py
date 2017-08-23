@@ -522,8 +522,11 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
         # Draw a rectangle around the map
+        ctx.save()
+        ctx.set_line_width(self.dpi/72.0)
         ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
         ctx.stroke()
+        ctx.restore()
 
         # Place the vertical and horizontal square labels
         self._draw_labels(ctx, self.grid,
