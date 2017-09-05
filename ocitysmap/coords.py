@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import math
 
 import shapely.wkt
@@ -34,7 +36,7 @@ import xml.sax
 # instead of importing mapnik2, we import mapnik and assert it isn't
 # an old version.
 import mapnik
-assert mapnik.mapnik_version >= 200100, \
+assert mapnik.mapnik_version() >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 
@@ -117,7 +119,7 @@ class BoundingBox:
         polygon given in WKT format."""
         try:
             geom_envelope = shapely.wkt.loads(wkt).bounds
-        except Exception, rx:
+        except Exception as rx:
             raise ValueError("Invalid input WKT: %s" % ex)
         return BoundingBox(geom_envelope[1], geom_envelope[0],
                            geom_envelope[3], geom_envelope[2])
@@ -249,4 +251,4 @@ class BoundingBox:
 if __name__ == "__main__":
     wkt = 'POINT(2.0333 48.7062132250362)'
     pt = Point.parse_wkt(wkt)
-    print wkt, pt, pt.as_wkt()
+    print(wkt, pt, pt.as_wkt())

@@ -341,4 +341,4 @@ if __name__ == "__main__":
                      72, 120)
 
     surface.finish()
-    print "Generated /tmp/idx_commons.pdf"
+    print("Generated /tmp/idx_commons.pdf")

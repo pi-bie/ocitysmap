@@ -88,12 +88,12 @@ import shapely
 import shapely.wkt
 import shapely.geometry
 
-import coords
+from . import coords
 import i18n
-from indexlib.indexer import StreetIndex
-from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
-from layoutlib import PAPER_SIZES, renderers
-import layoutlib.commons
+from .indexlib.indexer import StreetIndex
+from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+from .layoutlib import PAPER_SIZES, renderers
+from .layoutlib import commons
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -174,8 +174,8 @@ class Stylesheet:
         s.name = parser.get(section_name, 'name')
         s.path = parser.get(section_name, 'path')
         if not s.path.startswith('internal:') and not os.path.exists(s.path):
-            raise ValueError, \
-                'Could not find stylesheet file for stylesheet %s!' % s.name
+            raise ValueError(
+                'Could not find stylesheet file for stylesheet %s!' % s.name)
         assign_if_present('description')
 
         assign_if_present('grid_line_color')
@@ -233,7 +233,7 @@ class OCitySMap:
 
         self._parser = ConfigParser.RawConfigParser()
         if not self._parser.read(config_files):
-            raise IOError, 'None of the configuration files could be read!'
+            raise IOError('None of the configuration files could be read!')
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self.__db = None
@@ -241,8 +241,8 @@ class OCitySMap:
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
         if not self.STYLESHEET_REGISTRY:
-            raise ValueError, \
-                    'OCitySMap configuration does not contain any stylesheet!'
+            raise ValueError( \
+                    'OCitySMap configuration does not contain any stylesheet!')
         LOG.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
 
         self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
@@ -406,7 +406,7 @@ SELECT ST_AsText(ST_LongestLine(
         for style in self.STYLESHEET_REGISTRY:
             if style.name == name:
                 return style
-        raise LookupError, 'The requested stylesheet %s was not found!' % name
+        raise LookupError( 'The requested stylesheet %s was not found!' % name)
 
     def get_all_overlay_configurations(self):
         """Returns the list of all available overlay stylesheet configurations 
@@ -418,7 +418,7 @@ SELECT ST_AsText(ST_LongestLine(
         for style in self.OVERLAY_REGISTRY:
             if style.name == name:
                 return style
-        raise LookupError, 'The requested overlay stylesheet %s was not found!' % name
+        raise LookupError( 'The requested overlay stylesheet %s was not found!' % name)
 
     def get_all_renderers(self):
         """Returns the list of all available layout renderers (list of
@@ -542,8 +542,8 @@ SELECT ST_AsText(ST_LongestLine(
             return
 
         else:
-            raise ValueError, \
-                'Unsupported output format: %s!' % output_format.upper()
+            raise ValueError( \
+                'Unsupported output format: %s!' % output_format.upper())
 
         renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
 

@@ -39,7 +39,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # SQL string escaping routine
 _sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
 
-import commons
+from . import commons
 import ocitysmap
 import codecs
 
@@ -98,28 +98,28 @@ class PoiIndex:
         return self._center_lon
 
     def _read_json(self, f):
-	self._categories = []
+        self._categories = []
 
         try:
-	    j = json.load(f)
-        except ValueError, e:
+            j = json.load(f)
+        except ValueError as e:
             return False
 
-        title = j['title']	
+        title = j['title']        
         self._center_lat = float(j['center_lat'])
         self._center_lon = float(j['center_lon'])
 
         for cat in j['nodes']:
             c = commons.PoiIndexCategory(cat['text'], color=cat['color'], icon=cat['icon'])
             for node in cat['nodes']:
-		c.items.append(
+                c.items.append(
                     commons.PoiIndexItem(node['text'],
                                          ocitysmap.coords.Point(float(node['lat']),
                                                                 float(node['lon'])),
                                          icon = node['icon']));
             self._categories.append(c)
 
-	return True	
+        return True        
 
     def write_to_csv(self, title, output_filename):
         return
@@ -207,7 +207,7 @@ class StreetIndex:
         # TODO: implement writing the index to CSV
         try:
             fd = open(output_filename, 'w')
-        except Exception,ex:
+        except Exception as ex:
             l.warning('error while opening destination file %s: %s'
                       % (output_filename, ex))
             return
@@ -295,9 +295,9 @@ class StreetIndex:
         # built to represent the list of squares, and the list is
         # alphabetically-sorted.
         prev_locale = locale.getlocale(locale.LC_COLLATE)
-	try:
+        try:
             locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
-	except Exception:
+        except Exception:
             l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
 
         try:
@@ -582,6 +582,6 @@ if __name__ == "__main__":
 
     street_index = StreetIndex(db, limits_wkt, i18n)
 
-    print "=> Got %d categories, total %d items" \
+    print("=> Got %d categories, total %d items" \
         % (len(street_index.categories),
-           reduce(lambda r,cat: r+len(cat.items), street_index.categories, 0))
+           reduce(lambda r,cat: r+len(cat.items), street_index.categories, 0)))

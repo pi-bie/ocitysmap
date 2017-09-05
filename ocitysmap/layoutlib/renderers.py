@@ -16,7 +16,7 @@ def get_renderer_class_by_name(name):
     for renderer in _RENDERERS:
         if renderer.name == name:
             return renderer
-    raise LookupError, 'The requested renderer %s was not found!' % name
+    raise LookupError('The requested renderer %s was not found!' % name)
 
 def get_renderers():
     """Returns the list of available renderers' names."""

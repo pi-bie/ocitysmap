@@ -29,7 +29,7 @@ import optparse
 import subprocess
 
 def make_pot():
-    print "Make locale/ocitysmap.pot"
+    print("Make locale/ocitysmap.pot")
     subprocess.check_call(['xgettext', '-o', 'ocitysmap.pot', '-p', 'locale',
                            '-L', 'Python',
                            'ocitysmap/indexlib/indexer.py',
@@ -38,25 +38,25 @@ def make_pot():
     return
 
 def make_po(languages):
-    print "Merge locale/ocitysmap.pot into locale/*/LC_MESSAGES/ocitysmap.po"
+    print("Merge locale/ocitysmap.pot into locale/*/LC_MESSAGES/ocitysmap.po")
     for l in languages:
-        print " * %s" % l
+        print(" * %s" % l)
         subprocess.check_call(['msgmerge', '-U',
                                'locale/%s/LC_MESSAGES/ocitysmap.po' % l,
                                'locale/ocitysmap.pot'])
     return
 
 def compile_mo(languages):
-    print "Compile locale/*/LC_MESSAGES/ocitysmap.mo files"
+    print("Compile locale/*/LC_MESSAGES/ocitysmap.mo files")
     for l in languages:
-        print " * %s" % l
+        print(" * %s" % l)
         subprocess.check_call(['msgfmt', '-o',
                                'locale/%s/LC_MESSAGES/ocitysmap.mo' %l,
                                'locale/%s/LC_MESSAGES/ocitysmap.po' %l])
     return
 
 def create_language(country_code):
-    print "Create directory for %s" % country_code
+    print("Create directory for %s" % country_code)
     os.makedirs('locale/%s/LC_MESSAGES' % country_code)
     shutil.copyfile('locale/ocitysmap.pot',
                     'locale/%s/LC_MESSAGES/ocitysmap.po' % country_code)

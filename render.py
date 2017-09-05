@@ -160,7 +160,7 @@ def main():
     else:
         try:
             stylesheet = mapper.get_stylesheet_by_name(options.stylesheet)
-        except LookupError, ex:
+        except LookupError as ex:
             parser.error("%s. Available stylesheets: %s."
                  % (ex, ', '.join(map(lambda s: s.name,
                       mapper.STYLESHEET_REGISTRY))))
@@ -171,7 +171,7 @@ def main():
         for overlay_name in options.overlays.split(","): 
             try:
                 overlays.append(mapper.get_overlay_by_name(overlay_name))
-            except LookupError, ex:
+            except LookupError as ex:
                 parser.error("%s. Available overlay stylesheets: %s."
                      % (ex, ', '.join(map(lambda s: s.name,
                           mapper.OVERLAY_REGISTRY))))
@@ -182,7 +182,7 @@ def main():
     else:
         try:
             cls_renderer = ocitysmap.layoutlib.renderers.get_renderer_class_by_name(options.layout)
-        except LookupError, ex:
+        except LookupError as ex:
             parser.error("%s\nAvailable layouts: %s."
                  % (ex, ', '.join(map(lambda lo: "%s (%s)"
                           % (lo.name, lo.description),

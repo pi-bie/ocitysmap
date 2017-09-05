@@ -60,7 +60,7 @@ if __name__ == '__main__':
                           database='maposmatic')
 
     street_index = StreetIndex(db, bbox.as_wkt(), i18n)
-    print street_index.categories
+    print(street_index.categories)
 
     # Render the items
     class i18nMock:
@@ -133,4 +133,4 @@ if __name__ == '__main__':
     _render('width', 'right')
 
     surface.finish()
-    print "Generated /tmp/myindex.pdf."
+    print("Generated /tmp/myindex.pdf.")

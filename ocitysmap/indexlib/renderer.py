@@ -111,7 +111,7 @@ class PoiIndexRenderer:
                                    freedom_direction, alignment):
 
         if (freedom_direction != 'width' or alignment != 'right'):
-            raise ValueError, 'Incompatible freedom direction and alignment!'
+            raise ValueError('Incompatible freedom direction and alignment!')
 
         x+= w * 0.2
         w = w * 0.8
@@ -327,7 +327,7 @@ class StreetIndexRenderer:
              alignment not in ('top', 'bottom')) or
             (freedom_direction == 'width' and
              alignment not in ('left', 'right'))):
-            raise ValueError, 'Incompatible freedom direction and alignment!'
+            raise ValueError('Incompatible freedom direction and alignment!')
 
         if not self._index_categories:
             raise commons.IndexEmptyError
@@ -658,7 +658,7 @@ class StreetIndexRenderer:
 
             return int(n_cols), min_required_width
 
-        raise ValueError, 'Invalid freedom direction!'
+        raise ValueError('Invalid freedom direction!')
 
 
 if __name__ == '__main__':
@@ -755,4 +755,4 @@ if __name__ == '__main__':
     _render('width', 'right')
 
     surface.finish()
-    print "Generated /tmp/myindex_render.pdf"
+    print("Generated /tmp/myindex_render.pdf")

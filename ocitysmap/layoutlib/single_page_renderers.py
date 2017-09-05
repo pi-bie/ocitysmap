@@ -22,6 +22,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import os
 import tempfile
 import cairo
@@ -907,10 +909,10 @@ if __name__ == '__main__':
     renderer_cls = renderers.get_renderer_class_by_name('plain')
     papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom)
 
-    print 'Compatible paper sizes:'
+    print('Compatible paper sizes:')
     for p in papers:
-        print '  * %s (%.1fx%.1fcm)' % (p[0], p[1]/10.0, p[2]/10.0)
-    print 'Using first available:', papers[0]
+        print('  * %s (%.1fx%.1fcm)' % (p[0], p[1]/10.0, p[2]/10.0))
+    print('Using first available:', papers[0])
 
     class StylesheetMock:
         def __init__(self):
@@ -942,4 +944,4 @@ if __name__ == '__main__':
     plain.render(surface, commons.PT_PER_INCH)
     surface.finish()
 
-    print "Generated /tmp/plain.pdf"
+    print("Generated /tmp/plain.pdf")
