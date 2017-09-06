@@ -27,21 +27,19 @@ from __future__ import print_function
 import os
 import tempfile
 import cairo
-import rsvg
+from gi.repository import Rsvg, Pango, PangoCairo
 import datetime
 import locale
 import logging
 import mapnik
-assert mapnik.mapnik_version >= 200100, \
+assert mapnik.mapnik_version() >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 import math
-import pango
-import pangocairo
 
-import commons
+from ocitysmap.layoutlib import commons
 import ocitysmap
-from abstract_renderer import Renderer
+from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.renderer import StreetIndexRenderer, PoiIndexRenderer
 from indexlib.indexer import StreetIndex, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
@@ -55,8 +53,11 @@ import time
 import qrcode
 import qrcode.image.svg
 import sys
-import StringIO
 
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -358,7 +359,7 @@ class SinglePageRenderer(Renderer):
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)
-	try:
+        try:
             locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
         except Exception:
             l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
@@ -597,7 +598,7 @@ class SinglePageRenderer(Renderer):
         ##
         ## Draw the creator notice
         ##
-	if self.rc.poi_file:
+        if self.rc.poi_file:
             ctx.save()
 
             # Move to the right position
@@ -674,7 +675,7 @@ class SinglePageRenderer(Renderer):
 
         # apply GPX track
         if self.rc.gpx_file:
-	   tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+           tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
            filename = tmpfile.name
 
            tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
@@ -766,6 +767,9 @@ class SinglePageRenderer(Renderer):
         # sizes.
         valid_sizes = []
         for name, w, h in ocitysmap.layoutlib.PAPER_SIZES:
+            if w is None: 
+                continue
+
             portrait_ok  = paper_width_mm <= w and paper_height_mm <= h
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 

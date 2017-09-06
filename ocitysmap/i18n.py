@@ -30,7 +30,7 @@ def _install_language(language, locale_path):
                             localedir=locale_path,
                             languages=[language],
                             fallback=True)
-    t.install(unicode=True)
+    t.install()
 
 class i18n:
     """Functions needed to be implemented for a new language.
@@ -113,12 +113,12 @@ class i18n_fr_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäãæ]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõœ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
-    Y_ACCENT = re.compile(ur"[ÿ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäãæ]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõœ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    Y_ACCENT = re.compile(r"[ÿ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -159,11 +159,11 @@ class i18n_it_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -205,12 +205,12 @@ class i18n_es_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
-    N_ACCENT = re.compile(ur"[ñ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    N_ACCENT = re.compile(r"[ñ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -329,13 +329,13 @@ class i18n_ca_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
-    N_ACCENT = re.compile(ur"[ñ]", re.IGNORECASE | re.UNICODE)
-    C_ACCENT = re.compile(ur"[ç]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    N_ACCENT = re.compile(r"[ñ]", re.IGNORECASE | re.UNICODE)
+    C_ACCENT = re.compile(r"[ç]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -384,11 +384,11 @@ class i18n_pt_br_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -431,7 +431,7 @@ class i18n_ar_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    A_ACCENT = re.compile(ur"[اإآ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[اإآ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -507,7 +507,7 @@ class i18n_ru_generic(i18n):
         f for t, ff in STATUS_PARTS for f in ff), re.IGNORECASE | re.UNICODE)
     # matches status prefixes at start of name used to move prefixes to the end
     PREFIX_REGEXP = re.compile(
-        ur"^(?P<num_prefix>\d+-?(ы?й|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
+        r"^(?P<num_prefix>\d+-?(ы?й|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
         (u"|".join(f for f,t in STATUS_PARTS)), re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
@@ -590,7 +590,7 @@ class i18n_be_generic(i18n):
         f for t, ff in STATUS_PARTS for f in ff), re.IGNORECASE | re.UNICODE)
     # matches status prefixes at start of name used to move prefixes to the end
     PREFIX_REGEXP = re.compile(
-        ur"^(?P<num_prefix>\d+-?(і|ы|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
+        r"^(?P<num_prefix>\d+-?(і|ы|я))?\s*(?P<prefix>(%s)\.?)?\s*(?P<name>.+)?" %
         (u"|".join(f for f,t in STATUS_PARTS)), re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
@@ -671,11 +671,11 @@ class i18n_nl_generic(i18n):
                                       re.IGNORECASE | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -719,12 +719,12 @@ class i18n_nl_generic(i18n):
 
 class i18n_hr_HR(i18n):
     # for upper_unaccent_string
-    C_ACCENT = re.compile(ur"[ćč]", re.IGNORECASE | re.UNICODE)
-    D_ACCENT = re.compile(ur"đ|dž", re.IGNORECASE | re.UNICODE)
-    N_ACCENT = re.compile(ur"nj", re.IGNORECASE | re.UNICODE)
-    L_ACCENT = re.compile(ur"lj", re.IGNORECASE | re.UNICODE)
-    S_ACCENT = re.compile(ur"š", re.IGNORECASE | re.UNICODE)
-    Z_ACCENT = re.compile(ur"ž", re.IGNORECASE | re.UNICODE)
+    C_ACCENT = re.compile(r"[ćč]", re.IGNORECASE | re.UNICODE)
+    D_ACCENT = re.compile(r"đ|dž", re.IGNORECASE | re.UNICODE)
+    N_ACCENT = re.compile(r"nj", re.IGNORECASE | re.UNICODE)
+    L_ACCENT = re.compile(r"lj", re.IGNORECASE | re.UNICODE)
+    S_ACCENT = re.compile(r"š", re.IGNORECASE | re.UNICODE)
+    Z_ACCENT = re.compile(r"ž", re.IGNORECASE | re.UNICODE)
 
     def upper_unaccent_string(self, s):
         s = self.C_ACCENT.sub("c", s)
@@ -877,11 +877,11 @@ class i18n_de_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)
@@ -984,14 +984,14 @@ class i18n_ast_generic(i18n):
                                                                  | re.UNICODE)
 
     # for IndexPageGenerator.upper_unaccent_string
-    E_ACCENT = re.compile(ur"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
-    I_ACCENT = re.compile(ur"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
-    A_ACCENT = re.compile(ur"[áàâäã]", re.IGNORECASE | re.UNICODE)
-    O_ACCENT = re.compile(ur"[óòôöõ]", re.IGNORECASE | re.UNICODE)
-    U_ACCENT = re.compile(ur"[úùûüũ]", re.IGNORECASE | re.UNICODE)
-    N_ACCENT = re.compile(ur"[ñ]", re.IGNORECASE | re.UNICODE)
-    H_ACCENT = re.compile(ur"[ḥ]", re.IGNORECASE | re.UNICODE)
-    L_ACCENT = re.compile(ur"[ḷ]", re.IGNORECASE | re.UNICODE)
+    E_ACCENT = re.compile(r"[éèêëẽ]", re.IGNORECASE | re.UNICODE)
+    I_ACCENT = re.compile(r"[íìîïĩ]", re.IGNORECASE | re.UNICODE)
+    A_ACCENT = re.compile(r"[áàâäã]", re.IGNORECASE | re.UNICODE)
+    O_ACCENT = re.compile(r"[óòôöõ]", re.IGNORECASE | re.UNICODE)
+    U_ACCENT = re.compile(r"[úùûüũ]", re.IGNORECASE | re.UNICODE)
+    N_ACCENT = re.compile(r"[ñ]", re.IGNORECASE | re.UNICODE)
+    H_ACCENT = re.compile(r"[ḥ]", re.IGNORECASE | re.UNICODE)
+    L_ACCENT = re.compile(r"[ḷ]", re.IGNORECASE | re.UNICODE)
 
     def __init__(self, language, locale_path):
         self.language = str(language)

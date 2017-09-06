@@ -25,7 +25,7 @@
 import logging
 import math
 
-import shapes
+from . import shapes
 
 l = logging.getLogger('ocitysmap')
 

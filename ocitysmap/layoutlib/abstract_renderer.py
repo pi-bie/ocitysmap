@@ -24,24 +24,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
-import rsvg
+from gi.repository import Rsvg, Pango, PangoCairo
 import logging
 import mapnik
-assert mapnik.mapnik_version >= 200100, \
+assert mapnik.mapnik_version() >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 import math
-import pango
 import os
 import re
 import shapely.wkt
 import sys
-from pluginbase import PluginBase
 
-import commons
+from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
 from ocitysmap import draw_utils, maplib
+
+from pluginbase import PluginBase
 
 LOG = logging.getLogger('ocitysmap')
 

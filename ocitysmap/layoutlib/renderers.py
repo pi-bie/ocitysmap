@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import single_page_renderers
-import multi_page_renderer
+from . import single_page_renderers
+from . import multi_page_renderer
 
 # The renderers registry
 _RENDERERS = [

@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import pango
+from gi.repository import Pango
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -144,11 +144,11 @@ class IndexItem:
     humanized squares description.
     """
     __slots__    = ['label', 'endpoint1', 'endpoint2', 'location_str','page_number']
-    label        = None # str
-    endpoint1    = None # coords.Point
-    endpoint2    = None # coords.Point
-    location_str = None # str or None
-    page_number  = None # integer or None. Only used by multi-page renderer.
+    # label        = None # str
+    # endpoint1    = None # coords.Point
+    # endpoint2    = None # coords.Point
+    # location_str = None # str or None
+    # page_number  = None # integer or None. Only used by multi-page renderer.
 
     def __init__(self, label, endpoint1, endpoint2, page_number=None):
         assert label is not None
@@ -298,7 +298,7 @@ class StreetIndexItem(IndexItem):
 class PoiIndexItem(IndexItem):
 
     __slots__    = ['icon']
-    icon = None
+    # icon = None
 
     def __init__(self, label, coords, icon=None):
         IndexItem.__init__(self, label, coords, None)

@@ -19,8 +19,7 @@
 
 import cairo
 import math
-import pango
-import pangocairo
+from gi.repository import Rsvg, Pango, PangoCairo
 
 import draw_utils
 import ocitysmap.layoutlib.commons as UTILS

@@ -25,24 +25,23 @@ from itertools import groupby
 import locale
 import logging
 import mapnik
-assert mapnik.mapnik_version >= 200100, \
+assert mapnik.mapnik_version() >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 import math
 import os
-import pangocairo
-import pango
+from gi.repository import Rsvg, Pango, PangoCairo
 import shapely.wkt
 import sys
 import tempfile
 
 import ocitysmap
 import coords
-import commons
-from abstract_renderer import Renderer
-from indexlib.commons import StreetIndexCategory
-from indexlib.indexer import StreetIndex
-from indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
+from . import commons
+from ocitysmap.layoutlib.abstract_renderer import Renderer
+from ocitysmap.indexlib.commons import StreetIndexCategory
+from ocitysmap.indexlib.indexer import StreetIndex
+from ocitysmap.indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
@@ -300,7 +299,7 @@ class MultiPageRenderer(Renderer):
             map_canvas.render()
 
             for overlay_canvas in overlay_canvases:
-		overlay_canvas.render()
+                overlay_canvas.render()
 
             self.pages.append((map_canvas, map_grid, overlay_canvases, overlay_effects))
 
@@ -374,7 +373,7 @@ class MultiPageRenderer(Renderer):
             except Exception:
                 l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
 
-	    try:
+            try:
                 grouped_items_sorted = \
                     sorted(grouped_items,
                            lambda x,y: locale.strcoll(x.label, y.label))
@@ -713,7 +712,7 @@ class MultiPageRenderer(Renderer):
             mapnik.render(rendered_map, ctx)
 
             for overlay_canvas in overlay_canvases:
-		rendered_overlay = overlay_canvas.get_rendered_map()
+                rendered_overlay = overlay_canvas.get_rendered_map()
                 mapnik.render(rendered_overlay, ctx)
 
             # Place the vertical and horizontal square labels

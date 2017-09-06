@@ -24,8 +24,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
-import pango
-import pangocairo
+from gi.repository import Pango, PangoCairo
 
 import ocitysmap.layoutlib.commons as commons
 
@@ -96,7 +95,7 @@ def draw_text_center(ctx, pc, layout, fascent, fheight,
     """
     txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
                                       baseline_x, baseline_y, text,
-                                      pango.ALIGN_CENTER)
+                                      Pango.Alignment.CENTER)
     layout_width = layout.get_width() / pango.SCALE
     return ( baseline_x + (layout_width - txt_width) / 2.,
              baseline_y,
@@ -169,7 +168,7 @@ def adjust_font_size(layout, fd, constraint_x, constraint_y):
     layout.set_font_description(fd)
 
 def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
-                       text_color=(0, 0, 0, 1), align=pango.ALIGN_CENTER,
+                       text_color=(0, 0, 0, 1), align=Pango.Alignment.CENTER,
                        width_adjust=0.7, height_adjust=0.8):
     """
     Draw a text adjusted to a maximum character number
@@ -204,7 +203,7 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
     text_x, text_y, text_w, text_h = layout.get_extents()[1]
     ctx.save()
     ctx.set_source_rgba(*text_color)
-    if align == pango.ALIGN_CENTER:
+    if align == Pango.Alignment.CENTER:
         x = x - (text_w/2.0)/pango.SCALE - int(float(text_x)/pango.SCALE)
         y = y - (text_h/2.0)/pango.SCALE - int(float(text_y)/pango.SCALE)
     else:

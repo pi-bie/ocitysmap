@@ -30,7 +30,7 @@ import logging
 # instead of importing mapnik2, we import mapnik and assert it isn't
 # an old version.
 import mapnik
-assert mapnik.mapnik_version >= 200100, \
+assert mapnik.mapnik_version() >= 200100, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 
@@ -38,8 +38,8 @@ import math
 import os
 
 import ocitysmap
-from layoutlib.commons import convert_pt_to_dots
-import shapes
+from ocitysmap.layoutlib.commons import convert_pt_to_dots
+import ocitysmap.maplib.shapes
 
 l = logging.getLogger('ocitysmap')
 

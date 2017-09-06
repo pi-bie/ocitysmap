@@ -38,14 +38,14 @@ def main():
 
     # Paper sizes, sorted in increasing widths
     KNOWN_PAPER_SIZE_NAMES = \
-        map(lambda p: p[0],
+        list(map(lambda p: p[0],
             sorted(ocitysmap.layoutlib.PAPER_SIZES,
-                   key=lambda p: p[1]))
+                   key=lambda p: int(p[1] or 0))))
 
     # Known renderer names
     KNOWN_RENDERERS_NAMES = \
-        map(lambda r: "%s (%s)" % (r.name, r.description),
-            ocitysmap.layoutlib.renderers.get_renderers())
+        list(map(lambda r: "%s (%s)" % (r.name, r.description),
+            ocitysmap.layoutlib.renderers.get_renderers()))
 
     # Known paper orientations
     KNOWN_PAPER_ORIENTATIONS = ['portrait', 'landscape']
@@ -89,11 +89,12 @@ def main():
                       'Defaults to none')
     parser.add_option('-l', '--layout', dest='layout',
                       metavar='NAME',
-                      default=KNOWN_RENDERERS_NAMES[0].split()[0],
-                      help=('specify which layout to use. Available layouts '
-                            'are: %s. Defaults to %s.' %
-                            (', '.join(KNOWN_RENDERERS_NAMES),
-                             KNOWN_RENDERERS_NAMES[0].split()[0])))
+#                      default=KNOWN_RENDERERS_NAMES[0].split()[0],
+#                      help=('specify which layout to use. Available layouts '
+#                            'are: %s. Defaults to %s.' %
+#                            (', '.join(KNOWN_RENDERERS_NAMES),
+#                             KNOWN_RENDERERS_NAMES[0].split()[0]))
+                     )
     parser.add_option('--paper-format', metavar='FMT',
                       help='set the output paper format. Either "default", '
                            'or one of %s.' % ', '.join(KNOWN_PAPER_SIZE_NAMES),

@@ -24,14 +24,12 @@
 
 import os
 import cairo
-import rsvg
+from gi.repository import Rsvg, Pango, PangoCairo
 import logging
 import math
-import pango
-import pangocairo
 import re
 
-import commons
+from . import commons
 import ocitysmap.layoutlib.commons as UTILS
 
 from colour import Color
@@ -48,8 +46,6 @@ class StreetIndexRenderingStyle:
     label items should be drawn (font family, size, etc.).
     """
     __slots__ = ["header_font_spec", "label_font_spec"]
-    header_font_spec = None
-    label_font_spec  = None
 
     def __init__(self, header_font_spec, label_font_spec):
         """

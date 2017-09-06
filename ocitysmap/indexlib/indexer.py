@@ -32,6 +32,7 @@ import os
 import psycopg2
 import re
 import json
+from functools import cmp_to_key
 
 import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
@@ -275,6 +276,9 @@ class StreetIndex:
 
         return selected_amenities
 
+    def _my_cmp(self, x, y):
+        return locale.strcoll(x[0].lower(), y[0].lower())
+
     def _convert_street_index(self, sl):
         """Given a list of street names, do some cleanup and pass it
         through the internationalization layer to get proper sorting,
@@ -303,14 +307,13 @@ class StreetIndex:
         try:
             sorted_sl = sorted([(self._i18n.user_readable_street(name),
                                  linestring) for name,linestring in sl],
-                               lambda x,y: locale.strcoll(x[0].lower(),
-                                                          y[0].lower()))
+                               key = cmp_to_key(self._my_cmp))
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 
         result = []
         current_category = None
-        NUMBER_LIST = [str(i) for i in xrange(10)]
+        NUMBER_LIST = [str(i) for i in range(10)]
         for street_name, linestring in sorted_sl:
             # Create new category if needed
             if (not current_category
@@ -445,9 +448,8 @@ order by amenity_name""" \
                    'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4002), 3857)"
                                   % (polygon_wkt,))}
 
-
-            # l.debug("Amenity query for for %s/%s (nogrid): %s" \
-            #             % (catname, db_amenity, query))
+            l.debug("Amenity query for for %s/%s (nogrid): %s" \
+                        % (catname, db_amenity, query))
             try:
                 cursor.execute(query % {'way':'way'})
             except psycopg2.InternalError:

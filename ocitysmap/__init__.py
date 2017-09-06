@@ -76,7 +76,7 @@ __author__ = 'The MapOSMatic developers'
 __version__ = '0.2'
 
 import cairo
-import ConfigParser
+import configparser
 import gzip
 import logging
 import os
@@ -89,7 +89,7 @@ import shapely.wkt
 import shapely.geometry
 
 from . import coords
-import i18n
+from . import i18n
 from .indexlib.indexer import StreetIndex
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 from .layoutlib import PAPER_SIZES, renderers
@@ -193,7 +193,7 @@ class Stylesheet:
     def create_all_from_config(parser, type='stylesheets'):
         try:
             styles = parser.get('rendering', 'available_'+type)
-        except (ConfigParser.NoOptionError, ValueError):
+        except (configparser.NoOptionError, ValueError):
             return []
 
         return [Stylesheet.create_from_config_section(parser, name.strip())
@@ -231,9 +231,10 @@ class OCitySMap:
         LOG.debug('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
-        self._parser = ConfigParser.RawConfigParser()
-        if not self._parser.read(config_files):
-            raise IOError('None of the configuration files could be read!')
+        self._parser = configparser.RawConfigParser()
+        # if not self._parser.read(['/home/maposmatic/.ocitysmap.conf']):
+        #    raise IOError('None of the configuration files could be read!')
+        self._parser.read_file(open('/home/maposmatic/.ocitysmap.conf'))
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self.__db = None
@@ -257,7 +258,7 @@ class OCitySMap:
         datasource = dict(self._parser.items('datasource'))
         # The port is not a mandatory configuration option, so make
         # sure we define a default value.
-        if not datasource.has_key('port'):
+        if not 'port' in datasource:
             datasource['port'] = 5432
         LOG.info('Connecting to database %s on %s:%s as %s...' %
                  (datasource['dbname'], datasource['host'], datasource['port'],
@@ -278,7 +279,7 @@ class OCitySMap:
 
         try:
             timeout = int(self._parser.get('datasource', 'request_timeout'))
-        except (ConfigParser.NoOptionError, ValueError):
+        except (configparser.NoOptionError, ValueError):
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(db, timeout)
 
@@ -509,7 +510,7 @@ SELECT ST_AsText(ST_LongestLine(
         if output_format == 'png':
             try:
                 dpi = int(self._parser.get('rendering', 'png_dpi'))
-            except ConfigParser.NoOptionError:
+            except configparser.NoOptionError:
                 dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
             # As strange as it may seem, we HAVE to use a vector
