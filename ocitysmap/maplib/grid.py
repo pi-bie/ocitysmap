@@ -109,15 +109,15 @@ class Grid:
 
         self._horizontal_lines = [ ( self._bbox.get_top_left()[0] -
                                     (x+1) * self._vert_unit_angle)
-                                  for x in xrange(int(math.floor(self.vert_count)))]
+                                  for x in range(int(math.floor(self.vert_count)))]
         self._vertical_lines   = [ (self._bbox.get_top_left()[1] +
                                     (x+1) * self._horiz_unit_angle)
-                                   for x in xrange(int(math.floor(self.horiz_count)))]
+                                   for x in range(int(math.floor(self.horiz_count)))]
 
-        self.horizontal_labels = map(self._gen_horizontal_square_label,
-                                      xrange(int(math.ceil(self.horiz_count))))
-        self.vertical_labels = map(self._gen_vertical_square_label,
-                                   xrange(int(math.ceil(self.vert_count))))
+        self.horizontal_labels = list(map(self._gen_horizontal_square_label,
+                                      range(int(math.ceil(self.horiz_count)))))
+        self.vertical_labels = list(map(self._gen_vertical_square_label,
+                                   range(int(math.ceil(self.vert_count)))))
 
         l.info('Using %sx%sm grid (%sx%s squares).' %
                (self.grid_size_m, self.grid_size_m,
@@ -156,7 +156,7 @@ class Grid:
 
         label = ''
         while x != -1:
-            label = chr(ord('A') + x % 26) + label
+            label = chr(ord('A') + int(x % 26)) + label
             x = x/26 - 1
         return label
 

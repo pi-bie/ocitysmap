@@ -38,7 +38,7 @@ import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # SQL string escaping routine
-_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s.encode('utf-8'))
+_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(str(s.encode('utf-8')))
 
 from . import commons
 import ocitysmap
@@ -448,8 +448,8 @@ order by amenity_name""" \
                    'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4002), 3857)"
                                   % (polygon_wkt,))}
 
-            l.debug("Amenity query for for %s/%s (nogrid): %s" \
-                        % (catname, db_amenity, query))
+            # l.debug("Amenity query for for %s/%s (nogrid): %s" \
+            #            % (catname, db_amenity, query))
             try:
                 cursor.execute(query % {'way':'way'})
             except psycopg2.InternalError:

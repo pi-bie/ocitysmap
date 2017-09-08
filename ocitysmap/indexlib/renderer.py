@@ -28,6 +28,7 @@ from gi.repository import Rsvg, Pango, PangoCairo
 import logging
 import math
 import re
+from functools import reduce
 
 from . import commons
 import ocitysmap.layoutlib.commons as UTILS
@@ -333,7 +334,7 @@ class StreetIndexRenderer:
 
         # Create a PangoCairo context for drawing to Cairo
         ctx = cairo.Context(surface)
-        pc  = pangocairo.CairoContext(ctx)
+        pc  = PangoCairo.create_context(ctx)
 
         # Iterate over the rendering_styles until we find a suitable layout
         rendering_style = None
@@ -341,7 +342,7 @@ class StreetIndexRenderer:
             LOG.debug("Trying index fit using %s..." % rs)
             try:
                 n_cols, min_dimension \
-                    = self._compute_columns_split(pc, rs, w, h,
+                    = self._compute_columns_split(ctx, pc, rs, w, h,
                                                   freedom_direction)
 
                 # Great: index did fit OK !
@@ -411,17 +412,17 @@ class StreetIndexRenderer:
                     UTILS.convert_pt_to_dots(rendering_area.y, dpi))
 
         # Create a PangoCairo context for drawing to Cairo
-        pc = pangocairo.CairoContext(ctx)
+        pc = PangoCairo.create_context(ctx)
 
-        header_fd = pango.FontDescription(
+        header_fd = Pango.FontDescription(
             rendering_area.rendering_style.header_font_spec)
-        label_fd  = pango.FontDescription(
+        label_fd  = Pango.FontDescription(
             rendering_area.rendering_style.label_font_spec)
 
         header_layout, header_fascent, header_fheight, header_em = \
-                self._create_layout_with_font(pc, header_fd)
+                self._create_layout_with_font(ctx, pc, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-                self._create_layout_with_font(pc, label_fd)
+                self._create_layout_with_font(ctx, pc, label_fd)
 
         #print "RENDER", header_layout, header_fascent, header_fheight, header_em
         #print "RENDER", label_layout, label_fascent, label_fheight, label_em
@@ -431,9 +432,9 @@ class StreetIndexRenderer:
         # according to pangocairo docs). If we want to render with
         # another resolution (different from 72), we have to scale the
         # pangocairo resolution accordingly:
-        pangocairo.context_set_resolution(label_layout.get_context(),
+        PangoCairo.context_set_resolution(label_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
-        pangocairo.context_set_resolution(header_layout.get_context(),
+        PangoCairo.context_set_resolution(header_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
         # All this is because we want pango to have the exact same
         # behavior as with the default 72dpi resolution. If we instead
@@ -445,9 +446,9 @@ class StreetIndexRenderer:
         column_width = int(rendering_area.w / rendering_area.n_cols)
 
         label_layout.set_width(int(UTILS.convert_pt_to_dots(
-                    (column_width - margin) * pango.SCALE, dpi)))
+                    (column_width - margin) * Pango.SCALE, dpi)))
         header_layout.set_width(int(UTILS.convert_pt_to_dots(
-                    (column_width - margin) * pango.SCALE, dpi)))
+                    (column_width - margin) * Pango.SCALE, dpi)))
 
         if not self._i18n.isrtl():
             offset_x = margin/2.
@@ -503,21 +504,21 @@ class StreetIndexRenderer:
         assert actual_n_cols <= rendering_area.n_cols
 
 
-    def _create_layout_with_font(self, pc, font_desc):
-        layout = pc.create_layout()
+    def _create_layout_with_font(self, ctx, pc, font_desc):
+        layout = PangoCairo.create_layout(ctx)
         layout.set_font_description(font_desc)
         font = layout.get_context().load_font(font_desc)
         font_metric = font.get_metrics()
 
-        fascent = float(font_metric.get_ascent()) / pango.SCALE
+        fascent = float(font_metric.get_ascent()) / Pango.SCALE
         fheight = float((font_metric.get_ascent() + font_metric.get_descent())
-                        / pango.SCALE)
-        em = float(font_metric.get_approximate_char_width()) / pango.SCALE
+                        / Pango.SCALE)
+        em = float(font_metric.get_approximate_char_width()) / Pango.SCALE
 
         return layout, fascent, fheight, em
 
 
-    def _compute_lines_occupation(self, pc, font_desc, n_em_padding,
+    def _compute_lines_occupation(self, ctx, pc, font_desc, n_em_padding,
                                   text_lines):
         """Compute the visual dimension parameters of the initial long column
         for the given text lines with the given font.
@@ -537,7 +538,7 @@ class StreetIndexRenderer:
             fheight: scaled font height.
         """
 
-        layout, fascent, fheight, em = self._create_layout_with_font(pc,
+        layout, fascent, fheight, em = self._create_layout_with_font(ctx, pc,
                                                                      font_desc)
         #print "PREPARE", layout, fascent, fheight, em
 
@@ -552,10 +553,10 @@ class StreetIndexRenderer:
 
 
     def _label_width(self, layout, label):
-        layout.set_text(label)
-        return float(layout.get_size()[0]) / pango.SCALE
+        layout.set_text(label, -1)
+        return float(layout.get_size()[0]) / Pango.SCALE
 
-    def _compute_column_occupation(self, pc, rendering_style):
+    def _compute_column_occupation(self, ctx, pc, rendering_style):
         """Returns the size of the tall column with all headers, labels and
         squares for the given font sizes.
 
@@ -568,16 +569,16 @@ class StreetIndexRenderer:
                         vertical margin to reserve after each small column).
         """
 
-        header_fd = pango.FontDescription(rendering_style.header_font_spec)
-        label_fd  = pango.FontDescription(rendering_style.label_font_spec)
+        header_fd = Pango.FontDescription(rendering_style.header_font_spec)
+        label_fd  = Pango.FontDescription(rendering_style.label_font_spec)
 
         # Account for maximum square width (at worst " " + "Z99-Z99")
-        label_block = self._compute_lines_occupation(pc, label_fd, 1+7,
+        label_block = self._compute_lines_occupation(ctx, pc, label_fd, 1+7,
                 reduce(lambda x,y: x+y.get_all_item_labels(),
                        self._index_categories, []))
 
         # Reserve a small margin around the category headers
-        headers_block = self._compute_lines_occupation(pc, header_fd, 2,
+        headers_block = self._compute_lines_occupation(ctx, pc, header_fd, 2,
                 [x.name for x in self._index_categories])
 
         column_width = max(label_block['column_width'],
@@ -593,7 +594,7 @@ class StreetIndexRenderer:
         return column_width, column_height, vertical_extra
 
 
-    def _compute_columns_split(self, pc, rendering_style,
+    def _compute_columns_split(self, ctx, pc, rendering_style,
                                zone_width_dots, zone_height_dots,
                                freedom_direction):
         """Computes the columns split for this index. From the one tall column
@@ -621,7 +622,7 @@ class StreetIndexRenderer:
         """
 
         tall_width, tall_height, vertical_extra = \
-                self._compute_column_occupation(pc, rendering_style)
+                self._compute_column_occupation(ctx, pc, rendering_style)
 
         if zone_width_dots < tall_width:
             raise commons.IndexDoesNotFitError
