@@ -1,5 +1,4 @@
 import cairo
-import rsvg
 import math
 import os
 import psycopg2
@@ -21,7 +20,7 @@ def render(renderer, ctx):
     oom   = 10 ** floor(log10(meter))
 
     # get the desired width of the scalebar in dots
-    map_coords_dots = map(lambda l: pt2px(l), renderer._map_coords)
+    map_coords_dots = list(map(lambda l: pt2px(l), renderer._map_coords))
 
     dots = map_coords_dots[2]
 

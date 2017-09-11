@@ -34,6 +34,7 @@ from gi.repository import Rsvg, Pango, PangoCairo
 import shapely.wkt
 import sys
 import tempfile
+from functools import cmp_to_key
 
 import ocitysmap
 import coords
@@ -345,6 +346,9 @@ class MultiPageRenderer(Renderer):
 
         return all_categories_merged
 
+    def _my_cmp(self, x, y):
+        return locale.strcoll(x.label, y.label)
+
     def _merge_index_same_categories(self, categories, is_street=True):
         # Sort by categories. Now we may have several consecutive
         # categories with the same name (i.e category for letter 'A'
@@ -375,8 +379,7 @@ class MultiPageRenderer(Renderer):
 
             try:
                 grouped_items_sorted = \
-                    sorted(grouped_items,
-                           lambda x,y: locale.strcoll(x.label, y.label))
+                    sorted(grouped_items, key = cmp_to_key(self._my_cmp))        
             finally:
                 locale.setlocale(locale.LC_COLLATE, prev_locale)
 
@@ -525,7 +528,7 @@ class MultiPageRenderer(Renderer):
 
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
-                footer_h, align=pango.ALIGN_LEFT)
+                footer_h, align=Pango.Alignment.LEFT)
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
@@ -613,7 +616,7 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         if reverse_text:
             ctx.rotate(math.pi)
-        draw_utils.draw_text_adjusted(ctx, unicode(number), 0, 0, arrow_edge,
+        draw_utils.draw_text_adjusted(ctx, str(number), 0, 0, arrow_edge,
                         arrow_edge, max_char_number=max_digit_number,
                         text_color=(1, 1, 1, 1), width_adjust=0.85,
                         height_adjust=0.9)
@@ -623,7 +626,7 @@ class MultiPageRenderer(Renderer):
                                  max_digit_number):
         nb_previous_pages = 4
         current_line, current_col = None, None
-        for line_nb in xrange(self.nb_pages_height):
+        for line_nb in range(self.nb_pages_height):
             if map_number in self.page_disposition[line_nb]:
                 current_line = line_nb
                 current_col = self.page_disposition[line_nb].index(
@@ -634,7 +637,7 @@ class MultiPageRenderer(Renderer):
             return
 
         # north arrow
-        for line_nb in reversed(xrange(current_line)):
+        for line_nb in reversed(range(current_line)):
             if self.page_disposition[line_nb][current_col] != None:
                 north_arrow = self.page_disposition[line_nb][current_col]
                 ctx.save()
@@ -646,7 +649,7 @@ class MultiPageRenderer(Renderer):
                 break
 
         # south arrow
-        for line_nb in xrange(current_line + 1, self.nb_pages_height):
+        for line_nb in range(current_line + 1, self.nb_pages_height):
             if self.page_disposition[line_nb][current_col] != None:
                 south_arrow = self.page_disposition[line_nb][current_col]
                 ctx.save()
@@ -661,7 +664,7 @@ class MultiPageRenderer(Renderer):
                 break
 
         # west arrow
-        for col_nb in reversed(xrange(0, current_col)):
+        for col_nb in reversed(range(0, current_col)):
             if self.page_disposition[current_line][col_nb] != None:
                 west_arrow = self.page_disposition[current_line][col_nb]
                 ctx.save()
@@ -675,7 +678,7 @@ class MultiPageRenderer(Renderer):
                 break
 
         # east arrow
-        for col_nb in xrange(current_col + 1, self.nb_pages_width):
+        for col_nb in range(current_col + 1, self.nb_pages_width):
             if self.page_disposition[current_line][col_nb] != None:
                 east_arrow = self.page_disposition[current_line][col_nb]
                 ctx.save()
@@ -746,7 +749,7 @@ class MultiPageRenderer(Renderer):
                                           self.grayed_margin_pt,
                                           transparent_background = True)
             self._render_neighbour_arrows(ctx, cairo_surface, map_number,
-                                          len(unicode(len(self.pages)+4)))
+                                          len(str(len(self.pages)+4)))
 
             cairo_surface.show_page()
         ctx.restore()
@@ -823,8 +826,8 @@ class MultiPageRenderer(Renderer):
                                                          )/coord_delta_x
                 h = area_height_dots*(p_top_right.y - p_bottom_right.y
                                                          )/coord_delta_y
-            draw_utils.draw_text_adjusted(ctx, unicode(idx+4), x, y, w, h,
-                 max_char_number=len(unicode(len(overview_grid._pages_bbox)+3)),
+            draw_utils.draw_text_adjusted(ctx, str(idx+4), x, y, w, h,
+                 max_char_number=len(str(len(overview_grid._pages_bbox)+3)),
                  text_color=(0, 0, 0, 0.6))
 
         ctx.restore()

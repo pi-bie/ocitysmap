@@ -108,8 +108,9 @@ class Renderer:
         Return a tuple (cairo group object for the SVG, SVG width in
                         cairo units).
         """
+        handle = Rsvg.Handle();
         try:
-            svg = rsvg.Handle(path);
+            svg   = handle.new_from_file(path)
         except Exception:
             LOG.warning("Cannot read SVG from '%s'." % path)
             return None, None

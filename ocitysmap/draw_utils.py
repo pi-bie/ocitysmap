@@ -48,11 +48,12 @@ def draw_text(ctx, pc, layout, fascent, fheight,
     """
     layout.set_auto_dir(False) # Make sure ALIGN_RIGHT is independent on RTL...
     layout.set_alignment(pango_alignment)
-    layout.set_text(text)
-    width, height = [x/pango.SCALE for x in layout.get_size()]
+    layout.set_text(text, -1)
+    width, height = [x/Pango.SCALE for x in layout.get_size()]
 
     ctx.move_to(baseline_x, baseline_y - fascent)
-    pc.show_layout(layout)
+    PangoCairo.update_layout(ctx, layout)
+    PangoCairo.show_layout(ctx, layout)
     return width, height
 
 def draw_text_left(ctx, pc, layout, fascent, fheight,
@@ -73,7 +74,7 @@ def draw_text_left(ctx, pc, layout, fascent, fheight,
         A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
     """
     w,h = draw_text(ctx, pc, layout, fascent, fheight,
-                    baseline_x, baseline_y, text, pango.ALIGN_LEFT)
+                    baseline_x, baseline_y, text, Pango.Alignment.LEFT)
     return baseline_x, baseline_y, baseline_x + w
 
 def draw_text_center(ctx, pc, layout, fascent, fheight,
@@ -96,7 +97,7 @@ def draw_text_center(ctx, pc, layout, fascent, fheight,
     txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
                                       baseline_x, baseline_y, text,
                                       Pango.Alignment.CENTER)
-    layout_width = layout.get_width() / pango.SCALE
+    layout_width = layout.get_width() / Pango.SCALE
     return ( baseline_x + (layout_width - txt_width) / 2.,
              baseline_y,
              baseline_x + (layout_width + txt_width) / 2. )
@@ -120,8 +121,8 @@ def draw_text_right(ctx, pc, layout, fascent, fheight,
     """
     txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
                                       baseline_x, baseline_y,
-                                      text, pango.ALIGN_RIGHT)
-    layout_width = layout.get_width() / pango.SCALE
+                                      text, Pango.Alignment.RIGHT)
+    layout_width = layout.get_width() / Pango.SCALE
     return (baseline_x + layout_width - txt_width,
             baseline_y,
             baseline_x + layout_width)
@@ -160,8 +161,8 @@ def adjust_font_size(layout, fd, constraint_x, constraint_y):
        constraint_x/constraint_y (numbers): The area we want to
            write into (cairo units).
     """
-    while (layout.get_size()[0] / pango.SCALE < constraint_x and
-           layout.get_size()[1] / pango.SCALE < constraint_y):
+    while (layout.get_size()[0] / Pango.SCALE < constraint_x and
+           layout.get_size()[1] / Pango.SCALE < constraint_y):
         fd.set_size(int(fd.get_size()*1.2))
         layout.set_font_description(fd)
     fd.set_size(int(fd.get_size()/1.2))
@@ -181,41 +182,42 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
            write into (cairo units).
        max_char_number (number): If set a maximum character number.
     """
-    pc = pangocairo.CairoContext(ctx)
-    layout = pc.create_layout()
-    layout.set_width(int(width_adjust * width * pango.SCALE))
+    pc = PangoCairo.create_context(ctx)
+    layout = PangoCairo.create_layout(ctx)
+    layout.set_width(int(width_adjust * width * Pango.SCALE))
     layout.set_alignment(align)
-    fd = pango.FontDescription("Georgia Bold")
-    fd.set_size(pango.SCALE)
+    fd = Pango.FontDescription("Georgia Bold")
+    fd.set_size(Pango.SCALE)
     layout.set_font_description(fd)
 
     if max_char_number:
         # adjust size with the max character number
-        layout.set_text('0'*max_char_number)
+        layout.set_text('0'*max_char_number, -1)
         adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
 
     # set the real text
-    layout.set_text(text)
+    layout.set_text(text, -1)
     if not max_char_number:
         adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
 
     # draw
-    text_x, text_y, text_w, text_h = layout.get_extents()[1]
+    ink, logical = layout.get_extents()
     ctx.save()
     ctx.set_source_rgba(*text_color)
     if align == Pango.Alignment.CENTER:
-        x = x - (text_w/2.0)/pango.SCALE - int(float(text_x)/pango.SCALE)
-        y = y - (text_h/2.0)/pango.SCALE - int(float(text_y)/pango.SCALE)
+        x = x - (ink.width/2.0)/Pango.SCALE - int(float(ink.x)/Pango.SCALE)
+        y = y - (ink.height/2.0)/Pango.SCALE - int(float(ink.y)/Pango.SCALE)
     else:
-        y = y - (text_h/2.0)/pango.SCALE - text_y/pango.SCALE
+        y = y - (ink.height/2.0)/Pango.SCALE - ink.y/Pango.SCALE
     ctx.translate(x, y)
 
-    if align == pango.ALIGN_LEFT:
+    if align == Pango.Alignment.LEFT:
         # Hack to workaround what appears to be a Cairo bug: without
         # drawing a rectangle here, the translation above is not taken
         # into account for rendering the text.
         ctx.rectangle(0, 0, 0, 0)
-    pc.show_layout(layout)
+    PangoCairo.update_layout(ctx, layout)
+    PangoCairo.show_layout(ctx, layout)
     ctx.restore()
 
 def render_page_number(ctx, page_number,
@@ -245,6 +247,6 @@ def render_page_number(ctx, page_number,
     x_offset = commons.convert_pt_to_dots(margin_pt)/2
     y_offset = commons.convert_pt_to_dots(margin_pt)/2
     ctx.translate(x_offset, y_offset)
-    draw_simpletext_center(ctx, unicode(page_number), 0, 0)
+    draw_simpletext_center(ctx, str(page_number), 0, 0)
     ctx.restore()
 

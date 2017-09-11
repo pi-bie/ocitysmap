@@ -169,6 +169,7 @@ class MapCanvas:
         return scale
 
     def _render_shape_file(self, shape_file, color, line_width):
+        l.info("render_shape_file")
         shape_file.flush()
 
         shpid = os.path.basename(shape_file.get_filepath())

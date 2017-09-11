@@ -1,5 +1,5 @@
 import cairo
-import rsvg
+from gi.repository import Rsvg
 import math
 import os
 import psycopg2
@@ -105,8 +105,8 @@ def _show_symbol(renderer, ctx, lat, lon, surveillance, symbol):
     data = fp.read()
     fp.close()
 
-    svg = rsvg.Handle(data=data)
-
+    rsvg = Rsvg.Handle()
+    svg  = rsvg.new_from_data(data)
     x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
 
     svg_scale = renderer.dpi / (4 * svg.props.height);

@@ -314,15 +314,15 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
         # Prepare the title
-        pc = pangocairo.CairoContext(ctx)
-        layout = pc.create_layout()
-        layout.set_width(int((w_dots - 0.1*w_dots - logo_width - logo_width2) * pango.SCALE))
-        if not self.rc.i18n.isrtl(): layout.set_alignment(pango.ALIGN_LEFT)
-        else:                        layout.set_alignment(pango.ALIGN_RIGHT)
-        fd = pango.FontDescription(font_face)
-        fd.set_size(pango.SCALE)
+        pc = PangoCairo.create_context(ctx)
+        layout = PangoCairo.create_layout(ctx)
+        layout.set_width(int((w_dots - 0.1*w_dots - logo_width - logo_width2) * Pango.SCALE))
+        if not self.rc.i18n.isrtl(): layout.set_alignment(Pango.Alignment.LEFT)
+        else:                        layout.set_alignment(Pango.Alignment.RIGHT)
+        fd = Pango.FontDescription(font_face)
+        fd.set_size(Pango.SCALE)
         layout.set_font_description(fd)
-        layout.set_text(self.rc.title)
+        layout.set_text(self.rc.title, -1)
         draw_utils.adjust_font_size(layout, fd, layout.get_width(), 0.8*h_dots)
 
         # Draw the title
@@ -331,8 +331,9 @@ class SinglePageRenderer(Renderer):
         ctx.stroke()
         ctx.translate(0.4*h_dots + logo_width2,
                       (h_dots -
-                       (layout.get_size()[1] / pango.SCALE)) / 2.0)
-        pc.show_layout(layout)
+                       (layout.get_size()[1] / Pango.SCALE)) / 2.0)
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
 
@@ -377,14 +378,15 @@ class SinglePageRenderer(Renderer):
             locale.setlocale(locale.LC_TIME, prev_locale)
 
         ctx.save()
-        pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('DejaVu')
-        fd.set_size(pango.SCALE)
-        layout = pc.create_layout()
+        pc = PangoCairo.create_context(ctx)
+        fd = Pango.FontDescription('DejaVu')
+        fd.set_size(Pango.SCALE)
+        layout = PangoCairo.create_layout(ctx)
         layout.set_font_description(fd)
-        layout.set_text(notice)
+        layout.set_text(notice, -1)
         draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
-        pc.show_layout(layout)
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
     def _draw_creator_notice(self, ctx, w_dots, h_dots, notice=None,
@@ -403,14 +405,15 @@ class SinglePageRenderer(Renderer):
                     u'Kontakt: Hartmut Holzgraefe (hartmut@php.net)')
 
         ctx.save()
-        pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('DejaVu')
-        fd.set_size(pango.SCALE)
+        pc = PangoCairo.create_context(ctx)
+        fd = Pango.FontDescription('DejaVu')
+        fd.set_size(Pango.SCALE)
         layout = pc.create_layout()
         layout.set_font_description(fd)
-        layout.set_text(notice)
+        layout.set_text(notice, -1)
         draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
-        pc.show_layout(layout)
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
     def _marker(self, color, txt, lat, lon, ctx, dpi):
@@ -428,7 +431,8 @@ class SinglePageRenderer(Renderer):
 
         data = data.replace('#000000', color)
 
-        svg = rsvg.Handle(data = data)
+        rsvg = Rsvg.Handle()
+        svg = rsvg.new_from_data(data)
 
         x,y = self._latlon2xy(lat, lon, dpi)
 
@@ -443,16 +447,17 @@ class SinglePageRenderer(Renderer):
         ctx.scale(scale, scale)
         svg.render_cairo(ctx)
 
-        pc = pangocairo.CairoContext(ctx)
-        fd = pango.FontDescription('Droid Sans')
-        fd.set_size(pango.SCALE)
+        pc = PangoCairo.create_context(ctx)
+        fd = Pango.FontDescription('Droid Sans')
+        fd.set_size(Pango.SCALE)
         layout = pc.create_layout()
         layout.set_font_description(fd)
-        layout.set_text(txt)
+        layout.set_text(txt, -1)
         draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
         text_x, text_y, text_w, text_h = layout.get_extents()[1]
         ctx.translate(svg.props.width/2 - text_w * scale/50, svg.props.height/5)
-        pc.show_layout(layout)
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
 
         ctx.restore()
 
@@ -481,8 +486,8 @@ class SinglePageRenderer(Renderer):
         copyright_margin_dots \
             = commons.convert_pt_to_dots(self._copyright_margin_pt, dpi)
 
-        map_coords_dots = map(lambda l: commons.convert_pt_to_dots(l, dpi),
-                              self._map_coords)
+        map_coords_dots = list(map(lambda l: commons.convert_pt_to_dots(l, dpi),
+                              self._map_coords))
 
         ctx = cairo.Context(cairo_surface)
 
@@ -632,7 +637,8 @@ class SinglePageRenderer(Renderer):
           img = qrcode.make(self.qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
           svgstr = StringIO.StringIO()
           img.save(svgstr);
-          svg = rsvg.Handle(data=svgstr.getvalue())
+          rsvg = Rsvg.Hanlde()
+          svg = rsvg.new_from_data(svgstr.getvalue())
           svgstr.close()
           ctx.move_to(0, 0)
           factor = 200 / svg.props.height

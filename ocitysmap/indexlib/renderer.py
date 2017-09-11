@@ -134,7 +134,8 @@ class PoiIndexRenderer:
                 os.path.dirname(__file__), '..', '..', '..', 'Font-Awesome-SVG-PNG', 'white', 'svg', logo + '.svg'))
 
             if os.path.isfile(logo_path):
-                svg = rsvg.Handle(logo_path)
+                rsvg = Rsvg.Handle()
+                svg = rsvg.new_from_file(logo_path)
 
                 scale = dpi * 0.6 / svg.props.height;
                 x += svg.props.width * scale + 10

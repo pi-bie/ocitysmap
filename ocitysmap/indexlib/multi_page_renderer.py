@@ -49,16 +49,16 @@ class MultiPageStreetIndexRenderer:
         self.rendering_area_h = rendering_area[3]
         self.page_number      = page_number
 
-    def _create_layout_with_font(self, pc, font_desc):
-        layout = pc.create_layout()
+    def _create_layout_with_font(self, ctx, pc, font_desc):
+        layout = PangoCairo.create_layout(ctx)
         layout.set_font_description(font_desc)
         font = layout.get_context().load_font(font_desc)
         font_metric = font.get_metrics()
 
-        fascent = float(font_metric.get_ascent()) / pango.SCALE
+        fascent = float(font_metric.get_ascent()) / Pango.SCALE
         fheight = float((font_metric.get_ascent() + font_metric.get_descent())
-                        / pango.SCALE)
-        em = float(font_metric.get_approximate_char_width()) / pango.SCALE
+                        / Pango.SCALE)
+        em = float(font_metric.get_approximate_char_width()) / Pango.SCALE
 
         return layout, fascent, fheight, em
 
@@ -82,28 +82,28 @@ class MultiPageStreetIndexRenderer:
         self.ctx.save()
 
         # Create a PangoCairo context for drawing to Cairo
-        pc = pangocairo.CairoContext(self.ctx)
+        pc = PangoCairo.create_context(self.ctx)
 
-        header_fd = pango.FontDescription("Georgia Bold 12")
-        label_column_fd  = pango.FontDescription("DejaVu 8")
+        header_fd = Pango.FontDescription("Georgia Bold 12")
+        label_column_fd  = Pango.FontDescription("DejaVu 8")
 
         header_layout, header_fascent, header_fheight, header_em = \
-            self._create_layout_with_font(pc, header_fd)
+            self._create_layout_with_font(self.ctx, pc, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-            self._create_layout_with_font(pc, label_column_fd)
+            self._create_layout_with_font(self.ctx, pc, label_column_fd)
         column_layout, _, _, _ = \
-            self._create_layout_with_font(pc, label_column_fd)
+            self._create_layout_with_font(self.ctx, pc, label_column_fd)
 
         # By OCitysmap's convention, the default resolution is 72 dpi,
         # which maps to the default pangocairo resolution (96 dpi
         # according to pangocairo docs). If we want to render with
         # another resolution (different from 72), we have to scale the
         # pangocairo resolution accordingly:
-        pangocairo.context_set_resolution(column_layout.get_context(),
+        PangoCairo.context_set_resolution(column_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
-        pangocairo.context_set_resolution(label_layout.get_context(),
+        PangoCairo.context_set_resolution(label_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
-        pangocairo.context_set_resolution(header_layout.get_context(),
+        PangoCairo.context_set_resolution(header_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)
 
         margin = label_em
@@ -139,13 +139,13 @@ class MultiPageStreetIndexRenderer:
         column_width = self.rendering_area_w / columns_count
 
         column_layout.set_width(int(UTILS.convert_pt_to_dots(
-                    (column_width - margin) * pango.SCALE, dpi)))
+                    (column_width - margin) * Pango.SCALE, dpi)))
         label_layout.set_width(int(UTILS.convert_pt_to_dots(
                     (column_width - margin - max_location_drawing_width
                      - 2 * label_em)
-                    * pango.SCALE, dpi)))
+                    * Pango.SCALE, dpi)))
         header_layout.set_width(int(UTILS.convert_pt_to_dots(
-                    (column_width - margin) * pango.SCALE, dpi)))
+                    (column_width - margin) * Pango.SCALE, dpi)))
 
         if not self._i18n.isrtl():
             orig_offset_x = offset_x = margin/2.

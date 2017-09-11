@@ -170,7 +170,10 @@ class PolyShapeFile(_ShapeFile):
         """Add the polygon feature to the shape file."""
         # Prevent the current locale from influencing how the WKT data is
         # parsed by OGR.
-        prev_locale = locale.getlocale(locale.LC_ALL)
+        try:
+            prev_locale = locale.getlocale(locale.LC_ALL)
+        except:
+            prev_locale = ''
         locale.setlocale(locale.LC_ALL, "C")
 
         try:

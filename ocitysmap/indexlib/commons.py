@@ -23,7 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from gi.repository import Pango
+from gi.repository import GObject, Pango
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -99,7 +99,7 @@ class StreetIndexCategory(IndexCategory):
         ctx.save()
         ctx.set_source_rgb(0.9, 0.9, 0.9)
         ctx.rectangle(baseline_x, baseline_y - fascent,
-                      layout.get_width() / pango.SCALE, fheight)
+                      layout.get_width() / Pango.SCALE, fheight)
         ctx.fill()
 
         ctx.set_source_rgb(0.0, 0.0, 0.0)
@@ -218,16 +218,16 @@ class StreetIndexItem(IndexItem):
     """
 
     def label_drawing_width(self, layout):
-        layout.set_text(self.label)
-        return float(layout.get_size()[0]) / pango.SCALE
+        layout.set_text(self.label, -1)
+        return float(layout.get_size()[0]) / Pango.SCALE
 
     def label_drawing_height(self, layout):
-        layout.set_text(self.label)
-        return float(layout.get_size()[1]) / pango.SCALE
+        layout.set_text(self.label, -1)
+        return float(layout.get_size()[1]) / Pango.SCALE
 
     def location_drawing_width(self, layout):
-        layout.set_text(self.location_str)
-        return float(layout.get_size()[0]) / pango.SCALE
+        layout.set_text(self.location_str, -1)
+        return float(layout.get_size()[0]) / Pango.SCALE
 
     def draw(self, rtl, ctx, pc, column_layout, fascent, fheight,
              baseline_x, baseline_y,
@@ -316,18 +316,18 @@ if __name__ == "__main__":
     pc = pangocairo.CairoContext(ctx)
 
     font_desc = pango.FontDescription('DejaVu')
-    font_desc.set_size(12 * pango.SCALE)
+    font_desc.set_size(12 * Pango.SCALE)
 
     layout = pc.create_layout()
     layout.set_font_description(font_desc)
-    layout.set_width(200 * pango.SCALE)
+    layout.set_width(200 * Pango.SCALE)
 
     font = layout.get_context().load_font(font_desc)
     font_metric = font.get_metrics()
 
-    fascent = font_metric.get_ascent() / pango.SCALE
+    fascent = font_metric.get_ascent() / Pango.SCALE
     fheight = ((font_metric.get_ascent() + font_metric.get_descent())
-               / pango.SCALE)
+               / Pango.SCALE)
 
     first_item  = StreetIndexItem('First Item', None, None)
     second_item = StreetIndexItem('Second Item', None, None)

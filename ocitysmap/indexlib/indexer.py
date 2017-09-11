@@ -38,7 +38,8 @@ import psycopg2.extensions
 # compatibility with django: see http://code.djangoproject.com/ticket/5996
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 # SQL string escaping routine
-_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(str(s.encode('utf-8')))
+#_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(str(s.encode('utf-8')))
+_sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s)
 
 from . import commons
 import ocitysmap
@@ -201,7 +202,7 @@ class StreetIndex:
             sort_key = lambda item:(item.label, item.location_str)
             items = sorted(category.items, key=sort_key)
             for label, same_items in groupby(items, key=sort_key):
-                grouped_items.append(same_items.next())
+                grouped_items.append(next(same_items))
             category.items = grouped_items
 
     def write_to_csv(self, title, output_filename):
@@ -220,9 +221,10 @@ class StreetIndex:
         def csv_writerow(row):
             _r = []
             for e in row:
-                if type(e) is unicode:
-                    _r.append(e.encode('UTF-8'))
-                else:
+#                TODO
+#                if type(e) is unicode:
+#                    _r.append(e.encode('UTF-8'))
+#                else:
                     _r.append(e)
             return writer.writerow(_r)
 
@@ -444,7 +446,7 @@ from (
              and ST_intersects(%%(way)s, %(wkb_limits)s)
      ) as foo
 order by amenity_name""" \
-                % {'amenity': _sql_escape_unicode(db_amenity),
+                % {'amenity': str(_sql_escape_unicode(db_amenity)),
                    'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4002), 3857)"
                                   % (polygon_wkt,))}
 
