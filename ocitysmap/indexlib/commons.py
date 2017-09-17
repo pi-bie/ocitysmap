@@ -23,6 +23,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import gi
+gi.require_version('Pango', '1.0')
 from gi.repository import GObject, Pango
 import sys
 
@@ -308,17 +310,18 @@ class PoiIndexItem(IndexItem):
 
 if __name__ == "__main__":
     import cairo
-    import pangocairo
+    gi.require_version('PangoCairo', '1.0')
+    from gi.repository import PangoCairo
 
     surface = cairo.PDFSurface('/tmp/idx_commons.pdf', 1000, 1000)
 
     ctx = cairo.Context(surface)
-    pc = pangocairo.CairoContext(ctx)
+    pc = PangoCairo.create_context(ctx)
 
-    font_desc = pango.FontDescription('DejaVu')
+    font_desc = Pango.FontDescription('DejaVu')
     font_desc.set_size(12 * Pango.SCALE)
 
-    layout = pc.create_layout()
+    layout = PangoCairo.create_layout(ctx)
     layout.set_font_description(font_desc)
     layout.set_width(200 * Pango.SCALE)
 

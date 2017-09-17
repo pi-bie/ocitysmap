@@ -19,6 +19,10 @@
 
 import cairo
 import math
+import gi
+gi.require_version('Rsvg', '2.0')
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
 from gi.repository import Rsvg, Pango, PangoCairo
 
 import draw_utils

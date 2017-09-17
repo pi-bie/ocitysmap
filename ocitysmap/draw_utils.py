@@ -24,9 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cairo
+import gi
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
 from gi.repository import Pango, PangoCairo
 
-import ocitysmap.layoutlib.commons as commons
+import layoutlib.commons as commons
 
 def draw_text(ctx, pc, layout, fascent, fheight,
               baseline_x, baseline_y, text, pango_alignment):
