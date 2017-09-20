@@ -139,8 +139,10 @@ class Grid:
         l.info("Generating shapefile")
         g = shapes.LineShapeFile(self._bbox.create_expanded(0.001, 0.001),
                                  filename, 'grid')
-        map(g.add_vert_line, self._vertical_lines)
-        map(g.add_horiz_line, self._horizontal_lines)
+        for x in self._vertical_lines:
+            g.add_vert_line(x)
+        for y in self._horizontal_lines:
+            g.add_horiz_line(y)
         return g
 
     def _gen_horizontal_square_label(self, x):
