@@ -64,7 +64,9 @@ class OverviewGrid:
         # for the small imprecisions of re-projecting.
         g = shapes.BoxShapeFile(self._bbox.create_expanded(0.001, 0.001),
                                  filename, 'grid')
-        map(g.add_box, self._pages_bbox)
+        for box in self._pages_bbox:
+            g.add_box(box)
+
         return g
 
 
