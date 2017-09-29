@@ -359,7 +359,7 @@ class SinglePageRenderer(Renderer):
 	try:
             locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
         except Exception:
-            l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+            LOG.warning('error while setting LC_COLLATE to "%s"' % self.rc.i18n.language_code())
 
         try:
             if osm_date is None:
