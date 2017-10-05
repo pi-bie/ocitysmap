@@ -55,7 +55,7 @@ class GpxElementHandler(xml.sax.ContentHandler):
   max_lon = -180
 
   def startElement(self, name, attrs):
-    if attrs.has_key("lat"):
+    if "lat" in attrs:
       lat = float(attrs.getValue("lat"));
       lon = float(attrs.getValue("lon"));
 
