@@ -234,7 +234,8 @@ class MultiPageRenderer(Renderer):
                              'shade-overview')
         shade.add_shade_from_wkt(shade_wkt)
 
-        self.overview_canvas.add_shape_file(shade)
+        if self.rc.osmid != None:
+            self.overview_canvas.add_shape_file(shade)
         self.overview_canvas.add_shape_file(grid_shape,
                                   self.rc.stylesheet.grid_line_color, 1,
                                   self.rc.stylesheet.grid_line_width)
