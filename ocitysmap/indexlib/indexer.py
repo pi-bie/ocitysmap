@@ -208,7 +208,7 @@ class StreetIndex:
     def write_to_csv(self, title, output_filename):
         # TODO: implement writing the index to CSV
         try:
-            fd = open(output_filename, 'w')
+            fd = open(output_filename, 'w', encoding='utf-8')
         except Exception as ex:
             l.warning('error while opening destination file %s: %s'
                       % (output_filename, ex))
@@ -221,11 +221,7 @@ class StreetIndex:
         def csv_writerow(row):
             _r = []
             for e in row:
-#                TODO
-#                if type(e) is unicode:
-#                    _r.append(e.encode('UTF-8'))
-#                else:
-                    _r.append(e)
+                _r.append(e)
             return writer.writerow(_r)
 
         copyright_notice = (u'© %(year)d MapOSMatic/ocitysmap authors. '
