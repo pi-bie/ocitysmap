@@ -17,7 +17,11 @@ def render(renderer, ctx):
     m = renderer._map_canvas.get_rendered_map()
 
     # get the desired width of the scalebar in m
-    meter = renderer.grid.grid_size_m
+    try: # TODO find better way to deal with multi page maps
+        meter = renderer.grid.grid_size_m
+    except AttributeError:
+        return
+
     oom   = 10 ** floor(log10(meter))
 
     # get the desired width of the scalebar in dots
