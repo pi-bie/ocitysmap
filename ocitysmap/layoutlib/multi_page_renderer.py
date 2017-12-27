@@ -289,9 +289,10 @@ class MultiPageRenderer(Renderer):
                 os.path.join(self.tmpdir, 'grid%d.shp' % i))
 
             map_canvas.add_shape_file(shade)
-            map_canvas.add_shape_file(shade_contour,
-                                  self.rc.stylesheet.shade_color_2,
-                                  self.rc.stylesheet.shade_alpha_2)
+            if self.rc.osmid != None:
+                map_canvas.add_shape_file(shade_contour,
+                                      self.rc.stylesheet.shade_color_2,
+                                      self.rc.stylesheet.shade_alpha_2)
             map_canvas.add_shape_file(grid_shape,
                                       self.rc.stylesheet.grid_line_color,
                                       self.rc.stylesheet.grid_line_alpha,
