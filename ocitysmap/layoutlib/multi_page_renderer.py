@@ -706,6 +706,7 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
+            LOG.info('Map page %d of %d' % (map_number, len(self.pages)))
 
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
