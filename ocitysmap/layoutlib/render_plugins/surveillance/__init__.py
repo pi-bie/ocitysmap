@@ -53,12 +53,15 @@ def _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, 
     x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
 
     if type(direction) == float and surveillance != 'indoor':
-        if type(height) != float:
-           height = 5
-        elif height < 3:
-           height = 3
-        elif height > 12:
-           height = 12
+        if height and height.isdigit():
+           height = float(height)
+        else:
+           height = 5.0
+
+        if height < 3.0:
+           height = 3.0
+        elif height > 12.0:
+           height = 12.0
 
         if type(angle) != float:
             angle = 1
