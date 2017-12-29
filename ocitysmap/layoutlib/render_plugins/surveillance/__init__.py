@@ -3,6 +3,9 @@ import rsvg
 import math
 import os
 import psycopg2
+import logging
+
+LOG = logging.getLogger('ocitysmap')
 
 def _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, direction, angle, height):
     if camera_type == 'dome':
