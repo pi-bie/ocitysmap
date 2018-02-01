@@ -410,9 +410,9 @@ class SinglePageRenderer(Renderer):
 
         ctx.save()
         pc = PangoCairo.create_context(ctx)
+        layout = PangoCairo.create_layout(ctx)
         fd = Pango.FontDescription('DejaVu')
         fd.set_size(Pango.SCALE)
-        layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(notice, -1)
         draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
@@ -425,7 +425,7 @@ class SinglePageRenderer(Renderer):
         marker_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
 
-        fp = open(marker_path,'rb')
+        fp = open(marker_path,'r')
         data = fp.read()
         fp.close()
 
@@ -436,7 +436,7 @@ class SinglePageRenderer(Renderer):
         data = data.replace('#000000', color)
 
         rsvg = Rsvg.Handle()
-        svg = rsvg.new_from_data(data)
+        svg = rsvg.new_from_data(data.encode())
 
         x,y = self._latlon2xy(lat, lon, dpi)
 
@@ -452,14 +452,14 @@ class SinglePageRenderer(Renderer):
         svg.render_cairo(ctx)
 
         pc = PangoCairo.create_context(ctx)
+        layout = PangoCairo.create_layout(ctx)
         fd = Pango.FontDescription('Droid Sans')
         fd.set_size(Pango.SCALE)
-        layout = pc.create_layout()
         layout.set_font_description(fd)
         layout.set_text(txt, -1)
         draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
-        text_x, text_y, text_w, text_h = layout.get_extents()[1]
-        ctx.translate(svg.props.width/2 - text_w * scale/50, svg.props.height/5)
+        ink, logical = layout.get_extents()
+        ctx.translate(svg.props.width/2 - ink.width * scale/50, svg.props.height/5)
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
 

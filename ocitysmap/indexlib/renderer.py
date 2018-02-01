@@ -170,7 +170,7 @@ class PoiIndexRenderer:
         marker_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
 
-        fp = open(marker_path,'rb')
+        fp = open(marker_path,'r')
         data = fp.read()
         fp.close()
 
@@ -180,7 +180,8 @@ class PoiIndexRenderer:
 
         data = data.replace('#000000', color)
 
-        svg = rsvg.Handle(data = data)
+        rsvg = Rsvg.Handle()
+        svg = rsvg.new_from_data(data.encode())
 
         scale = 50.0 / svg.props.height;
         x += 35
