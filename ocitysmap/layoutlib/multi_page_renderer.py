@@ -209,6 +209,23 @@ class MultiPageRenderer(Renderer):
         # for i, (bb, bb_inner) in enumerate(bboxes):
         #    print bb.as_javascript(name="p%d" % i)
 
+        # apply GPX track
+        GPX_filename = None
+        if self.rc.gpx_file:
+            GPX_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+            GPX_filename = GPX_tmpfile.name
+            
+            GPX_tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
+            GPX_tmpfile.write("<!DOCTYPE Map[\n")
+            GPX_tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
+            GPX_tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
+            GPX_tmpfile.write("]>\n")
+            GPX_tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
+            GPX_tmpfile.write(" &body;\n");
+            GPX_tmpfile.write("</Map>\n");
+            
+            GPX_tmpfile.close()
+
         self.pages = []
 
         # Create an overview map
@@ -245,22 +262,34 @@ class MultiPageRenderer(Renderer):
 
         self.overview_canvas.render()
 
-        # apply GPX track
-        if self.rc.gpx_file:
-            GPX_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-            GPX_filename = GPX_tmpfile.name
-            
-            GPX_tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
-            GPX_tmpfile.write("<!DOCTYPE Map[\n")
-            GPX_tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
-            GPX_tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
-            GPX_tmpfile.write("]>\n")
-            GPX_tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
-            GPX_tmpfile.write(" &body;\n");
-            GPX_tmpfile.write("</Map>\n");
-            
-            GPX_tmpfile.close()
+        self.overview_overlay_canvases = []
+        self.overview_overlay_effects = []
+        
+        for overlay in self.rc.overlays:
+            path = overlay.path.strip()
+            if path.startswith('internal:'):
+                self.overview_overlay_effects.append(path.lstrip('internal:'))
+            else:
+                ov_canvas = MapCanvas(overlay,
+                                      overview_bb,
+                                      self._usable_area_width_pt,
+                                      self._usable_area_height_pt,
+                                      dpi,
+                                      extend_bbox_to_ratio=True)
+                ov_canvas.render()
+                self.overview_overlay_canvases.append(ov_canvas);
 
+        if self.rc.gpx_file:
+            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
+                                  overview_bb,
+                                  self._usable_area_width_pt,
+                                  self._usable_area_height_pt,
+                                  dpi,
+                                  extend_bbox_to_ratio=True)
+            ov_canvas.render()
+            self.overview_overlay_canvases.append(ov_canvas);
+        
+                
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
@@ -273,7 +302,6 @@ class MultiPageRenderer(Renderer):
                 bb, os.path.join(self.tmpdir, 'shade%d.shp' % i),
                 'shade%d' % i)
             shade.add_shade_from_wkt(shade_wkt)
-
 
             # Create the contour shade
 
@@ -345,14 +373,14 @@ class MultiPageRenderer(Renderer):
             index.apply_grid(map_grid)
             indexes.append(index)
 
-        if self.rc.gpx_file:
-            os.unlink(GPX_filename)
-
         # Merge all indexes
         self.index_categories = self._merge_page_indexes(indexes)
 
         # Prepare the small map for the front page
-        self._front_page_map = self._prepare_front_page_map(dpi)
+        self._prepare_front_page_map(dpi, GPX_filename)
+
+        if self.rc.gpx_file:
+            os.unlink(GPX_filename)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -454,7 +482,7 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _prepare_front_page_map(self, dpi):
+    def _prepare_front_page_map(self, dpi, GPX_filename):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -480,8 +508,34 @@ class MultiPageRenderer(Renderer):
         shade.add_shade_from_wkt(shade_wkt)
         front_page_map.add_shape_file(shade)
         front_page_map.render()
-        return front_page_map
+        self._front_page_map = front_page_map
 
+        self._frontpage_overlay_canvases = []
+        self._frontpage_overlay_effects  = []
+        for overlay in self.rc.overlays:
+            path = overlay.path.strip()
+            if path.startswith('internal:'):
+                self._frontpage_overlay_effects.append(path.lstrip('internal:'))
+            else:
+                ov_canvas = MapCanvas(overlay,
+                                      self.rc.bounding_box,
+                                      front_page_map_w,
+                                      front_page_map_h,
+                                      dpi,
+                                      extend_bbox_to_ratio=True)
+                ov_canvas.render()
+                self._frontpage_overlay_canvases.append(ov_canvas)
+
+        if self.rc.gpx_file:
+            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
+                                  self.rc.bounding_box,
+                                  front_page_map_w,
+                                  front_page_map_h,
+                                  dpi,
+                                  extend_bbox_to_ratio=True)
+            ov_canvas.render()
+            self._frontpage_overlay_canvases.append(ov_canvas)
+        
     def _render_front_page_header(self, ctx, w, h):
         # Draw a grey blue block which will contain the name of the
         # city being rendered.
@@ -506,6 +560,22 @@ class MultiPageRenderer(Renderer):
 
         # Render the map !
         mapnik.render(self._front_page_map.get_rendered_map(), ctx)
+        
+        for ov_canvas in self._frontpage_overlay_canvases:
+            rendered_map = ov_canvas.get_rendered_map()
+            mapnik.render(rendered_map, ctx)
+
+        # apply effect overlays
+        ctx.save()
+        # we have to undo border adjustments here
+        ctx.translate(0, -(0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT))
+        self._map_canvas = self._front_page_map;
+        for effect in self._frontpage_overlay_effects:
+            self.render_plugin(effect, ctx)
+        ctx.restore()
+    
+
+            
         ctx.restore()
 
     def _render_front_page_footer(self, ctx, w, h, osm_date):
@@ -620,6 +690,21 @@ class MultiPageRenderer(Renderer):
         rendered_map = self.overview_canvas.get_rendered_map()
         mapnik.render(rendered_map, ctx)
 
+        for ov_canvas in self.overview_overlay_canvases:
+            rendered_map = ov_canvas.get_rendered_map()
+            mapnik.render(rendered_map, ctx)
+
+        # apply effect overlays
+        ctx.save()
+        # we have to undo border adjustments here
+        ctx.translate(
+                -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
+                -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+        self._map_canvas = self.overview_canvas;
+        for effect in self.overview_overlay_effects:
+            self.render_plugin(effect, ctx)
+        ctx.restore()
+            
         # draw pages numbers
         self._draw_overview_labels(ctx, self.overview_canvas, self.overview_grid,
               commons.convert_pt_to_dots(self._usable_area_width_pt),
