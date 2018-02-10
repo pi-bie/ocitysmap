@@ -54,6 +54,9 @@ from ocitysmap.maplib.overview_grid import OverviewGrid
 
 LOG = logging.getLogger('ocitysmap')
 
+class SimpleStylesheet:
+    def __init__(self, path):
+        self.path = os.path.abspath(os.path.join('/home/maposmatic/maposmatic/media', path))
 
 class MultiPageRenderer(Renderer):
     """
@@ -242,6 +245,22 @@ class MultiPageRenderer(Renderer):
 
         self.overview_canvas.render()
 
+        # apply GPX track
+        if self.rc.gpx_file:
+            GPX_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+            GPX_filename = GPX_tmpfile.name
+            
+            GPX_tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
+            GPX_tmpfile.write("<!DOCTYPE Map[\n")
+            GPX_tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
+            GPX_tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
+            GPX_tmpfile.write("]>\n")
+            GPX_tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
+            GPX_tmpfile.write(" &body;\n");
+            GPX_tmpfile.write("</Map>\n");
+            
+            GPX_tmpfile.close()
+
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
@@ -288,6 +307,13 @@ class MultiPageRenderer(Renderer):
                                                self._usable_area_height_pt, dpi,
                                                extend_bbox_to_ratio=False))
 
+            # apply GPX track
+            if self.rc.gpx_file:
+                overlay_canvases.append(MapCanvas(SimpleStylesheet(GPX_filename),
+                                           bb, self._usable_area_width_pt,
+                                           self._usable_area_height_pt, dpi,
+                                           extend_bbox_to_ratio=False))
+                
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
             grid_shape = map_grid.generate_shape_file(
@@ -318,6 +344,9 @@ class MultiPageRenderer(Renderer):
 
             index.apply_grid(map_grid)
             indexes.append(index)
+
+        if self.rc.gpx_file:
+            os.unlink(GPX_filename)
 
         # Merge all indexes
         self.index_categories = self._merge_page_indexes(indexes)
