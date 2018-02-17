@@ -231,10 +231,10 @@ class OCitySMap:
         LOG.debug('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
-        self._parser = configparser.RawConfigParser()
+        self._parser = configparser.ConfigParser()
         # if not self._parser.read(['/home/maposmatic/.ocitysmap.conf']):
         #    raise IOError('None of the configuration files could be read!')
-        self._parser.read_file(open('/home/maposmatic/.ocitysmap.conf'))
+        self._parser.read('/home/maposmatic/.ocitysmap.conf', encoding='utf-8')
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self.__db = None
