@@ -828,7 +828,6 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
@@ -858,6 +857,7 @@ class MultiPageRenderer(Renderer):
                       -commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
             self._map_canvas = canvas;
             for effect in overlay_effects:
+                self.grid = grid
                 self.render_plugin(effect, ctx)
             ctx.restore()
 
