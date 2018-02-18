@@ -25,8 +25,8 @@
 from __future__ import print_function
 
 import os
-import string
 import tempfile
+from string import Template
 import cairo
 import gi
 gi.require_version('Rsvg', '2.0')
@@ -698,14 +698,9 @@ class SinglePageRenderer(Renderer):
            tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
            filename = tmpfile.name
 
-           tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
-           tmpfile.write("<!DOCTYPE Map[\n")
-           tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
-           tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
-           tmpfile.write("]>\n")
-           tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
-           tmpfile.write(" &body;\n");
-           tmpfile.write("</Map>\n");
+           with open('/home/maposmatic/gpx-test/template.xml', 'r') as style_template:
+               tmpstyle = Template(style_template.read())
+               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file))
 
            tmpfile.close()
            
@@ -723,8 +718,6 @@ class SinglePageRenderer(Renderer):
            ctx.restore()
 
            os.unlink(filename)
-
-        # TODO: map scale
 
         cairo_surface.flush()
 

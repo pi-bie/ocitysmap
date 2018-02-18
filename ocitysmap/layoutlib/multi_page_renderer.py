@@ -38,6 +38,7 @@ from gi.repository import Rsvg, Pango, PangoCairo
 import shapely.wkt
 import sys
 import tempfile
+from string import Template
 from functools import cmp_to_key
 
 import ocitysmap
@@ -215,15 +216,10 @@ class MultiPageRenderer(Renderer):
             GPX_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
             GPX_filename = GPX_tmpfile.name
             
-            GPX_tmpfile.write("<?xml version='1.0' encoding='utf-8'?>\n")
-            GPX_tmpfile.write("<!DOCTYPE Map[\n")
-            GPX_tmpfile.write(" <!ENTITY gpxfile '%s'>\n" % self.rc.gpx_file)
-            GPX_tmpfile.write(" <!ENTITY body    SYSTEM '/home/maposmatic/gpx-test/body.xml'>\n")
-            GPX_tmpfile.write("]>\n")
-            GPX_tmpfile.write("<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>\n")
-            GPX_tmpfile.write(" &body;\n");
-            GPX_tmpfile.write("</Map>\n");
-            
+            with open('/home/maposmatic/gpx-test/template.xml', 'r') as style_template:
+                tmpstyle = Template(style_template.read())
+                GPX_tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file))
+
             GPX_tmpfile.close()
 
         self.pages = []
