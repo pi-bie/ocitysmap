@@ -725,7 +725,6 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background = True)
-
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -834,6 +833,8 @@ class MultiPageRenderer(Renderer):
         ctx.translate(
                 commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
                 commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+        ctx.rectangle(0, 0, self._usable_area_width_pt, self._usable_area_height_pt)
+        ctx.clip()
 
         self._render_overview_page(ctx, cairo_surface, dpi)
 
