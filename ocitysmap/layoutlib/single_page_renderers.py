@@ -25,6 +25,7 @@
 from __future__ import print_function
 
 import os
+import string
 import tempfile
 import cairo
 import gi
@@ -114,7 +115,7 @@ class SinglePageRenderer(Renderer):
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
         self._title_margin_pt = 0.05 * self.paper_height_pt
-        self._copyright_margin_pt = 0.02 * self.paper_height_pt
+        self._copyright_margin_pt = 0.03 * self.paper_height_pt
 
         self._usable_area_width_pt = (self.paper_width_pt -
                                       2 * Renderer.PRINT_SAFE_MARGIN_PT)
@@ -355,12 +356,21 @@ class SinglePageRenderer(Renderer):
         """
 
         today = datetime.date.today()
-        notice = notice or \
-            _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
+        if notice is None: 
+            notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
               u'Map data © %(year)d OpenStreetMap.org '
               u'and contributors. http://osm.org/copyright\n'
               u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. '
               u'The map may be incomplete or inaccurate.')
+
+            annotations = []
+            if self.rc.stylesheet.annotation != '':
+                annotations.append(self.rc.stylesheet.annotation)
+            for overlay in self.rc.overlays:
+                if overlay.annotation != '':
+                    annotations.append(overlay.annotation)
+            if len(annotations) > 0:
+                notice = notice + '\nMap styles: ' + '; '.join(annotations)
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)

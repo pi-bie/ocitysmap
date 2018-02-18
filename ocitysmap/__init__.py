@@ -196,8 +196,16 @@ class Stylesheet:
         except (configparser.NoOptionError, ValueError):
             return []
 
-        return [Stylesheet.create_from_config_section(parser, name.strip())
-                for name in styles.split(',')]
+        results = []
+
+        for name in styles.split(','):
+            try:
+                results.append(Stylesheet.create_from_config_section(parser, name.strip()))
+            except Exception:
+                LOG.warning("%s overlay '%s' not found or incomplete" % (type, name.strip()))
+
+        return results
+
 
 class OCitySMap:
     """
@@ -231,10 +239,10 @@ class OCitySMap:
         LOG.debug('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
-        self._parser = configparser.RawConfigParser()
+        self._parser = configparser.ConfigParser()
         # if not self._parser.read(['/home/maposmatic/.ocitysmap.conf']):
         #    raise IOError('None of the configuration files could be read!')
-        self._parser.read_file(open('/home/maposmatic/.ocitysmap.conf'))
+        self._parser.read('/home/maposmatic/.ocitysmap.conf', encoding='utf-8')
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self.__db = None
