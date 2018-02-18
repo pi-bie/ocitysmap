@@ -631,6 +631,16 @@ class MultiPageRenderer(Renderer):
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
 
+        annotations = []
+        if self.rc.stylesheet.annotation != '':
+            annotations.append(self.rc.stylesheet.annotation)
+            for overlay in self.rc.overlays:
+                if overlay.annotation != '':
+                    annotations.append(overlay.annotation)
+
+        if len(annotations) > 0:
+            notice = notice + '\nMap styles: ' + '; '.join(annotations)
+
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
                 footer_h, align=Pango.Alignment.LEFT)
