@@ -196,8 +196,16 @@ class Stylesheet:
         except (configparser.NoOptionError, ValueError):
             return []
 
-        return [Stylesheet.create_from_config_section(parser, name.strip())
-                for name in styles.split(',')]
+        results = []
+
+        for name in styles.split(','):
+            try:
+                results.append(Stylesheet.create_from_config_section(parser, name.strip()))
+            except Exception:
+                LOG.warning("%s overlay '%s' not found or incomplete" % (type, name.strip()))
+
+        return results
+
 
 class OCitySMap:
     """
