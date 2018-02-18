@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
+  <FileSource name="markers">${svgdir}/markers</FileSource>
+  <FileSource name="symbols">${svgdir}/make/icons</FileSource>
+
+  <Style name="polygon">
+    <Rule>
+      <Filter>[mapnik::geometry_type]=polygon</Filter> 
+      <PolygonSymbolizer fill="[fillColor]" fill-opacity="[fillOpacity]" stroke="[color]" stroke-opacity="[opacity]" stroke-width="[weight]" />
+      <Filter>[mapnik::geometry_type]=polygon</Filter> 
+      <LineSymbolizer stroke="[color]" stroke-opacity="[opacity]" stroke-width="[weight]" stroke-linecap="round" stroke-linejoin="round"/>
+    </Rule>
+  </Style>	
+  <Style name="line">
+    <Rule>
+      <Filter>[mapnik::geometry_type]=linestring</Filter> 
+      <LineSymbolizer stroke-width="[weight]" stroke="[color]" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="[opacity]" />
+    </Rule>
+  </Style>
+  
+  <Style name="point">
+    <Rule>
+      <Filter>[mapnik::geometry_type]=point</Filter> 
+      <PointSymbolizer base="markers" file="[iconClass].svg" allow-overlap="true" transform='translate(0,-4)' fill='[fillColor]'/>
+      
+      <Filter>(not ([icon] = null or [icon] = '')) and ([mapnik::geometry_type]=point)</Filter>      
+      <PointSymbolizer base="symbols" file="[iconURL]-15.svg" allow-overlap="true" transform='translate(0,-4.5)' />
+    </Rule>
+    <Rule>
+      <Filter>(not ([name] = null or [name] = '')) and ([mapnik::geometry_type]=point)</Filter> 
+      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
+    </Rule>
+  </Style>
+  
+  <Layer name="umap" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>polygon</StyleName>
+    <StyleName>line</StyleName>
+    <StyleName>point</StyleName>
+    <Datasource>
+      <Parameter name="file">${umapfile}</Parameter>
+      <Parameter name="type">geojson</Parameter>
+    </Datasource>      
+  </Layer>
+</Map>
