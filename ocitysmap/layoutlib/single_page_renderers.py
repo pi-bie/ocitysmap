@@ -694,17 +694,23 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # apply GPX track
+        GPX_filename = None
         if self.rc.gpx_file:
+           template_dir = os.path.realpath(
+               os.path.join(
+                   os.path.dirname(__file__),
+                   '../../templates/gpx'))
+           template_file = os.path.join(template_dir, 'template.xml')
            tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-           filename = tmpfile.name
+           GPX_filename = tmpfile.name
 
-           with open('/home/maposmatic/gpx-test/template.xml', 'r') as style_template:
+           with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file))
+               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file, svgdir = template_dir))
 
            tmpfile.close()
            
-           gpx_canvas = MapCanvas(SimpleStylesheet(filename),
+           gpx_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
                                   self.rc.bounding_box,
                                   float(self._map_coords[2]),  # W
                                   float(self._map_coords[3]),  # H
@@ -713,11 +719,11 @@ class SinglePageRenderer(Renderer):
            ctx.save()
            ctx.translate(map_coords_dots[0], map_coords_dots[1])
            gpx_overlay = gpx_canvas.get_rendered_map()
-           gpx_overlay.base = '/home/maposmatic/gpx-test'
+           gpx_overlay.base = template_dir
            mapnik.render(gpx_overlay, ctx, scale_factor, 0, 0)
            ctx.restore()
 
-           os.unlink(filename)
+           os.unlink(GPX_filename)
 
         cairo_surface.flush()
 

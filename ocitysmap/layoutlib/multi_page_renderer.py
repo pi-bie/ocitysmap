@@ -213,14 +213,19 @@ class MultiPageRenderer(Renderer):
         # apply GPX track
         GPX_filename = None
         if self.rc.gpx_file:
-            GPX_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-            GPX_filename = GPX_tmpfile.name
-            
-            with open('/home/maposmatic/gpx-test/template.xml', 'r') as style_template:
-                tmpstyle = Template(style_template.read())
-                GPX_tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file))
+           template_dir = os.path.realpath(
+               os.path.join(
+                   os.path.dirname(__file__),
+                   '../../templates/gpx'))
+           template_file = os.path.join(template_dir, 'template.xml')
+           tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+           GPX_filename = tmpfile.name
 
-            GPX_tmpfile.close()
+           with open(template_file, 'r') as style_template:
+               tmpstyle = Template(style_template.read())
+               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file, svgdir = template_dir))
+
+           tmpfile.close()
 
         self.pages = []
 
