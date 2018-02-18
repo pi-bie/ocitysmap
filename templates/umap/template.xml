@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
-  <FileSource name="markers">${svgdir}/markers</FileSource>
-  <FileSource name="symbols">${svgdir}/make/icons</FileSource>
+  <FileSource name="markers">${basedir}/markers</FileSource>
+  <FileSource name="symbols">${basedir}/maki/icons</FileSource>
 
   <Style name="polygon">
     <Rule>
@@ -21,10 +21,10 @@
   <Style name="point">
     <Rule>
       <Filter>[mapnik::geometry_type]=point</Filter> 
-      <PointSymbolizer base="markers" file="[iconClass].svg" allow-overlap="true" transform='translate(0,-4)' fill='[fillColor]'/>
+      <MarkersSymbolizer base="markers" file="[iconClass].svg" allow-overlap="true" transform='translate(0,-4)' fill='[fillColor]'/>
       
       <Filter>(not ([icon] = null or [icon] = '')) and ([mapnik::geometry_type]=point)</Filter>      
-      <PointSymbolizer base="symbols" file="[iconURL]-15.svg" allow-overlap="true" transform='translate(0,-4.5)' />
+      <MarkersSymbolizer base="symbols" file="[iconURL]-15.svg" allow-overlap="true" transform='translate(0,-4.5)' />
     </Rule>
     <Rule>
       <Filter>(not ([name] = null or [name] = '')) and ([mapnik::geometry_type]=point)</Filter> 
