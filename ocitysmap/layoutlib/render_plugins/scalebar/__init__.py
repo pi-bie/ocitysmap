@@ -20,6 +20,7 @@ def render(renderer, ctx):
         meter = renderer.grid.grid_size_m
     except Exception:
         return
+
     oom   = 10 ** floor(log10(meter))
 
     # get the desired width of the scalebar in dots
