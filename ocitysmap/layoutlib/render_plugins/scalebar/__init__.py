@@ -16,7 +16,11 @@ def render(renderer, ctx):
     m = renderer._map_canvas.get_rendered_map()
 
     # get the desired width of the scalebar in m
-    meter = renderer.grid.grid_size_m
+    try:
+        meter = renderer.grid.grid_size_m
+    except Exception:
+        return
+
     oom   = 10 ** floor(log10(meter))
 
     # get the desired width of the scalebar in dots
