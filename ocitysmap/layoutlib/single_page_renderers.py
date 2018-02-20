@@ -49,6 +49,7 @@ from ocitysmap.indexlib.renderer import StreetIndexRenderer, PoiIndexRenderer
 from indexlib.indexer import StreetIndex, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
+import umap_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
 
 from colour import Color
@@ -726,23 +727,33 @@ class SinglePageRenderer(Renderer):
            os.unlink(GPX_filename)
 
         # apply UMAP file
-        UMAP_filename = None
+        umap_filename = None
         if self.rc.umap_file:
+           json_tmpfile = tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w')
+           json_filename = json_tmpfile.name
+           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file))
+           json_tmpfile.close()
+
            template_dir = os.path.realpath(
                os.path.join(
                    os.path.dirname(__file__),
                    '../../templates/umap'))
+
            template_file = os.path.join(template_dir, 'template.xml')
-           tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-           umap_filename = tmpfile.name
+           style_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
+           style_filename = style_tmpfile.name
 
            with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(umapfile = self.rc.umap_file, basedir = template_dir))
+               style_tmpfile.write(
+                   tmpstyle.substitute(
+                       umapfile = json_filename,
+                       basedir  = template_dir
+                   ))
 
-           tmpfile.close()
+           style_tmpfile.close()
 
-           umap_canvas = MapCanvas(SimpleStylesheet(umap_filename),
+           umap_canvas = MapCanvas(SimpleStylesheet(style_filename),
                                   self.rc.bounding_box,
                                   float(self._map_coords[2]),  # W
                                   float(self._map_coords[3]),  # H
@@ -755,7 +766,8 @@ class SinglePageRenderer(Renderer):
            mapnik.render(umap_overlay, ctx, scale_factor, 0, 0)
            ctx.restore()
 
-           os.unlink(umap_filename)
+           os.unlink(style_filename)
+           os.unlink(json_filename)
 
         cairo_surface.flush()
 
