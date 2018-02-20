@@ -1,3 +1,6 @@
 [submodule "ci-scripts"]
 	path = ci-scripts
 	url = git@github.com:maposmatic/ci-scripts.git
+[submodule "templates/umap/maki"]
+	path = templates/umap/maki
+	url = https://github.com/mapbox/maki.git
