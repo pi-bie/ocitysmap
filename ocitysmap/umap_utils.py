@@ -27,7 +27,7 @@ def umap_preprocess(umap_file):
 
     umap = json.load(fp)
 
-    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight']:
+    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'iconClass', 'iconUrl']:
         if prop in umap['properties']:
             umap_defaults[prop] = umap['properties'][prop]
 
@@ -37,9 +37,18 @@ def umap_preprocess(umap_file):
 
     for layer in layers:
         for feature in layer['features']:
+            layer_defaults = umap_defaults
+
+            for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'iconClass', 'iconUrl']:
+                try:
+                    if prop in layer['_storage']:
+                        layer_defaults[prop] = layer['_storage'][prop]
+                except:
+                    pass
+
             new_props = {}
             for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'fill', 'stroke']:
-                new_props[prop] = umap_defaults[prop]
+                new_props[prop] = layer_defaults[prop]
                 try:
                     if prop in feature['properties']:
                         new_props[prop] = feature['properties'][prop]
@@ -52,12 +61,12 @@ def umap_preprocess(umap_file):
                 try:
                     iconClass = feature['properties']['_storage_options']['iconClass']
                 except:
-                    iconClass = umap_defaults['iconClass']
+                    iconClass = layer_defaults['iconClass']
 
                 try:
                     iconUrl = feature['properties']['_storage_options']['iconUrl']
                 except:
-                    iconUrl = umap_defaults['iconUrl']
+                    iconUrl = layer_defaults['iconUrl']
 
                 new_props['iconClass'] = iconClass
 
