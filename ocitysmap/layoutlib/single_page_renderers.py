@@ -26,6 +26,7 @@ from __future__ import print_function
 
 import os
 import tempfile
+import shutil
 from string import Template
 import cairo
 import gi
@@ -729,19 +730,21 @@ class SinglePageRenderer(Renderer):
         # apply UMAP file
         umap_filename = None
         if self.rc.umap_file:
-           json_tmpfile = tempfile.NamedTemporaryFile(suffix='.json', delete=False, mode='w')
-           json_filename = json_tmpfile.name
-           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file))
-           json_tmpfile.close()
+           tmpdir =  tempfile.mkdtemp(prefix='ocitysmap', suffix='.d')
 
            template_dir = os.path.realpath(
                os.path.join(
                    os.path.dirname(__file__),
                    '../../templates/umap'))
 
+           json_filename = os.path.join(tmpdir, 'geo.json')
+           json_tmpfile = open(json_filename, 'w')
+           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, tmpdir))
+           json_tmpfile.close()
+
            template_file = os.path.join(template_dir, 'template.xml')
-           style_tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-           style_filename = style_tmpfile.name
+           style_filename = os.path.join(tmpdir, 'style.xml')
+           style_tmpfile = open(style_filename, 'w')
 
            with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
@@ -766,8 +769,7 @@ class SinglePageRenderer(Renderer):
            mapnik.render(umap_overlay, ctx, scale_factor, 0, 0)
            ctx.restore()
 
-           os.unlink(style_filename)
-           os.unlink(json_filename)
+           shutil.rmtree(tmpdir)
 
         cairo_surface.flush()
 

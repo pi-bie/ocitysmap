@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import json, re
+import os, json, re, urllib3, tempfile, logging
 
-def umap_preprocess(umap_file):
+LOG = logging.getLogger('ocitysmap')
+
+def umap_preprocess(umap_file, tmpdir):
     umap_defaults = {
         'color'      :   'blue',
         'opacity'    :      0.5,
@@ -24,6 +26,13 @@ def umap_preprocess(umap_file):
         'Ball'  : -16
     }
 
+    icon_dir = os.path.realpath(
+        os.path.join(
+            os.path.dirname(__file__),
+            '../templates/umap/maki/icons'))
+
+    http = urllib3.PoolManager()
+
     fp = open(umap_file, 'r')
 
     umap = json.load(fp)
@@ -35,6 +44,8 @@ def umap_preprocess(umap_file):
     layers = umap['layers']
 
     new_features = []
+
+    icon_cache = {}
 
     for layer in layers:
         for feature in layer['features']:
@@ -72,11 +83,26 @@ def umap_preprocess(umap_file):
                 new_props['iconClass'] = iconClass
 
                 if iconClass == 'Square' or iconClass == 'Drop':
-                    m = re.match(r'/uploads/pictogram/(.*)-24.*png', iconUrl)
+                    m = re.match(r'/uploads/pictogram/(.*)-24(.*)\.png', iconUrl)
                     if m:
-                        new_props['iconUrl'] = m.group(1)
+                        new_props['iconUrl']  = icon_dir + '/' +  m.group(1) + "-15.svg"
+                        if m.group(2) == '':
+                            new_props['iconFill'] = 'black'
+                        else:
+                            new_props['iconFill'] = 'white'
                     else:
-                        new_props['iconUrl'] = iconUrl
+                        if iconUrl in icon_cache:
+                            new_props['iconUrl'] = icon_cache[iconUrl]
+                        else:
+                            response = http.request('GET', iconUrl)
+                            iconFile = tempfile.NamedTemporaryFile(suffix='.png', delete=False, mode='wb', dir=tmpdir)
+                            iconFile.write(response.data)
+                            iconFile.close()
+
+                            iconPath = os.path.realpath(iconFile.name)
+
+                            new_props['iconUrl'] = iconPath
+                            icon_cache[iconUrl] = iconPath
 
                 try:
                     new_props['offset'] = marker_offsets[iconClass]

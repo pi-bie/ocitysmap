@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
-
+  <FileSource name="root">/</FileSource>
   <Style name="polygon">
     <Rule>
       <Filter>[mapnik::geometry_type]=polygon and [fill]='yes'</Filter>
@@ -26,7 +26,7 @@
     </Rule>
     <Rule>
       <Filter>(not ([iconUrl] = null or [iconUrl] = '')) and ([mapnik::geometry_type]=point)</Filter>
-      <MarkersSymbolizer file="${basedir}/maki/icons/[iconUrl]-15.svg" allow-overlap="true" transform='translate(0,-23)' fill='white'/>
+      <MarkersSymbolizer base="root" file="[iconUrl]" allow-overlap="true" transform='translate(0,-23)' fill='[iconFill]' width='20'/>
     </Rule>
     <Rule>
       <Filter>(not ([name] = null or [name] = '')) and ([mapnik::geometry_type]=point)</Filter> 
