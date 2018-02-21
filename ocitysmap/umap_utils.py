@@ -9,6 +9,7 @@ def umap_preprocess(umap_file):
         'fillColor'  :   'blue',
         'fillOpacity':      0.2,
         'weight'     :        3,
+        'dashArray'  :       '',
         'fill'       :    'yes',
         'stroke'     :    'yes',
         'name'       :       '',
@@ -27,7 +28,7 @@ def umap_preprocess(umap_file):
 
     umap = json.load(fp)
 
-    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'iconClass', 'iconUrl']:
+    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
         if prop in umap['properties']:
             umap_defaults[prop] = umap['properties'][prop]
 
@@ -39,7 +40,7 @@ def umap_preprocess(umap_file):
         for feature in layer['features']:
             layer_defaults = umap_defaults
 
-            for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'iconClass', 'iconUrl']:
+            for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                 try:
                     if prop in layer['_storage']:
                         layer_defaults[prop] = layer['_storage'][prop]
@@ -47,7 +48,7 @@ def umap_preprocess(umap_file):
                     pass
 
             new_props = {}
-            for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'fill', 'stroke']:
+            for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
                 new_props[prop] = layer_defaults[prop]
                 try:
                     if prop in feature['properties']:

@@ -15,7 +15,7 @@
   <Style name="line">
     <Rule>
       <Filter>[mapnik::geometry_type]=linestring</Filter> 
-      <LineSymbolizer stroke-width="[weight]" stroke="[color]" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="[opacity]" />
+      <LineSymbolizer stroke-width="[weight]" stroke="[color]" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="[opacity]" stroke-dasharray="[dashArray]"/>
     </Rule>
   </Style>
 
