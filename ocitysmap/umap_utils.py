@@ -16,6 +16,13 @@ def umap_preprocess(umap_file):
         'iconUrl'    : 'circle'
     }
 
+    marker_offsets = {
+        'Square': -18,
+        'Drop'  : -18,
+        'Circle': 0,
+        'Ball'  : -16
+    }
+
     fp = open(umap_file, 'r')
 
     umap = json.load(fp)
@@ -42,20 +49,29 @@ def umap_preprocess(umap_file):
                     pass
 
             if feature['geometry']['type'] == 'Point':
-                for prop in ['iconClass', 'iconUrl']:
-                    new_props[prop] = umap_defaults[prop]
-                    try:
-                        if prop in feature['properties']['_storage_options']:
-                            if prop == 'iconUrl':
-                                val = feature['properties']['_storage_options'][prop]
-                                m = re.match(r'/uploads/pictogram/(.*)-24.*png', val)
-                                if m:
-                                    val = m.group(1)
-                                    new_props[prop] = val
-                                else:
-                                    new_props[prop] = feature['properties']['_storage_options'][prop]
-                    except:
-                        pass
+                try:
+                    iconClass = feature['properties']['_storage_options']['iconClass']
+                except:
+                    iconClass = umap_defaults['iconClass']
+
+                try:
+                    iconUrl = feature['properties']['_storage_options']['iconUrl']
+                except:
+                    iconUrl = umap_defaults['iconUrl']
+
+                new_props['iconClass'] = iconClass
+
+                if iconClass == 'Square' or iconClass == 'Drop':
+                    m = re.match(r'/uploads/pictogram/(.*)-24.*png', iconUrl)
+                    if m:
+                        new_props['iconUrl'] = m.group(1)
+                    else:
+                        new_props['iconUrl'] = iconUrl
+
+                try:
+                    new_props['offset'] = marker_offsets[iconClass]
+                except:
+                    pass
 
             new_props['weight'] = float(new_props['weight']) / 4
                         
