@@ -16,7 +16,7 @@ def umap_preprocess(umap_file, tmpdir):
         'stroke'     :    'yes',
         'name'       :       '',
         'iconClass'  : 'Square',
-        'iconUrl'    : 'circle'
+        'iconUrl'    : '/uploads/pictogram/circle-24_1.png'
     }
 
     marker_offsets = {
@@ -94,12 +94,16 @@ def umap_preprocess(umap_file, tmpdir):
                         if iconUrl in icon_cache:
                             new_props['iconUrl'] = icon_cache[iconUrl]
                         else:
-                            response = http.request('GET', iconUrl)
-                            iconFile = tempfile.NamedTemporaryFile(suffix='.png', delete=False, mode='wb', dir=tmpdir)
-                            iconFile.write(response.data)
-                            iconFile.close()
+                            LOG.info("Umap: fetching icon from URL: %s" % iconUrl)
+                            try:
+                                response = http.request('GET', iconUrl)
+                                iconFile = tempfile.NamedTemporaryFile(suffix='.png', delete=False, mode='wb', dir=tmpdir)
+                                iconFile.write(response.data)
+                                iconFile.close()
 
-                            iconPath = os.path.realpath(iconFile.name)
+                                iconPath = os.path.realpath(iconFile.name)
+                            except:
+                                iconPath = icon_dir + '/circle-15.svg'
 
                             new_props['iconUrl'] = iconPath
                             icon_cache[iconUrl] = iconPath
