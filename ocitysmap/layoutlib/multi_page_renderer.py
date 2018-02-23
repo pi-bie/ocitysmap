@@ -30,6 +30,7 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 import os
+import shutil
 import gi
 gi.require_version('Rsvg', '2.0')
 gi.require_version('Pango', '1.0')
@@ -48,7 +49,7 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.commons import StreetIndexCategory
 from ocitysmap.indexlib.indexer import StreetIndex
 from ocitysmap.indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
-from ocitysmap import draw_utils, maplib
+from ocitysmap import draw_utils, maplib, umap_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
 from ocitysmap.maplib.overview_grid import OverviewGrid
@@ -227,6 +228,35 @@ class MultiPageRenderer(Renderer):
 
            tmpfile.close()
 
+        # apply UMAP file
+        umap_filename = None
+        if self.rc.umap_file:
+           tmpdir =  tempfile.mkdtemp(prefix='ocitysmap', suffix='.d')
+
+           template_dir = os.path.realpath(
+               os.path.join(
+                   os.path.dirname(__file__),
+                   '../../templates/umap'))
+
+           json_filename = os.path.join(tmpdir, 'geo.json')
+           json_tmpfile = open(json_filename, 'w')
+           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, tmpdir))
+           json_tmpfile.close()
+
+           template_file = os.path.join(template_dir, 'template.xml')
+           style_filename = os.path.join(tmpdir, 'style.xml')
+           style_tmpfile = open(style_filename, 'w')
+
+           with open(template_file, 'r') as style_template:
+               tmpstyle = Template(style_template.read())
+               style_tmpfile.write(
+                   tmpstyle.substitute(
+                       umapfile = json_filename,
+                       basedir  = template_dir
+                   ))
+
+           style_tmpfile.close()
+
         self.pages = []
 
         # Create an overview map
@@ -278,7 +308,7 @@ class MultiPageRenderer(Renderer):
                                       dpi,
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
-                self.overview_overlay_canvases.append(ov_canvas);
+                self.overview_overlay_canvases.append(ov_canvas)
 
         if self.rc.gpx_file:
             ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
@@ -288,9 +318,17 @@ class MultiPageRenderer(Renderer):
                                   dpi,
                                   extend_bbox_to_ratio=True)
             ov_canvas.render()
-            self.overview_overlay_canvases.append(ov_canvas);
-        
-                
+            self.overview_overlay_canvases.append(ov_canvas)
+
+        if self.rc.umap_file:
+            ov_canvas = MapCanvas(SimpleStylesheet(style_filename),
+                                  self.rc.bounding_box,
+                                  float(self._map_coords[2]),  # W
+                                  float(self._map_coords[3]),  # H
+                                  dpi)
+            ov_canvas.render()
+            self.overview_overlay_canvases.append(ov_canvas)
+
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
@@ -342,7 +380,14 @@ class MultiPageRenderer(Renderer):
                                            bb, self._usable_area_width_pt,
                                            self._usable_area_height_pt, dpi,
                                            extend_bbox_to_ratio=False))
-                
+
+            # apply UMAP file
+            if self.rc.umap_file:
+                overlay_canvases.append(MapCanvas(SimpleStylesheet(style_filename),
+                                                  bb, self._usable_area_width_pt,
+                                                  self._usable_area_height_pt, dpi,
+                                                  extend_bbox_to_ratio=False))
+
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
             grid_shape = map_grid.generate_shape_file(
@@ -378,10 +423,13 @@ class MultiPageRenderer(Renderer):
         self.index_categories = self._merge_page_indexes(indexes)
 
         # Prepare the small map for the front page
-        self._prepare_front_page_map(dpi, GPX_filename)
+        self._prepare_front_page_map(dpi, GPX_filename, style_filename)
 
         if self.rc.gpx_file:
             os.unlink(GPX_filename)
+
+        if self.rc.umap_file:
+            shutil.rmtree(tmpdir)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -483,7 +531,7 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _prepare_front_page_map(self, dpi, GPX_filename):
+    def _prepare_front_page_map(self, dpi, GPX_filename, style_filename):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -536,7 +584,17 @@ class MultiPageRenderer(Renderer):
                                   extend_bbox_to_ratio=True)
             ov_canvas.render()
             self._frontpage_overlay_canvases.append(ov_canvas)
-        
+
+        if self.rc.umap_file:
+            ov_canvas = MapCanvas(SimpleStylesheet(style_filename),
+                                  self.rc.bounding_box,
+                                  front_page_map_w,
+                                  front_page_map_h,
+                                  dpi,
+                                  extend_bbox_to_ratio=True)
+            ov_canvas.render()
+            self._frontpage_overlay_canvases.append(ov_canvas)
+
     def _render_front_page_header(self, ctx, w, h):
         # Draw a grey blue block which will contain the name of the
         # city being rendered.
