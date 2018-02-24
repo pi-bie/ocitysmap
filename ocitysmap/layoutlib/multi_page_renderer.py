@@ -30,7 +30,6 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 import os
-import shutil
 import gi
 gi.require_version('Rsvg', '2.0')
 gi.require_version('Pango', '1.0')
@@ -38,7 +37,6 @@ gi.require_version('PangoCairo', '1.0')
 from gi.repository import Rsvg, Pango, PangoCairo
 import shapely.wkt
 import sys
-import tempfile
 from string import Template
 from functools import cmp_to_key
 
@@ -219,20 +217,19 @@ class MultiPageRenderer(Renderer):
                    os.path.dirname(__file__),
                    '../../templates/gpx'))
            template_file = os.path.join(template_dir, 'template.xml')
-           tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-           GPX_filename = tmpfile.name
+           GPX_filename = os.path.join(tmpdir, 'gpx_style.xml')
+           tmpfile = open(GPX_filename, 'w')
 
            with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file, svgdir = template_dir))
+               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file,
+                                                 svgdir = template_dir))
 
            tmpfile.close()
 
         # apply UMAP file
         umap_filename = None
         if self.rc.umap_file:
-           tmpdir =  tempfile.mkdtemp(prefix='ocitysmap', suffix='.d')
-
            template_dir = os.path.realpath(
                os.path.join(
                    os.path.dirname(__file__),
@@ -244,7 +241,7 @@ class MultiPageRenderer(Renderer):
            json_tmpfile.close()
 
            template_file = os.path.join(template_dir, 'template.xml')
-           style_filename = os.path.join(tmpdir, 'style.xml')
+           style_filename = os.path.join(tmpdir, 'umap_style.xml')
            style_tmpfile = open(style_filename, 'w')
 
            with open(template_file, 'r') as style_template:
@@ -424,12 +421,6 @@ class MultiPageRenderer(Renderer):
 
         # Prepare the small map for the front page
         self._prepare_front_page_map(dpi, GPX_filename, style_filename)
-
-        if self.rc.gpx_file:
-            os.unlink(GPX_filename)
-
-        if self.rc.umap_file:
-            shutil.rmtree(tmpdir)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,

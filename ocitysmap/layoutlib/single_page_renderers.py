@@ -25,8 +25,6 @@
 from __future__ import print_function
 
 import os
-import tempfile
-import shutil
 from string import Template
 import cairo
 import gi
@@ -703,8 +701,8 @@ class SinglePageRenderer(Renderer):
                    os.path.dirname(__file__),
                    '../../templates/gpx'))
            template_file = os.path.join(template_dir, 'template.xml')
-           tmpfile = tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w')
-           GPX_filename = tmpfile.name
+           GPX_filename = os.path.join(tmpdir, 'gpx_style.xml')
+           tmpfile = open(GPX_filename, 'w')
 
            with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
@@ -725,8 +723,6 @@ class SinglePageRenderer(Renderer):
            mapnik.render(gpx_overlay, ctx, scale_factor, 0, 0)
            ctx.restore()
 
-           os.unlink(GPX_filename)
-
         # apply UMAP file
         umap_filename = None
         if self.rc.umap_file:
@@ -743,7 +739,7 @@ class SinglePageRenderer(Renderer):
            json_tmpfile.close()
 
            template_file = os.path.join(template_dir, 'template.xml')
-           style_filename = os.path.join(tmpdir, 'style.xml')
+           style_filename = os.path.join(tmpdir, 'umap_style.xml')
            style_tmpfile = open(style_filename, 'w')
 
            with open(template_file, 'r') as style_template:
@@ -768,8 +764,6 @@ class SinglePageRenderer(Renderer):
            umap_overlay.base = template_dir
            mapnik.render(umap_overlay, ctx, scale_factor, 0, 0)
            ctx.restore()
-
-           shutil.rmtree(tmpdir)
 
         cairo_surface.flush()
 
