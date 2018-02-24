@@ -241,8 +241,8 @@ class MultiPageRenderer(Renderer):
            json_tmpfile.close()
 
            template_file = os.path.join(template_dir, 'template.xml')
-           style_filename = os.path.join(tmpdir, 'umap_style.xml')
-           style_tmpfile = open(style_filename, 'w')
+           umap_filename = os.path.join(tmpdir, 'umap_style.xml')
+           style_tmpfile = open(umap_filename, 'w')
 
            with open(template_file, 'r') as style_template:
                tmpstyle = Template(style_template.read())
@@ -318,7 +318,7 @@ class MultiPageRenderer(Renderer):
             self.overview_overlay_canvases.append(ov_canvas)
 
         if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(style_filename),
+            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
                                   self.rc.bounding_box,
                                   float(self._map_coords[2]),  # W
                                   float(self._map_coords[3]),  # H
@@ -380,7 +380,7 @@ class MultiPageRenderer(Renderer):
 
             # apply UMAP file
             if self.rc.umap_file:
-                overlay_canvases.append(MapCanvas(SimpleStylesheet(style_filename),
+                overlay_canvases.append(MapCanvas(SimpleStylesheet(umap_filename),
                                                   bb, self._usable_area_width_pt,
                                                   self._usable_area_height_pt, dpi,
                                                   extend_bbox_to_ratio=False))
@@ -420,7 +420,7 @@ class MultiPageRenderer(Renderer):
         self.index_categories = self._merge_page_indexes(indexes)
 
         # Prepare the small map for the front page
-        self._prepare_front_page_map(dpi, GPX_filename, style_filename)
+        self._prepare_front_page_map(dpi, GPX_filename, umap_filename)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -522,7 +522,7 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _prepare_front_page_map(self, dpi, GPX_filename, style_filename):
+    def _prepare_front_page_map(self, dpi, GPX_filename, umap_filename):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -577,7 +577,7 @@ class MultiPageRenderer(Renderer):
             self._frontpage_overlay_canvases.append(ov_canvas)
 
         if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(style_filename),
+            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
                                   self.rc.bounding_box,
                                   front_page_map_w,
                                   front_page_map_h,
