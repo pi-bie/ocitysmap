@@ -357,11 +357,10 @@ class SinglePageRenderer(Renderer):
 
         today = datetime.date.today()
         if notice is None: 
-            notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers. '
-              u'Map data © %(year)d OpenStreetMap.org '
-              u'and contributors. http://osm.org/copyright\n'
-              u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. '
-              u'The map may be incomplete or inaccurate.')
+            notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
+            notice+= ' '
+            notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
+            notice+= '\n'
 
             annotations = []
             if self.rc.stylesheet.annotation != '':
@@ -370,7 +369,12 @@ class SinglePageRenderer(Renderer):
                 if overlay.annotation != '':
                     annotations.append(overlay.annotation)
             if len(annotations) > 0:
-                notice = notice + '\nMap styles: ' + '; '.join(annotations)
+                notice+= _(u'Map styles:')
+                notice+= ' ' + '; '.join(annotations) + '\n'
+
+            notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
+            notice+= ' '
+            notice+= _(u'The map may be incomplete or inaccurate.')
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)

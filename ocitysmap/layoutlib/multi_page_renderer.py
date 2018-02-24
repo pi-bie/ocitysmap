@@ -655,16 +655,24 @@ class MultiPageRenderer(Renderer):
 
         # Prepare the text for the left of the footer
         today = datetime.date.today()
-        notice = \
-            _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.\n'
-              u'http://www.maposmatic.org\n\n'
-              u'Map data © %(year)d OpenStreetMap.org '
-              u'and contributors (cc-by-sa).\n'
-              u'http://www.openstreetmap.org\n\n'
-              u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.\n'
-              u'The map may be incomplete or inaccurate. '
-              u'You can contribute to improve this map.\n'
-              u'See http://wiki.openstreetmap.org')
+        notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
+        notice+= '\n\n'
+        notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
+        notice+= '\n'
+        annotations = []
+
+        if self.rc.stylesheet.annotation != '':
+            annotations.append(self.rc.stylesheet.annotation)
+            for overlay in self.rc.overlays:
+                if overlay.annotation != '':
+                    annotations.append(overlay.annotation)
+        if len(annotations) > 0:
+            notice+= _u('Map styles:')
+            notice+= ' ' + '; '.join(annotations) + '\n'
+
+        notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
+        notice+= '\n'
+        notice+= _(u'The map may be incomplete or inaccurate.')
 
         # We need the correct locale to be set for strftime().
         prev_locale = locale.getlocale(locale.LC_TIME)
@@ -680,16 +688,6 @@ class MultiPageRenderer(Renderer):
                                'osmdate': osm_date_str}
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
-
-        annotations = []
-        if self.rc.stylesheet.annotation != '':
-            annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self.rc.overlays:
-                if overlay.annotation != '':
-                    annotations.append(overlay.annotation)
-
-        if len(annotations) > 0:
-            notice = notice + '\nMap styles: ' + '; '.join(annotations)
 
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
