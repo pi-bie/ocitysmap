@@ -107,7 +107,9 @@ def main():
                       help='provide a file containing POI information to '
                            'create an index instead of auto-generating it.')
     parser.add_option('--gpx-file', metavar='FILE',
-                      help='a GPX track to be put on top of the rendered mapr.')
+                      help='a GPX track to be put on top of the rendered map.')
+    parser.add_option('--umap-file', metavar='FILE',
+                      help='a Umap export file to be put on top of the rendered map.')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -250,6 +252,7 @@ def main():
     rc.overlays     = overlays
     rc.poi_file     = options.poi_file
     rc.gpx_file     = options.gpx_file
+    rc.umap_file     = options.umap_file
     if options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr[1]
         rc.paper_height_mm = paper_descr[2]
