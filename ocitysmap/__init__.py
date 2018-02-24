@@ -80,6 +80,7 @@ import configparser
 import gzip
 import logging
 import os
+import shutil
 import mapnik
 import psycopg2
 import re
@@ -320,12 +321,7 @@ SELECT ST_AsText(ST_LongestLine(
 
     def _cleanup_tempdir(self, tmpdir):
         LOG.debug('Cleaning up %s...' % tmpdir)
-        for root, dirs, files in os.walk(tmpdir, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
-        os.rmdir(tmpdir)
+        shutil.rmtree(tmpdir)
 
     def _get_geographic_info(self, osmid, table):
         """Return the area for the given osm id in the given table, or raise
