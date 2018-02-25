@@ -19,4 +19,11 @@ class i18n_ro_generic(i18n):
     def language_code(self):
         return self.language
 
+    def user_readable_street(self, name):
+        return name
 
+    def upper_unaccent_string(self, s):
+        return s.upper()
+
+    def first_letter_equal(self, a, b):
+        return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
