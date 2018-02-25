@@ -705,7 +705,7 @@ class SinglePageRenderer(Renderer):
                    os.path.dirname(__file__),
                    '../../templates/gpx'))
            template_file = os.path.join(template_dir, 'template.xml')
-           GPX_filename = os.path.join(tmpdir, 'gpx_style.xml')
+           GPX_filename = os.path.join(self.tmpdir, 'gpx_style.xml')
            tmpfile = open(GPX_filename, 'w')
 
            with open(template_file, 'r') as style_template:
@@ -730,20 +730,18 @@ class SinglePageRenderer(Renderer):
         # apply UMAP file
         umap_filename = None
         if self.rc.umap_file:
-           tmpdir =  tempfile.mkdtemp(prefix='ocitysmap', suffix='.d')
-
            template_dir = os.path.realpath(
                os.path.join(
                    os.path.dirname(__file__),
                    '../../templates/umap'))
 
-           json_filename = os.path.join(tmpdir, 'geo.json')
+           json_filename = os.path.join(self.tmpdir, 'geo.json')
            json_tmpfile = open(json_filename, 'w')
-           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, tmpdir))
+           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, self.tmpdir))
            json_tmpfile.close()
 
            template_file = os.path.join(template_dir, 'template.xml')
-           style_filename = os.path.join(tmpdir, 'umap_style.xml')
+           style_filename = os.path.join(self.tmpdir, 'umap_style.xml')
            style_tmpfile = open(style_filename, 'w')
 
            with open(template_file, 'r') as style_template:
