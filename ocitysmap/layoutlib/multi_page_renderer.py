@@ -667,7 +667,7 @@ class MultiPageRenderer(Renderer):
                 if overlay.annotation != '':
                     annotations.append(overlay.annotation)
         if len(annotations) > 0:
-            notice+= _u('Map styles:')
+            notice+= _(u'Map styles:')
             notice+= ' ' + '; '.join(annotations) + '\n'
 
         notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
