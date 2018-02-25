@@ -2,7 +2,7 @@ import re, gettext
 from . import i18n, _install_language
 
 class i18n_ro_generic(i18n):
-    APPELLATIONS = [ ]
+    APPELLATIONS = ['Aleea', 'Bulevardul', 'Calea', 'Piata', 'Strada']
 
     DETERMINANTS = [ ]
 
@@ -20,6 +20,9 @@ class i18n_ro_generic(i18n):
         return self.language
 
     def user_readable_street(self, name):
+        name = name.strip()
+        name = self.SPACE_REDUCE.sub(" ", name)
+        name = self.PREFIX_REGEXP.sub(r"\g<name>, \g<prefix>", name)
         return name
 
     def upper_unaccent_string(self, s):
