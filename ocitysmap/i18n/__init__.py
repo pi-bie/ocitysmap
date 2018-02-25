@@ -108,6 +108,7 @@ from .it    import i18n_it_generic
 from .nl    import i18n_nl_generic
 from .pl    import i18n_pl_generic
 from .pt_br import i18n_pt_br_generic
+from .ro    import i18n_ro_generic
 from .ru    import i18n_ru_generic
 from .tr    import i18n_tr_generic
 
@@ -187,6 +188,7 @@ language_class_map = {
     'ar_TN.UTF-8': i18n_ar_generic,
     'ar_YE.UTF-8': i18n_ar_generic,
     'hr_HR.UTF-8': i18n_hr_HR,
+    'ro_RO.UTF-8': i18n_ro_generic,
     'ru_RU.UTF-8': i18n_ru_generic,
     'pl_PL.UTF-8': i18n_pl_generic,
     'nb_NO.UTF-8': i18n_generic,
