@@ -381,7 +381,7 @@ class SinglePageRenderer(Renderer):
         try:
             locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
         except Exception:
-            l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+            LOG.warning('error while setting LC_COLLATE to "%s"' % self.rc.i18n.language_code())
 
         try:
             if osm_date is None:
@@ -835,7 +835,7 @@ class SinglePageRenderer(Renderer):
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 
             if portrait_ok or landscape_ok:
-                valid_sizes.append([name, w, h, portrait_ok, landscape_ok, False])
+                valid_sizes.append([name, w, h, portrait_ok, landscape_ok, False, paper_width_mm > paper_height_mm])
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
@@ -844,7 +844,8 @@ class SinglePageRenderer(Renderer):
                             max(paper_width_mm, paper_height_mm),
                             paper_width_mm < paper_height_mm,
                             paper_width_mm > paper_height_mm,
-                            False])
+                            False,
+                            paper_width_mm > paper_height_mm])
 
         # select the first one as default
         valid_sizes[0][5] = True

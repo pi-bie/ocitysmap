@@ -3,6 +3,9 @@ from gi.repository import Rsvg
 import math
 import os
 import psycopg2
+import logging
+
+LOG = logging.getLogger('ocitysmap')
 
 def _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, direction, angle, height):
     if camera_type == 'dome':
@@ -50,12 +53,15 @@ def _camera_view(renderer, ctx, map_scale, surveillance, lat, lon, camera_type, 
     x,y = renderer._latlon2xy(lat, lon, renderer.dpi)
 
     if type(direction) == float and surveillance != 'indoor':
-        if type(height) != float:
-           height = 5
-        elif height < 3:
-           height = 3
-        elif height > 12:
-           height = 12
+        if height and height.isdigit():
+           height = float(height)
+        else:
+           height = 5.0
+
+        if height < 3.0:
+           height = 3.0
+        elif height > 12.0:
+           height = 12.0
 
         if type(angle) != float:
             angle = 1
@@ -127,14 +133,26 @@ def render(renderer, ctx):
     query = """SELECT ST_Y(ST_TRANSFORM(way, 4002)) AS lat
                     , ST_X(ST_TRANSFORM(way, 4002)) AS lon
                     , tags->'surveillance'      AS surveillance
-                    , tags->'surveillance:type' AS type
+                    , COALESCE(tags->'surveillance:type', 'camera') AS type
                     , tags->'camera:direction'  AS camera_direction
                     , tags->'camera:angle'      AS camera_angle
                     , tags->'camera:type'       AS camera_type
                     , tags->'height'            AS camera_height
                  FROM planet_osm_point
                 WHERE tags->'man_made' = 'surveillance'
-                  AND ST_CONTAINS(ST_TRANSFORM(ST_GeomFromText('%s', 4002), 3857), way)""" % renderer.rc.polygon_wkt
+                  AND ST_CONTAINS(ST_TRANSFORM(ST_GeomFromText('%s', 4002), 3857), way)
+         UNION SELECT ST_Y(ST_TRANSFORM(way, 4002)) AS lat
+                    , ST_X(ST_TRANSFORM(way, 4002)) AS lon
+                    , tags->'surveillance'      AS surveillance
+                    , COALESCE(tags->'surveillance:type', 'camera') AS type
+                    , tags->'camera:direction'  AS camera_direction
+                    , tags->'camera:angle'      AS camera_angle
+                    , tags->'camera:type'       AS camera_type
+                    , tags->'height'            AS camera_height
+                 FROM planet_osm_point
+                WHERE tags->'surveillance' IS NOT NULL
+                  AND ST_CONTAINS(ST_TRANSFORM(ST_GeomFromText('%s', 4002), 3857), way)
+             """ % ( renderer.rc.polygon_wkt, renderer.rc.polygon_wkt)
 
     cursor = renderer.db.cursor()
     cursor.execute(query)
