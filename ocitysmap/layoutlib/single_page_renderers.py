@@ -824,6 +824,15 @@ class SinglePageRenderer(Renderer):
 
         LOG.debug('Best fit is %.1fx%.1fcm.' % (paper_width_mm/10., paper_height_mm/10.))
 
+        # TODO make min. width / height configurable
+        if paper_width_mm < 100:
+            paper_height_mm = paper_height_mm * 100 / paper_width_mm
+            paper_width_mm = 100
+        if paper_height_mm < 100:
+            paper_width_mm = paper_width_mm * 100 / paper_height_mm
+            paper_height_mm = 100
+
+
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
         valid_sizes = []
