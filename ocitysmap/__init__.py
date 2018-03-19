@@ -408,6 +408,13 @@ SELECT ST_AsText(ST_LongestLine(
         Stylesheet objects)."""
         return self.STYLESHEET_REGISTRY
 
+    def get_all_style_names(self):
+        """Returns the list of all available stylesheet names"""
+        style_names = []
+        for s in self.STYLESHEET_REGISTRY:
+            style_names.append(s.name)
+        return style_names;
+
     def get_stylesheet_by_name(self, name):
         """Returns a stylesheet by its key name."""
         for style in self.STYLESHEET_REGISTRY:
@@ -419,6 +426,13 @@ SELECT ST_AsText(ST_LongestLine(
         """Returns the list of all available overlay stylesheet configurations 
            (list of overlay Stylesheet objects)."""
         return self.OVERLAY_REGISTRY
+
+    def get_all_overlay_names(self):
+        """Returns the list of all available overlay names"""
+        overlay_names = []
+        for o in self.OVERLAY_REGISTRY:
+            overlay_names.append(o.name)
+        return overlay_names;
 
     def get_overlay_by_name(self, name):
         """Returns a overlay stylesheet by its key name."""
@@ -432,8 +446,29 @@ SELECT ST_AsText(ST_LongestLine(
         Renderer classes)."""
         return renderers.get_renderers()
 
-    def get_all_paper_sizes(self):
+    def get_all_renderer_names(self):
+        """Returns the list of all available layout renderers names"""
+        renderer_names = []
+        for r in renderers.get_renderers():
+            renderer_names.append(r.name)
+        return renderer_names;
+
+    @staticmethod
+    def get_all_paper_sizes():
         return PAPER_SIZES
+
+    @staticmethod
+    def get_all_paper_size_names():
+        paper_names = []
+        for p in PAPER_SIZES:
+            paper_names.append(p[0])
+
+    @staticmethod
+    def get_paper_size_by_name(name):
+        for p in PAPER_SIZES:
+            if p[0] == name:
+                return [p[1], p[2]]
+        raise LookupError( 'The requested paper size %s was not found!' % name)
 
     def render(self, config, renderer_name, output_formats, file_prefix):
         """Renders a job with the given rendering configuration, using the
