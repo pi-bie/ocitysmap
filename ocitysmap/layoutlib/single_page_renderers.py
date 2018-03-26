@@ -640,8 +640,8 @@ class SinglePageRenderer(Renderer):
         # Draw compass rose
         # TODO: proper positioning/scaling, move to abstract renderer
         ctx.save()
-        ctx.translate(safe_margin_dots + title_margin_dots * 0.5 , 
-                      safe_margin_dots + title_margin_dots * 1.5)
+        ctx.translate(map_coords_dots[0] + title_margin_dots/2,
+                      map_coords_dots[1] + title_margin_dots/2)
         rose_grp, rose_width = self._get_compass_rose(ctx, title_margin_dots)
         ctx.set_source(rose_grp)
         ctx.paint_with_alpha(0.75)
