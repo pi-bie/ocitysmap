@@ -102,6 +102,7 @@ from .be    import i18n_be_generic
 from .ca    import i18n_ca_generic
 from .de    import i18n_de_generic
 from .es    import i18n_es_generic
+from .fa    import i18n_fa_generic
 from .fr    import i18n_fr_generic
 from .hr    import i18n_hr_HR
 from .it    import i18n_it_generic
@@ -197,6 +198,7 @@ language_class_map = {
     'ast_ES.UTF-8': i18n_ast_generic,
     'sk_SK.UTF-8': i18n_generic,
     'be_BY.UTF-8': i18n_be_generic,
+    'fa_IR.UTF-8': i18n_fa_generic,
 }
 
 def install_translation(locale_name, locale_path):
