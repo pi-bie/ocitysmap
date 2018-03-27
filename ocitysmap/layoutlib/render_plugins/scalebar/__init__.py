@@ -43,10 +43,10 @@ def render(renderer, ctx):
     tickHeight = pt2px(15)	# height of the tick marks
 
     x = barBuffer
-    x+= pt2px(Renderer.PRINT_SAFE_MARGIN_PT)
+    x+= map_coords_dots[0]
 
     y = m.height
-    y+= pt2px(Renderer.PRINT_SAFE_MARGIN_PT + renderer._title_margin_pt)
+    y+= map_coords_dots[1]
     y-= barBuffer+lBuffer+lBuffer+tickHeight
 
     w = pxScaleBar + 2*lBuffer
