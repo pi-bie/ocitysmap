@@ -42,8 +42,6 @@ class IndexDoesNotFitError(Exception):
     graphical area, even after trying smaller font sizes."""
     pass
 
-NUMBER_CATEGORY_NAME = '0-9'
-
 class IndexCategory:
     """
     The IndexCategory represents a set of index items that belong to the same

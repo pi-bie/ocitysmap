@@ -50,6 +50,9 @@ class i18n:
     def upper_unaccent_string(self, s):
         return s.upper()
 
+    def number_category_name(self):
+        return "0-9"
+
 class i18n_template_code_CODE(i18n):
     def __init__(self, language, locale_path):
         """Install the _() function for the chosen locale other

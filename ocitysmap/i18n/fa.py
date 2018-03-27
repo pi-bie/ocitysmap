@@ -66,6 +66,9 @@ class i18n_fa_generic(i18n):
 
     def first_letter_equal(self, a, b):
         return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
-                
+
     def isrtl(self):
         return True
+
+    def number_category_name(self):
+        return "۰-۹"

@@ -311,18 +311,19 @@ class StreetIndex:
 
         result = []
         current_category = None
-        NUMBER_LIST = [str(i) for i in range(10)]
         for street_name, linestring in sorted_sl:
             # Create new category if needed
-            if (not current_category
-               or (not self._i18n.first_letter_equal(street_name[0],
-                                                     current_category.name)
-                   and (current_category.name != commons.NUMBER_CATEGORY_NAME
-                        or street_name[0] not in NUMBER_LIST))):
-                if street_name[0] in NUMBER_LIST:
-                    cat_name = commons.NUMBER_CATEGORY_NAME
-                else:
-                    cat_name = self._i18n.upper_unaccent_string(street_name[0])
+            cat_name = ""
+            for c in street_name:
+                if c.isdigit():
+                    cat_name = self._i18n.number_category_name()
+                    break
+                if c.isalpha():
+                    cat_name = self._i18n.upper_unaccent_string(c)
+                    if cat_name != "":
+                        break
+
+            if (not current_category or current_category.name != cat_name):
                 current_category = commons.StreetIndexCategory(cat_name)
                 result.append(current_category)
 
