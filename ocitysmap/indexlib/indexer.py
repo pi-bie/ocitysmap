@@ -44,6 +44,7 @@ _sql_escape_unicode = lambda s: psycopg2.extensions.adapt(s)
 from . import commons
 import ocitysmap
 import codecs
+from natsort import natsort_keygen, ns
 
 import time
 
@@ -305,7 +306,7 @@ class StreetIndex:
         try:
             sorted_sl = sorted([(self._i18n.user_readable_street(name),
                                  linestring) for name,linestring in sl],
-                               key = cmp_to_key(self._my_cmp))
+                               key = natsort_keygen(alg=ns.LOCALE|ns.IGNORECASE|ns.TYPESAFE, key=lambda street: street[0]))
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 
