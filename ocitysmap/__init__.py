@@ -494,7 +494,7 @@ SELECT ST_AsText(ST_LongestLine(
                  (renderer_name, config.i18n.language_code(),
                   config.i18n.isrtl()))
 
-        os.environ['PGOPTIONS'] = "-c mapnik.language=" + config.language[:2]
+        os.environ['PGOPTIONS'] = "-c mapnik.language=" + config.language[:2] + " -c mapnik.locality=" + config.language[:5] + " -c mapnik.country=" + config.language[3:5]
         LOG.info("PGOPTIONS '%s'" % os.environ.get('PGOPTIONS', 'not set'))
 
         # Determine bounding box and WKT of interest
