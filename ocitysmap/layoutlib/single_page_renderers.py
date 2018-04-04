@@ -332,6 +332,7 @@ class SinglePageRenderer(Renderer):
 
         # Draw the title
         ctx.save()
+        ctx.set_line_width(1)
         ctx.rectangle(0, 0, w_dots, h_dots)
         ctx.stroke()
         ctx.translate(0.4*h_dots + logo_width2,
@@ -547,19 +548,19 @@ class SinglePageRenderer(Renderer):
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
-        # Draw a rectangle around the map
-        ctx.save()
-        ctx.set_line_width(self.dpi/72.0)
-        ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
-        ctx.stroke()
-        ctx.restore()
-
         # Place the vertical and horizontal square labels
         self._draw_labels(ctx, self.grid,
                           map_coords_dots[2],
                           map_coords_dots[3],
                           commons.convert_pt_to_dots(self._grid_legend_margin_pt,
                                                    dpi))
+        ctx.restore()
+
+        # Draw a rectangle around the map
+        ctx.save()
+        ctx.set_line_width(1)
+        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.stroke()
         ctx.restore()
 
         ##
@@ -594,6 +595,7 @@ class SinglePageRenderer(Renderer):
 
             # Also draw a rectangle
             ctx.save()
+            ctx.set_line_width(1)
             ctx.rectangle(commons.convert_pt_to_dots(self._index_area.x, dpi),
                           commons.convert_pt_to_dots(self._index_area.y, dpi),
                           commons.convert_pt_to_dots(self._index_area.w, dpi),
