@@ -95,6 +95,7 @@ from .indexlib.indexer import StreetIndex
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 from .layoutlib import PAPER_SIZES, renderers
 from .layoutlib import commons
+from .stylelib import Stylesheet
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -131,84 +132,6 @@ class RenderingConfiguration:
 
         self.poi_file        = None
         self.gpx_file        = None
-
-class Stylesheet:
-    """
-    A Stylesheet object defines how the map features will be rendered. It
-    contains information pointing to the Mapnik stylesheet and other styling
-    parameters.
-    """
-    DEFAULT_ZOOM_LEVEL = 16
-
-    def __init__(self):
-        self.name        = None # str
-        self.path        = None # str
-        self.description = '' # str
-        self.annotation  = '' # str
-
-        self.grid_line_color = 'black'
-        self.grid_line_alpha = 0.5
-        self.grid_line_width = 1
-
-        self.shade_color = 'black'
-        self.shade_alpha = 0.1
-
-        # shade color for town contour in multi-pages
-        self.shade_color_2 = 'white'
-        self.shade_alpha_2 = 0.4
-
-    @staticmethod
-    def create_from_config_section(parser, section_name):
-        """Creates a Stylesheet object from the OCitySMap configuration.
-
-        Args:
-            parser (ConfigParser.ConfigParser): the configuration parser
-                object.
-            section_name (string): the stylesheet section name in the
-                configuration.
-        """
-        s = Stylesheet()
-
-        def assign_if_present(key, cast_fn=str):
-            if parser.has_option(section_name, key):
-                setattr(s, key, cast_fn(parser.get(section_name, key)))
-
-        s.name = parser.get(section_name, 'name')
-        s.path = parser.get(section_name, 'path')
-        if not s.path.startswith('internal:') and not os.path.exists(s.path):
-            raise ValueError(
-                'Could not find stylesheet file for stylesheet %s!' % s.name)
-        assign_if_present('description')
-        assign_if_present('annotation')
-
-        assign_if_present('grid_line_color')
-        assign_if_present('grid_line_alpha', float)
-        assign_if_present('grid_line_width', int)
-
-        assign_if_present('shade_color')
-        assign_if_present('shade_alpha', float)
-
-        assign_if_present('shade_color_2')
-        assign_if_present('shade_alpha_2', float)
-        return s
-
-    @staticmethod
-    def create_all_from_config(parser, type='stylesheets'):
-        try:
-            styles = parser.get('rendering', 'available_'+type)
-        except (configparser.NoOptionError, ValueError):
-            return []
-
-        results = []
-
-        for name in styles.split(','):
-            try:
-                results.append(Stylesheet.create_from_config_section(parser, name.strip()))
-            except Exception:
-                LOG.warning("%s overlay '%s' not found or incomplete" % (type, name.strip()))
-
-        return results
-
 
 class OCitySMap:
     """

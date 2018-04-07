@@ -123,13 +123,6 @@ def UMAP_style(umap_file, tmpdir):
 
     return UMAP_style
 
-
-class SimpleStylesheet:
-    def __init__(self, path):
-        self.path = os.path.abspath(os.path.join('/home/maposmatic/maposmatic/media', path))
-
-
-
 class SinglePageRenderer(Renderer):
     """
     This Renderer creates a full-page map, with the overlayed features
