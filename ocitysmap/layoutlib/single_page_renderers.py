@@ -177,7 +177,68 @@ class SinglePageRenderer(Renderer):
             dpi,
             rc.osmid != None )
 
-        # Prepare map overlay
+        # Prepare overlay styles for uploaded files
+
+        # generate style file for GPX file
+        if self.rc.gpx_file:
+           template_dir = os.path.realpath(
+               os.path.join(
+                   os.path.dirname(__file__),
+                   '../../templates/gpx'))
+
+           template_file = os.path.join(template_dir, 'template.xml')
+           GPX_filename = os.path.join(self.tmpdir, 'gpx_style.xml')
+           tmpfile = open(GPX_filename, 'w')
+
+           with open(template_file, 'r') as style_template:
+               tmpstyle = Template(style_template.read())
+               tmpfile.write(
+                   tmpstyle.substitute(
+                       gpxfile = self.rc.gpx_file,
+                       svgdir = template_dir
+                   ))
+
+           tmpfile.close()
+
+           GPX_style = ocitysmap.Stylesheet()
+           GPX_style.name = "GPX overlay"
+           GPX_style.path = GPX_filename
+           self.rc.overlays.append(GPX_style)
+
+        # denormalize UMAP json to geojson, then create style for it
+        if self.rc.umap_file:
+           template_dir = os.path.realpath(
+               os.path.join(
+                   os.path.dirname(__file__),
+                   '../../templates/umap'))
+
+           json_filename = os.path.join(self.tmpdir, 'geo.json')
+           json_tmpfile = open(json_filename, 'w')
+           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, self.tmpdir))
+           json_tmpfile.close()
+
+           template_file = os.path.join(template_dir, 'template.xml')
+           style_filename = os.path.join(self.tmpdir, 'umap_style.xml')
+           style_tmpfile = open(style_filename, 'w')
+
+           with open(template_file, 'r') as style_template:
+               tmpstyle = Template(style_template.read())
+               style_tmpfile.write(
+                   tmpstyle.substitute(
+                       umapfile = json_filename,
+                       basedir  = template_dir
+                   ))
+
+           style_tmpfile.close()
+
+           UMAP_style = ocitysmap.Stylesheet()
+           UMAP_style.name = "UMAP overlay"
+           UMAP_style.path = style_filename
+           self.rc.overlays.append(UMAP_style)
+
+   
+
+        # Prepare map overlays
         self._overlay_canvases = []
         self._overlay_effects  = []
         for overlay in self.rc.overlays:
@@ -699,75 +760,7 @@ class SinglePageRenderer(Renderer):
           self.render_plugin(effect, ctx)
         ctx.restore()
 
-        # apply GPX track
-        GPX_filename = None
-        if self.rc.gpx_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/gpx'))
-           template_file = os.path.join(template_dir, 'template.xml')
-           GPX_filename = os.path.join(self.tmpdir, 'gpx_style.xml')
-           tmpfile = open(GPX_filename, 'w')
 
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file, svgdir = template_dir))
-
-           tmpfile.close()
-           
-           gpx_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
-                                  self.rc.bounding_box,
-                                  float(self._map_coords[2]),  # W
-                                  float(self._map_coords[3]),  # H
-                                  dpi)
-
-           ctx.save()
-           ctx.translate(map_coords_dots[0], map_coords_dots[1])
-           gpx_overlay = gpx_canvas.get_rendered_map()
-           gpx_overlay.base = template_dir
-           mapnik.render(gpx_overlay, ctx, scale_factor, 0, 0)
-           ctx.restore()
-
-        # apply UMAP file
-        umap_filename = None
-        if self.rc.umap_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/umap'))
-
-           json_filename = os.path.join(self.tmpdir, 'geo.json')
-           json_tmpfile = open(json_filename, 'w')
-           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, self.tmpdir))
-           json_tmpfile.close()
-
-           template_file = os.path.join(template_dir, 'template.xml')
-           style_filename = os.path.join(self.tmpdir, 'umap_style.xml')
-           style_tmpfile = open(style_filename, 'w')
-
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               style_tmpfile.write(
-                   tmpstyle.substitute(
-                       umapfile = json_filename,
-                       basedir  = template_dir
-                   ))
-
-           style_tmpfile.close()
-
-           umap_canvas = MapCanvas(SimpleStylesheet(style_filename),
-                                  self.rc.bounding_box,
-                                  float(self._map_coords[2]),  # W
-                                  float(self._map_coords[3]),  # H
-                                  dpi)
-
-           ctx.save()
-           ctx.translate(map_coords_dots[0], map_coords_dots[1])
-           umap_overlay = umap_canvas.get_rendered_map()
-           umap_overlay.base = template_dir
-           mapnik.render(umap_overlay, ctx, scale_factor, 0, 0)
-           ctx.restore()
 
         cairo_surface.flush()
 
