@@ -319,10 +319,11 @@ class MultiPageRenderer(Renderer):
 
         if self.rc.umap_file:
             ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
-                                  self.rc.bounding_box,
-                                  float(self._map_coords[2]),  # W
-                                  float(self._map_coords[3]),  # H
-                                  dpi)
+                                  overview_bb,
+                                  self._usable_area_width_pt,
+                                  self._usable_area_height_pt,
+                                  dpi,
+                                  extend_bbox_to_ratio=True)
             ov_canvas.render()
             self.overview_overlay_canvases.append(ov_canvas)
 
