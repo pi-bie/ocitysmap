@@ -100,6 +100,11 @@ class UmapStylesheet(Stylesheet):
 
         umap = json.load(fp)
 
+        if 'licence' in umap['properties'] or 'shortCredit' in umap['properties']:
+            license = umap['properties']['licence']['name'] if 'licence' in umap['properties'] else ''
+            credit = umap['properties']['shortCredit'] if 'shortCredit' in umap['properties'] else ''
+            self.annotation = "Umap overlay © %s %s" % (license, credit)
+
         for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
             if prop in umap['properties']:
                 umap_defaults[prop] = umap['properties'][prop]
