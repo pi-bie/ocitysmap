@@ -26,11 +26,21 @@ from . import Stylesheet
 
 import os
 from string import Template
+import gpxpy
+import gpxpy.gpx
 
 class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir):
         super().__init__()
 
+        gpx_fp = open(gpx_file, 'r')
+        gpx = gpxpy.parse(gpx_fp)
+
+        if gpx.copyright_year or gpx.copyright_author or gpx.copyright_license:
+            self.annotation = "GPX track © %s %s %s" % (gpx.copyright_year, gpx.copyright_author, gpx.copyright_license)
+        
+        gpx_fp.close()
+        
         template_dir = os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__),

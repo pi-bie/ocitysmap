@@ -26,6 +26,7 @@ import os
 import logging
 import configparser
 
+
 LOG = logging.getLogger('ocitysmap')
 
 class Stylesheet:
@@ -105,4 +106,6 @@ class Stylesheet:
 
         return results
 
+from .Gpx import GpxStylesheet
+from .Umap import UmapStylesheet
 

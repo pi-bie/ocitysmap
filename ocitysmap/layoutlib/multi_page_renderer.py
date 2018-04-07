@@ -39,6 +39,7 @@ import shapely.wkt
 import sys
 from string import Template
 from functools import cmp_to_key
+from copy import copy
 
 import ocitysmap
 import coords
@@ -47,16 +48,13 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.commons import StreetIndexCategory
 from ocitysmap.indexlib.indexer import StreetIndex
 from ocitysmap.indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
-from ocitysmap import draw_utils, maplib, umap_utils
+from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
 from ocitysmap.maplib.overview_grid import OverviewGrid
+from ocitysmap.stylelib import GpxStylesheet, UmapStylesheet
 
 LOG = logging.getLogger('ocitysmap')
-
-class SimpleStylesheet:
-    def __init__(self, path):
-        self.path = os.path.abspath(os.path.join('/home/maposmatic/maposmatic/media', path))
 
 class MultiPageRenderer(Renderer):
     """
@@ -209,51 +207,6 @@ class MultiPageRenderer(Renderer):
         # for i, (bb, bb_inner) in enumerate(bboxes):
         #    print bb.as_javascript(name="p%d" % i)
 
-        # apply GPX track
-        GPX_filename = None
-        if self.rc.gpx_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/gpx'))
-           template_file = os.path.join(template_dir, 'template.xml')
-           GPX_filename = os.path.join(self.tmpdir, 'gpx_style.xml')
-           tmpfile = open(GPX_filename, 'w')
-
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file,
-                                                 svgdir = template_dir))
-
-           tmpfile.close()
-
-        # apply UMAP file
-        umap_filename = None
-        if self.rc.umap_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/umap'))
-
-           json_filename = os.path.join(self.tmpdir, 'geo.json')
-           json_tmpfile = open(json_filename, 'w')
-           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, self.tmpdir))
-           json_tmpfile.close()
-
-           template_file = os.path.join(template_dir, 'template.xml')
-           umap_filename = os.path.join(self.tmpdir, 'umap_style.xml')
-           style_tmpfile = open(umap_filename, 'w')
-
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               style_tmpfile.write(
-                   tmpstyle.substitute(
-                       umapfile = json_filename,
-                       basedir  = template_dir
-                   ))
-
-           style_tmpfile.close()
-
         self.pages = []
 
         # Create an overview map
@@ -290,10 +243,20 @@ class MultiPageRenderer(Renderer):
 
         self.overview_canvas.render()
 
+        self._overlays = copy(self.rc.overlays)
+        
+        # generate style file for GPX file
+        if self.rc.gpx_file:
+            self._overlays.append(GpxStylesheet(self.rc.gpx_file, self.tmpdir))
+
+        # denormalize UMAP json to geojson, then create style for it
+        if self.rc.umap_file:
+            self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
+
         self.overview_overlay_canvases = []
         self.overview_overlay_effects = []
         
-        for overlay in self.rc.overlays:
+        for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 self.overview_overlay_effects.append(path.lstrip('internal:'))
@@ -306,26 +269,6 @@ class MultiPageRenderer(Renderer):
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
                 self.overview_overlay_canvases.append(ov_canvas)
-
-        if self.rc.gpx_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
-                                  overview_bb,
-                                  self._usable_area_width_pt,
-                                  self._usable_area_height_pt,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self.overview_overlay_canvases.append(ov_canvas)
-
-        if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
-                                  overview_bb,
-                                  self._usable_area_width_pt,
-                                  self._usable_area_height_pt,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self.overview_overlay_canvases.append(ov_canvas)
 
         # Create the map canvas for each page
         indexes = []
@@ -362,7 +305,7 @@ class MultiPageRenderer(Renderer):
             # Create canvas for overlay on current page
             overlay_canvases = []
             overlay_effects  = []
-            for overlay in self.rc.overlays:
+            for overlay in self._overlays:
                 path = overlay.path.strip()
                 if path.startswith('internal:'):
                     overlay_effects.append(path.lstrip('internal:'))
@@ -371,20 +314,6 @@ class MultiPageRenderer(Renderer):
                                                bb, self._usable_area_width_pt,
                                                self._usable_area_height_pt, dpi,
                                                extend_bbox_to_ratio=False))
-
-            # apply GPX track
-            if self.rc.gpx_file:
-                overlay_canvases.append(MapCanvas(SimpleStylesheet(GPX_filename),
-                                           bb, self._usable_area_width_pt,
-                                           self._usable_area_height_pt, dpi,
-                                           extend_bbox_to_ratio=False))
-
-            # apply UMAP file
-            if self.rc.umap_file:
-                overlay_canvases.append(MapCanvas(SimpleStylesheet(umap_filename),
-                                                  bb, self._usable_area_width_pt,
-                                                  self._usable_area_height_pt, dpi,
-                                                  extend_bbox_to_ratio=False))
 
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
@@ -421,7 +350,7 @@ class MultiPageRenderer(Renderer):
         self.index_categories = self._merge_page_indexes(indexes)
 
         # Prepare the small map for the front page
-        self._prepare_front_page_map(dpi, GPX_filename, umap_filename)
+        self._prepare_front_page_map(dpi)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -523,7 +452,7 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _prepare_front_page_map(self, dpi, GPX_filename, umap_filename):
+    def _prepare_front_page_map(self, dpi):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -553,7 +482,7 @@ class MultiPageRenderer(Renderer):
 
         self._frontpage_overlay_canvases = []
         self._frontpage_overlay_effects  = []
-        for overlay in self.rc.overlays:
+        for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 self._frontpage_overlay_effects.append(path.lstrip('internal:'))
@@ -566,26 +495,6 @@ class MultiPageRenderer(Renderer):
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
                 self._frontpage_overlay_canvases.append(ov_canvas)
-
-        if self.rc.gpx_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
-                                  self.rc.bounding_box,
-                                  front_page_map_w,
-                                  front_page_map_h,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self._frontpage_overlay_canvases.append(ov_canvas)
-
-        if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
-                                  self.rc.bounding_box,
-                                  front_page_map_w,
-                                  front_page_map_h,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self._frontpage_overlay_canvases.append(ov_canvas)
 
     def _render_front_page_header(self, ctx, w, h):
         # Draw a grey blue block which will contain the name of the
@@ -664,7 +573,7 @@ class MultiPageRenderer(Renderer):
 
         if self.rc.stylesheet.annotation != '':
             annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self.rc.overlays:
+            for overlay in self._overlays:
                 if overlay.annotation != '':
                     annotations.append(overlay.annotation)
         if len(annotations) > 0:
