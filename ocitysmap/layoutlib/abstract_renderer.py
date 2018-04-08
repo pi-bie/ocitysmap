@@ -176,28 +176,6 @@ class Renderer:
 
 
     @staticmethod
-    def _get_compass_rose(ctx, height):
-        """
-        Read the compass rose image and rescale it to fit within height.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           height (number): final height of the image (cairo units).
-
-        Return a tuple (cairo group object for the image, image width in
-                        cairo units).
-        """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'compass-rose.svg')
-
-        return Renderer._get_svg(ctx, logo_path, height)
-
-
-    @staticmethod
     def _draw_labels(ctx, map_grid,
                      map_area_width_dots, map_area_height_dots,
                      grid_legend_margin_dots):

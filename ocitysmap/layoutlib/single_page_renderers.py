@@ -646,17 +646,6 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
 
-        # Draw compass rose
-        # TODO: proper positioning/scaling, move to abstract renderer
-        ctx.save()
-        ctx.translate(map_coords_dots[0] + title_margin_dots/2,
-                      map_coords_dots[1] + title_margin_dots/2)
-        rose_grp, rose_width = self._get_compass_rose(ctx, title_margin_dots)
-        ctx.set_source(rose_grp)
-        ctx.paint_with_alpha(0.75)
-        ctx.stroke()
-        ctx.restore()
-
         # Draw QR code
         if self.qrcode_text:
           ctx.save()
