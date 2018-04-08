@@ -60,10 +60,7 @@ import qrcode
 import qrcode.image.svg
 import sys
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import BytesIO
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -649,11 +646,11 @@ class SinglePageRenderer(Renderer):
         # Draw QR code
         if self.qrcode_text:
           ctx.save()
-          ctx.translate(safe_margin_dots + title_margin_dots * 0.5, usable_area_height_dots) 
+          ctx.translate(usable_area_width_dots - 200, usable_area_height_dots) 
           img = qrcode.make(self.qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
-          svgstr = StringIO.StringIO()
+          svgstr = BytesIO()
           img.save(svgstr);
-          rsvg = Rsvg.Hanlde()
+          rsvg = Rsvg.Handle()
           svg = rsvg.new_from_data(svgstr.getvalue())
           svgstr.close()
           ctx.move_to(0, 0)
