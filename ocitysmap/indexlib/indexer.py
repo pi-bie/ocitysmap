@@ -366,7 +366,7 @@ class StreetIndex:
 select name,
        --- street_kind, -- only when group by is: group by name, street_kind
        st_astext(st_transform(ST_LongestLine(street_path, street_path),
-                              4002)) as longest_linestring
+                              4326)) as longest_linestring
 from
   (select name,
           -- highway as street_kind, -- only when group by name, street_kind
@@ -377,7 +377,7 @@ from
                 and st_intersects(%%(way)s, %(wkb_limits)s)
    group by name ---, street_kind -- (optional)
    order by name) as foo;
-""" % dict(wkb_limits = ("st_transform(ST_GeomFromText('%s', 4002), 3857)"
+""" % dict(wkb_limits = ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
                          % (polygon_wkt,)))
 
         # l.debug("Street query (nogrid): %s" % query)
@@ -429,7 +429,7 @@ from
             query = """
 select amenity_name,
        st_astext(st_transform(ST_LongestLine(amenity_contour, amenity_contour),
-                              4002)) as longest_linestring
+                              4326)) as longest_linestring
 from (
        select name as amenity_name,
               st_intersection(%(wkb_limits)s, %%(way)s) as amenity_contour
@@ -445,7 +445,7 @@ from (
      ) as foo
 order by amenity_name""" \
                 % {'amenity': str(_sql_escape_unicode(db_amenity)),
-                   'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4002), 3857)"
+                   'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4326), 3857)"
                                   % (polygon_wkt,))}
 
             # l.debug("Amenity query for for %s/%s (nogrid): %s" \
@@ -506,7 +506,7 @@ order by amenity_name""" \
         query = """
 select village_name,
        st_astext(st_transform(ST_LongestLine(village_contour, village_contour),
-                              4002)) as longest_linestring
+                              4326)) as longest_linestring
 from (
        select name as village_name,
               st_intersection(%(wkb_limits)s, %%(way)s) as village_contour
@@ -518,7 +518,7 @@ from (
              and ST_intersects(%%(way)s, %(wkb_limits)s)
      ) as foo
 order by village_name""" \
-            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4002), 3857)"
+            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
                               % (polygon_wkt,))}
 
 

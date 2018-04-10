@@ -446,7 +446,7 @@ class MultiPageRenderer(Renderer):
         return mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
 
     def _inverse_envelope(self, envelope):
-        """Inverse the given cartesian envelope (in 900913) back to a 4002
+        """Inverse the given cartesian envelope (in 3587) back to a 4326
         bounding box."""
         c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))

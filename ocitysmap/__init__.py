@@ -269,7 +269,7 @@ SELECT ST_AsText(ST_LongestLine(
         cursor = self._db.cursor()
         cursor.execute("""select
                             st_astext(st_transform(st_buildarea(st_union(way)),
-                                                   4002))
+                                                   4326))
                           from planet_osm_%s where osm_id = %d
                           group by osm_id;""" %
                        (table, osmid))
