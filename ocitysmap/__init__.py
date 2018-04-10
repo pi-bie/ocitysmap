@@ -132,6 +132,9 @@ class RenderingConfiguration:
 
         self.poi_file        = None
         self.gpx_file        = None
+        self.umap_file       = None
+
+        self.qrcode_text     = None
 
 class OCitySMap:
     """

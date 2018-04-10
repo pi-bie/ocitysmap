@@ -56,11 +56,6 @@ from colour import Color
 
 import time
 
-import qrcode
-import qrcode.image.svg
-import sys
-
-from io import BytesIO
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -74,7 +69,6 @@ class SinglePageRenderer(Renderer):
 
     name = 'generic_single_page'
     description = 'A generic full-page layout with or without index.'
-    qrcode_text = ''
 
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
@@ -623,65 +617,6 @@ class SinglePageRenderer(Renderer):
                                     copyright_margin_dots,
                                     osm_date=osm_date)
         ctx.restore()
-
-        ##
-        ## Draw the creator notice
-        ##
-        if self.rc.poi_file:
-            ctx.save()
-
-            # Move to the right position
-            ctx.translate(safe_margin_dots + usable_area_width_dots/2.3,
-                          ( safe_margin_dots + title_margin_dots
-                            + usable_area_height_dots
-                            + copyright_margin_dots/4. ) )
-    
-            # Draw the copyright notice
-            self._draw_creator_notice(ctx, usable_area_width_dots,
-                                        copyright_margin_dots,
-                                        osm_date=osm_date)
-            ctx.restore()
-
-
-        # Draw QR code
-        if self.qrcode_text:
-          ctx.save()
-          ctx.translate(usable_area_width_dots - 200, usable_area_height_dots) 
-          img = qrcode.make(self.qrcode_text, image_factory=qrcode.image.svg.SvgPathFillImage)
-          svgstr = BytesIO()
-          img.save(svgstr);
-          rsvg = Rsvg.Handle()
-          svg = rsvg.new_from_data(svgstr.getvalue())
-          svgstr.close()
-          ctx.move_to(0, 0)
-          factor = 200 / svg.props.height
-          ctx.scale(factor, factor)
-          svg.render_cairo(ctx)
-          ctx.restore()
-
-
-        # Place "you are here" circle and markers from POI file
-        if self.rc.poi_file:
-            # place POI markers on map canvas
-            n = 0
-            for category in self.street_index.categories:
-                for poi in category.items:
-                    n = n + 1
-                    lat, lon = poi.endpoint1.get_latlong()
-                    self._marker(category.color, str(n), lat, lon, ctx, dpi)
-
-            # place "you are here" circle if coordinates are given
-            if self.street_index.lat != False:
-                x,y = self._latlon2xy(self.street_index.lat, self.street_index.lon, dpi)
-                ctx.save()
-                ctx.translate(x, y)
-                ctx.set_source_rgba(1, 0, 0, 0.8)
-                ctx.set_line_width(10)
-                ctx.arc(0, 0, 50, 0, 2*math.pi)
-                ctx.stroke_preserve()
-                ctx.set_source_rgba(1, 0, 0, 0.2)
-                ctx.fill()
-                ctx.restore()
 
         # apply effect overlays
         ctx.save()
