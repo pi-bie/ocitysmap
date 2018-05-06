@@ -42,6 +42,7 @@ class Stylesheet:
         self.path        = None # str
         self.description = '' # str
         self.annotation  = '' # str
+        self.url         = '' # str
 
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
@@ -77,6 +78,7 @@ class Stylesheet:
                 'Could not find stylesheet file for stylesheet %s!' % s.name)
         assign_if_present('description')
         assign_if_present('annotation')
+        assign_if_present('url')
 
         assign_if_present('grid_line_color')
         assign_if_present('grid_line_alpha', float)
