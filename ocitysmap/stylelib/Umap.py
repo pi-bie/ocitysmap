@@ -92,7 +92,7 @@ class UmapStylesheet(Stylesheet):
         icon_dir = os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__),
-                '../templates/umap/maki/icons'))
+                '../../templates/umap/maki/icons'))
 
         http = urllib3.PoolManager()
 
