@@ -103,7 +103,7 @@ class MapCanvas:
         # Added shapes to render
         self._shapes = []
 
-        l.info('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
+        l.debug('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
 
     def _fix_bbox_ratio(self, off_x, off_y, width, height, dest_ratio):
         """Adjusts the area expressed by its origin's offset and its size to
@@ -169,7 +169,7 @@ class MapCanvas:
         return scale
 
     def _render_shape_file(self, shape_file, color, line_width):
-        l.info("render_shape_file")
+        l.debug("render_shape_file")
         shape_file.flush()
 
         shpid = os.path.basename(shape_file.get_filepath())

@@ -359,7 +359,7 @@ class StreetIndex:
         """
 
         cursor = db.cursor()
-        l.info("Getting streets...")
+        l.debug("Getting streets...")
 
         # PostGIS >= 1.5.0 for this to work:
         query = """
@@ -415,7 +415,7 @@ from
 
         result = []
         for catname, db_amenity, label in self._get_selected_amenities():
-            l.info("Getting amenities for %s/%s..." % (catname, db_amenity))
+            l.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
 
             # Get the current IndexCategory object, or create one if
             # different than previous

@@ -197,7 +197,7 @@ class OCitySMap:
         # sure we define a default value.
         if not 'port' in datasource:
             datasource['port'] = 5432
-        LOG.info('Connecting to database %s on %s:%s as %s...' %
+        LOG.debug('Connecting to database %s on %s:%s as %s...' %
                  (datasource['dbname'], datasource['host'], datasource['port'],
                   datasource['user']))
 
@@ -421,7 +421,7 @@ SELECT ST_AsText(ST_LongestLine(
                   config.i18n.isrtl()))
 
         os.environ['PGOPTIONS'] = "-c mapnik.language=" + config.language[:2] + " -c mapnik.locality=" + config.language[:5] + " -c mapnik.country=" + config.language[3:5]
-        LOG.info("PGOPTIONS '%s'" % os.environ.get('PGOPTIONS', 'not set'))
+        LOG.debug("PGOPTIONS '%s'" % os.environ.get('PGOPTIONS', 'not set'))
 
         # Determine bounding box and WKT of interest
         if config.osmid:
@@ -470,7 +470,7 @@ SELECT ST_AsText(ST_LongestLine(
     def _render_one(self, config, tmpdir, renderer_cls,
                     output_format, output_filename, osm_date, file_prefix):
 
-        LOG.info('Rendering to %s format...' % output_format.upper())
+        LOG.debug('Rendering to %s format...' % output_format.upper())
 
         factory = None
         dpi = layoutlib.commons.PT_PER_INCH
