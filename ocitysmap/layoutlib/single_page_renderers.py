@@ -195,14 +195,14 @@ class SinglePageRenderer(Renderer):
                                               dpi))
 
         # Prepare the grid
-        self.grid = self._create_grid(self._map_canvas, dpi)
+        if index_position:
+            self.grid = self._create_grid(self._map_canvas, dpi)
 
         # Update the street_index to reflect the grid's actual position
         if self.grid and self.street_index:
             self.street_index.apply_grid(self.grid)
 
-        # Dump the CSV street index
-        if self.street_index:
+            # Dump the CSV street index
             self.street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
 
         # Commit the internal rendering stack of the map
@@ -552,11 +552,12 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
         # Place the vertical and horizontal square labels
-        self._draw_labels(ctx, self.grid,
-                          map_coords_dots[2],
-                          map_coords_dots[3],
-                          commons.convert_pt_to_dots(self._grid_legend_margin_pt,
-                                                   dpi))
+        if self.grid:
+            self._draw_labels(ctx, self.grid,
+                              map_coords_dots[2],
+                              map_coords_dots[3],
+                              commons.convert_pt_to_dots(self._grid_legend_margin_pt,
+                                                         dpi))
         ctx.restore()
 
         # Draw a rectangle around the map
