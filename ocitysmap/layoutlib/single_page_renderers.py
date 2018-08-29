@@ -101,7 +101,12 @@ class SinglePageRenderer(Renderer):
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
-        self._title_margin_pt = 0.05 * self.paper_height_pt
+
+        if self.rc.title:
+            self._title_margin_pt = 0.05 * self.paper_height_pt
+        else:
+            self._title_margin_pt = 0
+
         self._copyright_margin_pt = 0.03 * self.paper_height_pt
 
         self._usable_area_width_pt = (self.paper_width_pt -
@@ -564,11 +569,12 @@ class SinglePageRenderer(Renderer):
         ##
         ## Draw the title
         ##
-        ctx.save()
-        ctx.translate(safe_margin_dots, safe_margin_dots)
-        self._draw_title(ctx, usable_area_width_dots,
-                         title_margin_dots, 'Droid Sans Bold')
-        ctx.restore()
+        if self.rc.title:
+            ctx.save()
+            ctx.translate(safe_margin_dots, safe_margin_dots)
+            self._draw_title(ctx, usable_area_width_dots,
+                             title_margin_dots, 'Droid Sans Bold')
+            ctx.restore()
 
         ##
         ## Draw the index, when applicable
