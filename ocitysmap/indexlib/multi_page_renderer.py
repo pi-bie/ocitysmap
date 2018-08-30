@@ -89,7 +89,7 @@ class MultiPageStreetIndexRenderer:
         pc = PangoCairo.create_context(self.ctx)
 
         header_fd = Pango.FontDescription("Georgia Bold 12")
-        label_column_fd  = Pango.FontDescription("DejaVu 8")
+        label_column_fd  = Pango.FontDescription("DejaVu 6")
 
         header_layout, header_fascent, header_fheight, header_em = \
             self._create_layout_with_font(self.ctx, pc, header_fd)
