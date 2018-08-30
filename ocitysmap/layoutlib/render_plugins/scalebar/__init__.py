@@ -28,6 +28,9 @@ def render(renderer, ctx):
 
     dots = map_coords_dots[2]
 
+    if type(renderer).__name__ == "MultiPageRenderer":
+        dots = dots - 2 * renderer.PRINT_SAFE_MARGIN_PT
+
     step_horiz = dots / renderer.grid.horiz_count
 
     # make some text for the scalebar (sort units)
@@ -44,6 +47,8 @@ def render(renderer, ctx):
 
     x = barBuffer
     x+= map_coords_dots[0]
+    if type(renderer).__name__ == "MultiPageRenderer":
+        x += renderer.PRINT_SAFE_MARGIN_PT
 
     y = m.height
     y+= map_coords_dots[1]

@@ -19,9 +19,14 @@ def render(renderer, ctx):
         LOG.warning("No compass rose image found")
         return
         
-    h = convert_pt_to_dots(renderer._title_margin_pt, renderer.dpi)
-    x = convert_pt_to_dots(renderer._map_coords[0], renderer.dpi)
-    y = convert_pt_to_dots(renderer._map_coords[1], renderer.dpi)
+    h = convert_pt_to_dots(0.05 * renderer.paper_height_pt, renderer.dpi)
+
+    if type(renderer).__name__ == "MultiPageRenderer":
+        x = 0
+        y = 0
+    else:
+        x = convert_pt_to_dots(renderer._map_coords[0], renderer.dpi)
+        y = convert_pt_to_dots(renderer._map_coords[1], renderer.dpi)
         
     ctx.save()   
     ctx.translate(x + h/2, y + h/2)
