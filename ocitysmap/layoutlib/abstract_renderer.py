@@ -65,12 +65,13 @@ class Renderer:
 
     GRID_LEGEND_MARGIN_RATIO = .02
 
-    # The DEFAULT_KM_IN_MM represents the minimum acceptable mapnik scale
+    # The DEFAULT SCALE values represents the minimum acceptable mapnik scale
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
     # see entities.xml.inc file from osm style sheet
-    DEFAULT_SCALE = 70000
+    DEFAULT_SCALE           = 70000
     DEFAULT_MULTIPAGE_SCALE = 12000
+    MAX_MULTIPAGE_MAPPAGES  = 50
 
     def __init__(self, db, rc, tmpdir, dpi):
         """
