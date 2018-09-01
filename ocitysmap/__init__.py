@@ -483,6 +483,14 @@ SELECT ST_AsText(ST_LongestLine(
             except configparser.NoOptionError:
                 dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
+            w_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_width_mm, dpi))
+            h_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_height_mm, dpi))
+
+            if w_px > 25000 or h_px > 25000:
+                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
+                dpi = layoutlib.commons.PT_PER_INCH
+
+                
             # As strange as it may seem, we HAVE to use a vector
             # device here and not a raster device such as
             # ImageSurface. Because, for some reason, with
