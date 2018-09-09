@@ -217,12 +217,12 @@ class Renderer:
 
             # At the top clear the right corner of the horizontal label
             if (i < map_grid.horiz_count-1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, grid_legend_margin_dots/2.0)
 
             # At the bottom clear the left corner of the horizontal label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, map_area_height_dots -
                                              grid_legend_margin_dots/2.0)
 
@@ -238,12 +238,12 @@ class Renderer:
 
             # On the left clear the upper corner of the vertical label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          grid_legend_margin_dots/2.0, y)
 
             # On the right clear the bottom corner of the vertical label
             if (i < map_grid.vert_count -1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 

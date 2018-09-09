@@ -146,6 +146,31 @@ def draw_simpletext_center(ctx, text, x, y):
     ctx.stroke()
     ctx.restore()
 
+def draw_halotext_center(ctx, text, x, y):
+    """
+    Draw the given text centered at x,y, with a halo below
+
+    Args:
+       ctx (cairo.Context): The cairo context to use to draw.
+       text (str): the text to draw.
+       x,y (numbers): Location of the center (cairo units).
+    """
+    xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+    ctx.save()
+    ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.set_line_width(10);
+    ctx.set_source_rgba(1, 1, 1, 0.5);
+    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+    ctx.text_path(text)
+    ctx.stroke()
+    ctx.restore()
+
+    ctx.save()
+    ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.show_text(text)
+    ctx.stroke()
+    ctx.restore()
+
 def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.set_line_width(line_width)
     ctx.set_dash([line_width, line_width*2])
