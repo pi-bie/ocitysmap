@@ -1,6 +1,7 @@
 import cairo
 import os
 import sys
+import math
 import qrcode
 import qrcode.image.svg
 import gi
@@ -20,19 +21,19 @@ def render(renderer, ctx):
     ##
     ## Draw the creator notice
     ##
-        ctx.save()
-        
+        #ctx.save()
+        #
         # Move to the right position
-        ctx.translate(safe_margin_dots + usable_area_width_dots/2.3,
-                      ( safe_margin_dots + title_margin_dots
-                        + usable_area_height_dots
-                        + copyright_margin_dots/4. ) )
+        #ctx.translate(safe_margin_dots + usable_area_width_dots/2.3,
+        #              ( safe_margin_dots + title_margin_dots
+        #                + usable_area_height_dots
+        #                + copyright_margin_dots/4. ) )
         
         # Draw the copyright notice
-        self._draw_creator_notice(ctx, usable_area_width_dots,
-                                  copyright_margin_dots,
-                                  osm_date=osm_date)
-        ctx.restore()
+        #self._draw_creator_notice(ctx, usable_area_width_dots,
+        #                          copyright_margin_dots,
+        #                          osm_date=osm_date)
+        #ctx.restore()
 
         # place POI markers on map canvas
         n = 0
@@ -40,11 +41,11 @@ def render(renderer, ctx):
             for poi in category.items:
                 n = n + 1
                 lat, lon = poi.endpoint1.get_latlong()
-                renderer._marker(category.color, str(n), lat, lon, ctx, dpi)
+                renderer._marker(category.color, str(n), lat, lon, ctx, renderer.dpi)
 
         # place "you are here" circle if coordinates are given
         if renderer.street_index.lat != False:
-            x,y = renderer._latlon2xy(renderer.street_index.lat, renderer.street_index.lon, dpi)
+            x,y = renderer._latlon2xy(renderer.street_index.lat, renderer.street_index.lon, renderer.dpi)
             ctx.save()
             ctx.translate(x, y)
             ctx.set_source_rgba(1, 0, 0, 0.8)

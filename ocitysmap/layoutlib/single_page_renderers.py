@@ -83,10 +83,10 @@ class SinglePageRenderer(Renderer):
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom).
         """
+
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
         # Prepare the index
-
         if rc.poi_file:
             self.street_index = PoiIndex(rc.poi_file)
         else:
@@ -193,6 +193,9 @@ class SinglePageRenderer(Renderer):
                                               float(self._map_coords[2]),  # W
                                               float(self._map_coords[3]),  # H
                                               dpi))
+
+        if self.rc.poi_file:
+            self._overlay_effects.append('poi_markers')
 
         # Prepare the grid
         if index_position:
