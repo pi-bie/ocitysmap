@@ -49,6 +49,7 @@ class Grid:
 
         self._bbox = bounding_box
         self.rtl   = rtl
+        self.scale = scale
         self._height_m, self._width_m = bounding_box.spheric_sizes()
 
         l.info('Laying out grid on %.1fx%.1fm area...' %
@@ -134,9 +135,10 @@ class Grid:
         """
 
         # Use a slightly larger bounding box for the shape file to accomodate
-        # for the small imprecisions of re-projecting.
+        # for the small imprecisions of re-projecting and the extra gray margin
+        # area in multi page maps
         l.debug("Generating shapefile")
-        g = shapes.LineShapeFile(self._bbox.create_expanded(0.001, 0.001),
+        g = shapes.LineShapeFile(self._bbox.create_expanded(self.scale/6000000, self.scale/6000000),
                                  filename, 'grid')
         for x in self._vertical_lines:
             g.add_vert_line(x)

@@ -104,39 +104,55 @@ class MultiPageRenderer(Renderer):
         self._proj = mapnik.Projection(coords._MAPNIK_PROJECTION)
         orig_envelope = self._project_envelope(self.rc.bounding_box)
 
-        # Extend the bounding box to take into account the lost outter
-        # margin
-        off_x  = orig_envelope.minx - (GRAYED_MARGIN_MM * scale_denom) / 1000
-        off_y  = orig_envelope.miny - (GRAYED_MARGIN_MM * scale_denom) / 1000
-        width  = orig_envelope.width() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
-        height = orig_envelope.height() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
 
-        # Calculate the total width and height of paper needed to
-        # render the geographical area at the current scale.
-        total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
-        total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
-        self.grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
-        overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
+        while True:
+            # Extend the bounding box to take into account the lost outer
+            # margin
+            off_x  = orig_envelope.minx - GRAYED_MARGIN_MM * 9.6
+            off_y  = orig_envelope.miny - GRAYED_MARGIN_MM * 9.6
+            width  = orig_envelope.width() + (2 * GRAYED_MARGIN_MM) * 9.6
+            height = orig_envelope.height() + (2 * GRAYED_MARGIN_MM) * 9.6
 
-        # Calculate the number of pages needed in both directions
-        if total_width_pt < self._usable_area_width_pt:
-            nb_pages_width = 1
-        else:
-            nb_pages_width = \
-                (float(total_width_pt - self._usable_area_width_pt) / \
-                     (self._usable_area_width_pt - overlap_margin_pt)) + 1
+            # Calculate the total width and height of paper needed to
+            # render the geographical area at the current scale.
+            total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
+            total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
+            self.grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
+            overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
 
-        if total_height_pt < self._usable_area_height_pt:
-            nb_pages_height = 1
-        else:
-            nb_pages_height = \
-                (float(total_height_pt - self._usable_area_height_pt) / \
-                     (self._usable_area_height_pt - overlap_margin_pt)) + 1
+            # Calculate the number of pages needed in both directions
+            if total_width_pt < self._usable_area_width_pt:
+                nb_pages_width = 1
+            else:
+                nb_pages_width = \
+                    (float(total_width_pt - self._usable_area_width_pt) / \
+                         (self._usable_area_width_pt - overlap_margin_pt)) + 1
 
-        # Round up the number of pages needed so that we have integer
-        # number of pages
-        self.nb_pages_width = int(math.ceil(nb_pages_width))
-        self.nb_pages_height = int(math.ceil(nb_pages_height))
+            if total_height_pt < self._usable_area_height_pt:
+                nb_pages_height = 1
+            else:
+                nb_pages_height = \
+                    (float(total_height_pt - self._usable_area_height_pt) / \
+                         (self._usable_area_height_pt - overlap_margin_pt)) + 1
+
+            # Round up the number of pages needed so that we have integer
+            # number of pages
+            self.nb_pages_width = int(math.ceil(nb_pages_width))
+            self.nb_pages_height = int(math.ceil(nb_pages_height))
+
+            total_pages = self.nb_pages_width * self.nb_pages_height
+
+            if Renderer.MAX_MULTIPAGE_MAPPAGES and \
+               total_pages < Renderer.MAX_MULTIPAGE_MAPPAGES:
+                break
+
+            new_scale_denom = scale_denom * 1.41
+
+            if new_scale_denom > Renderer.DEFAULT_SCALE:
+                break
+
+            scale_denom = new_scale_denom
+
 
         # Calculate the entire paper area available
         total_width_pt_after_extension = self._usable_area_width_pt + \

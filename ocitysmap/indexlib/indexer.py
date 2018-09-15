@@ -84,7 +84,7 @@ def resolveIcon(icon):
 class PoiIndex:
 
     def __init__(self, filename):
-        f = codecs.open(filename, "r", "utf-8")
+        f = codecs.open(filename, "r", "utf-8-sig")
         self._read_json(f)
         f.close()
 
@@ -106,6 +106,7 @@ class PoiIndex:
         try:
             j = json.load(f)
         except ValueError as e:
+            l.warning('invalid json in POI file: %s' % e)
             return False
 
         title = j['title']        

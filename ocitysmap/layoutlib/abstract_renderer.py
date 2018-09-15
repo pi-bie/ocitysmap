@@ -65,12 +65,13 @@ class Renderer:
 
     GRID_LEGEND_MARGIN_RATIO = .02
 
-    # The DEFAULT_KM_IN_MM represents the minimum acceptable mapnik scale
+    # The DEFAULT SCALE values represents the minimum acceptable mapnik scale
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
     # see entities.xml.inc file from osm style sheet
-    DEFAULT_SCALE = 70000
+    DEFAULT_SCALE           = 70000
     DEFAULT_MULTIPAGE_SCALE = 12000
+    MAX_MULTIPAGE_MAPPAGES  = 50
 
     def __init__(self, db, rc, tmpdir, dpi):
         """
@@ -216,12 +217,12 @@ class Renderer:
 
             # At the top clear the right corner of the horizontal label
             if (i < map_grid.horiz_count-1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, grid_legend_margin_dots/2.0)
 
             # At the bottom clear the left corner of the horizontal label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, map_area_height_dots -
                                              grid_legend_margin_dots/2.0)
 
@@ -237,12 +238,12 @@ class Renderer:
 
             # On the left clear the upper corner of the vertical label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          grid_legend_margin_dots/2.0, y)
 
             # On the right clear the bottom corner of the vertical label
             if (i < map_grid.vert_count -1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 
