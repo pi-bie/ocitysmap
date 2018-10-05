@@ -28,12 +28,13 @@ import os
 from string import Template
 import gpxpy
 import gpxpy.gpx
+import codecs
 
 class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir):
         super().__init__()
 
-        gpx_fp = open(gpx_file, 'r')
+        gpx_fp = codecs.open(gpx_file, 'r', 'utf-8-sig')
         gpx = gpxpy.parse(gpx_fp)
 
         if gpx.copyright_year or gpx.copyright_author or gpx.copyright_license:

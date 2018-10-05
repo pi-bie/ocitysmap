@@ -31,6 +31,7 @@ import urllib3
 import tempfile
 import logging
 from string import Template
+import codecs
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -96,7 +97,7 @@ class UmapStylesheet(Stylesheet):
 
         http = urllib3.PoolManager()
 
-        fp = open(umap_file, 'r')
+        fp = codecs.open(umap_file, 'r', 'utf-8-sig')
 
         umap = json.load(fp)
 
