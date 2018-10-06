@@ -43,7 +43,8 @@ class Stylesheet:
         self.description = '' # str
         self.annotation  = '' # str
         self.url         = '' # str
-
+        self.group       = '' # str
+        
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
         self.grid_line_width = 1
@@ -79,6 +80,7 @@ class Stylesheet:
         assign_if_present('description')
         assign_if_present('annotation')
         assign_if_present('url')
+        assign_if_present('group')
 
         assign_if_present('grid_line_color')
         assign_if_present('grid_line_alpha', float)
