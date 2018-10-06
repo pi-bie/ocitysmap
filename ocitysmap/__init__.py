@@ -464,6 +464,8 @@ SELECT ST_AsText(ST_LongestLine(
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
                                   "constructor. Backtrace follows...")
+                except Exception as e:
+                    LOG.warning("OS Error while rendering %s: %s" % (output_format, e))
         finally:
             self._cleanup_tempdir(tmpdir)
 
