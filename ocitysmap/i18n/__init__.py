@@ -100,6 +100,7 @@ class i18n_generic(i18n):
         return a == b
 
 from .ar    import i18n_ar_generic
+from .al    import i18n_al_generic
 from .ast   import i18n_ast_generic
 from .be    import i18n_be_generic
 from .ca    import i18n_ca_generic
@@ -202,6 +203,7 @@ language_class_map = {
     'sk_SK.UTF-8': i18n_generic,
     'be_BY.UTF-8': i18n_be_generic,
     'fa_IR.UTF-8': i18n_fa_generic,
+    'sq_AL.UTF-8': i18n_al_generic,
 }
 
 def install_translation(locale_name, locale_path):
