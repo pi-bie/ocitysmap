@@ -16,7 +16,6 @@ class i18n_al_generic(i18n):
                                                                  | re.UNICODE)
 
     def __init__(self, language, locale_path):
-        LOG.info("i18n_al_generic %s:%s" % (language, locale_path))
         self.language = str(language)
         _install_language(language, locale_path)
 
@@ -32,14 +31,12 @@ class i18n_al_generic(i18n):
         # Make sure name actually contains something,
         # the PREFIX_REGEXP.match fails on zero-length strings
         #
-        LOG.info("name before %s" % name)
         if len(name) == 0:
             return name
 
         name = name.strip()
         name = self.SPACE_REDUCE.sub(" ", name)
         name = self.PREFIX_REGEXP.sub(r"\g<name> (\g<prefix>)", name)
-        LOG.info("name after %s" % name)
         return name
 
     def first_letter_equal(self, a, b):
