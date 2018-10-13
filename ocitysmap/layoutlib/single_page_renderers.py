@@ -198,8 +198,9 @@ class SinglePageRenderer(Renderer):
             self._overlay_effects.append('poi_markers')
 
         # Prepare the grid
+        self.grid = self._create_grid(self._map_canvas, dpi)
         if index_position:
-            self.grid = self._create_grid(self._map_canvas, dpi)
+            self._apply_grid(self.grid, self._map_canvas)
 
         # Update the street_index to reflect the grid's actual position
         if self.grid and self.street_index:
@@ -555,7 +556,7 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
         # Place the vertical and horizontal square labels
-        if self.grid:
+        if self.grid and self._index_area:
             self._draw_labels(ctx, self.grid,
                               map_coords_dots[2],
                               map_coords_dots[3],

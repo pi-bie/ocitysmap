@@ -303,8 +303,10 @@ class Renderer:
 
         Return a new Grid object.
         """
-        # Prepare the grid SHP
-        map_grid = Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale() * dpi / 72, self.rc.i18n.isrtl())
+
+        return Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale() * dpi / 72, self.rc.i18n.isrtl())
+
+    def _apply_grid(self, map_grid, canvas):
         grid_shape = map_grid.generate_shape_file(
             os.path.join(self.tmpdir, 'grid.shp'))
 
@@ -313,8 +315,6 @@ class Renderer:
                               self.rc.stylesheet.grid_line_color,
                               self.rc.stylesheet.grid_line_alpha,
                               self.rc.stylesheet.grid_line_width)
-
-        return map_grid
 
     def render_plugin(self, plugin_name, ctx):
         my_plugin = self.plugin_source.load_plugin(plugin_name)
