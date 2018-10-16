@@ -29,6 +29,17 @@ import configparser
 
 LOG = logging.getLogger('ocitysmap')
 
+def parse_bbox(bbox_str):
+    str_parts = bbox_str.split(',')
+    lat1 = float(str_parts[0])
+    lon1 = float(str_parts[1])
+    lat2 = float(str_parts[2])
+    lon2 = float(str_parts[3])
+    return {'min_lat': min(lat1, lat2),
+            'min_lon': min(lon1, lon2),
+            'max_lat': max(lat1, lat2),
+            'max_lon': max(lon1, lon2)}
+
 class Stylesheet:
     """
     A Stylesheet object defines how the map features will be rendered. It
@@ -44,7 +55,7 @@ class Stylesheet:
         self.annotation  = '' # str
         self.url         = '' # str
         self.group       = '' # str
-        
+
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
         self.grid_line_width = 1
@@ -55,6 +66,9 @@ class Stylesheet:
         # shade color for town contour in multi-pages
         self.shade_color_2 = 'white'
         self.shade_alpha_2 = 0.4
+
+        # optionally limit style choice to a specific area
+        self.bbox        = None
 
     @staticmethod
     def create_from_config_section(parser, section_name):
@@ -91,6 +105,9 @@ class Stylesheet:
 
         assign_if_present('shade_color_2')
         assign_if_present('shade_alpha_2', float)
+
+        assign_if_present('bbox', parse_bbox)
+
         return s
 
     @staticmethod
