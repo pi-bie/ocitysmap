@@ -6,7 +6,8 @@
       <LineSymbolizer stroke-width="6" stroke="#ffff00" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
     </Rule>
     <Rule>
-      <LineSymbolizer stroke-width="2" stroke="#ff0000" stroke-linejoin="round" stroke-linecap="round" />
+      <LineSymbolizer stroke-width="2" stroke="#ff0000" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+      <MarkersSymbolizer base="svg" file="oneway.svg" max-error="0.5" placement="line" spacing="32"/>
     </Rule>
   </Style>
   
