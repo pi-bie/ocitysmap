@@ -1,12 +1,23 @@
+# ignore temporary editor 
 *~
-.*.swp
+*.swp
+\#*#
+.#*
+
+# ignore compiled gettext language files
 *.mo
+
+# ignore local configuration
 /ocitysmap.conf
-/support/shoreline-update.sh
-/stylesheet/maposmatic-printable/inc/datasource-settings.xml.inc
-/stylesheet/maposmatic-printable/inc/fontset-settings.xml.inc
-/stylesheet/maposmatic-printable/inc/settings.xml.inc
 /ocitysmap.overlays
 /ocitysmap.styledefs
 /ocitysmap.styles
+
+# ignore local mapnik style database settings
+/stylesheet/maposmatic-printable/inc/datasource-settings.xml.inc
+/stylesheet/maposmatic-printable/inc/fontset-settings.xml.inc
+/stylesheet/maposmatic-printable/inc/settings.xml.inc
+
+# TODO: why was this set to be ignored in the first place?
+/support/shoreline-update.sh
 
