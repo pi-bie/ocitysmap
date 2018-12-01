@@ -86,6 +86,11 @@ class MultiPageRenderer(Renderer):
 
         scale_denom = Renderer.DEFAULT_MULTIPAGE_SCALE
 
+        # offset to the first map page number
+        # there are currently three header pages
+        # making the first actual map detail page number 4
+        self._first_map_page_number = 4
+
         # the mapnik scale depends on the latitude. However we are
         # always using Mapnik conversion functions (lat,lon <->
         # mercator_meters) so we don't need to take into account
@@ -707,10 +712,14 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.translate(-arrow_edge/2, -arrow_edge*0.45)
+
+        dest_name = "dest='mypage%d'" % number
         try: # tag_begin() does not exist prior to pycairo 1.18
-            ctx.tag_begin(cairo.TAG_LINK, "page=%d" % number)
+            LOG.debug("dest_name: '%s'" % dest_name)
+            ctx.tag_begin(cairo.TAG_LINK, dest_name)
         except Exception:
             pass
+
         ctx.line_to(0, 0)
         ctx.line_to(0, arrow_edge)
         ctx.line_to(arrow_edge, arrow_edge)
@@ -728,7 +737,7 @@ class MultiPageRenderer(Renderer):
         if reverse_text:
             ctx.rotate(math.pi)
         try: # tag_begin() does not exist prior to pycairo 1.18
-            ctx.tag_begin(cairo.TAG_LINK, "page=%d" % number)
+            ctx.tag_begin(cairo.TAG_LINK, dest_name)
         except Exception:
             pass
         draw_utils.draw_text_adjusted(ctx, str(number), 0, 0, arrow_edge,
@@ -743,7 +752,6 @@ class MultiPageRenderer(Renderer):
 
     def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,
                                  max_digit_number):
-        nb_previous_pages = 4
         current_line, current_col = None, None
         for line_nb in range(self.nb_pages_height):
             if map_number in self.page_disposition[line_nb]:
@@ -763,7 +771,7 @@ class MultiPageRenderer(Renderer):
                 ctx.translate(self._usable_area_width_pt/2,
                     commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 self._draw_arrow(ctx, cairo_surface,
-                              north_arrow + nb_previous_pages, max_digit_number)
+                              north_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
 
@@ -777,7 +785,7 @@ class MultiPageRenderer(Renderer):
                       - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
-                      south_arrow + nb_previous_pages, max_digit_number,
+                      south_arrow + self._first_map_page_number, max_digit_number,
                       reverse_text=True)
                 ctx.restore()
                 break
@@ -792,7 +800,7 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(-math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                               west_arrow + nb_previous_pages, max_digit_number)
+                               west_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
 
@@ -807,7 +815,7 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                               east_arrow + nb_previous_pages, max_digit_number)
+                               east_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
 
@@ -829,10 +837,19 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            LOG.info('Map page %d of %d' % (map_number, len(self.pages)))
+            LOG.info('Map page %d of %d' % (map_number + 1, len(self.pages)))
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
+
+            dest_tag = "name='mypage%d'" % (map_number + self._first_map_page_number)
+            LOG.debug('anchor: "%s"' % dest_tag)
+            try: # tag_begin() and tag_end() do not exist prior to pycairo 1.18
+                ctx.tag_begin(cairo.TAG_DEST, dest_tag)
+                ctx.tag_end(cairo.TAG_DEST)
+            except Exception:
+                pass
+
             mapnik.render(rendered_map, ctx)
 
             for overlay_canvas in overlay_canvases:
