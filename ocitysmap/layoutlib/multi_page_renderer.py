@@ -707,6 +707,10 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.translate(-arrow_edge/2, -arrow_edge*0.45)
+        try: # tag_begin() does not exist prior to pycairo 1.18
+            ctx.tag_begin(cairo.TAG_LINK, "page=%d" % number)
+        except Exception:
+            pass
         ctx.line_to(0, 0)
         ctx.line_to(0, arrow_edge)
         ctx.line_to(arrow_edge, arrow_edge)
@@ -714,15 +718,27 @@ class MultiPageRenderer(Renderer):
         ctx.line_to(arrow_edge/2, -arrow_edge*.25)
         ctx.close_path()
         ctx.fill()
+        try: # tag_end() does not exist prior to pycairo 1.18
+            ctx.tag_end(cairo.TAG_LINK)
+        except Exception:
+            pass
         ctx.restore()
 
         ctx.save()
         if reverse_text:
             ctx.rotate(math.pi)
+        try: # tag_begin() does not exist prior to pycairo 1.18
+            ctx.tag_begin(cairo.TAG_LINK, "page=%d" % number)
+        except Exception:
+            pass
         draw_utils.draw_text_adjusted(ctx, str(number), 0, 0, arrow_edge,
                         arrow_edge, max_char_number=max_digit_number,
                         text_color=(1, 1, 1, 1), width_adjust=0.85,
                         height_adjust=0.9)
+        try: # tag_end() does not exist prior to pycairo 1.18
+            ctx.tag_end(cairo.TAG_LINK)
+        except Exception:
+            pass
         ctx.restore()
 
     def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,
