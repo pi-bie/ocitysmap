@@ -975,13 +975,13 @@ class MultiPageRenderer(Renderer):
             ctx.set_source_rgba(0,0,0,0.1)
             try: # tag_begin() only available starting with PyCairo 1.18.0
                 ctx.tag_begin(cairo.TAG_LINK, "dest='mypage%d'" % (idx + self._first_map_page_number))
-            except Exteption:
+            except Exception:
                 pass
             ctx.rectangle(0,0,w,h)
             ctx.stroke()
             try: # tag_end() only available starting with PyCairo 1.18.0
                 ctx.tag_end(cairo.TAG_LINK)
-            except Exteption:
+            except Exception:
                 pass
             ctx.restore()
 
