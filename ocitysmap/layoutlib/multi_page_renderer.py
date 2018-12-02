@@ -928,8 +928,7 @@ class MultiPageRenderer(Renderer):
             valid_sizes.append((sz[0], sz[1], sz[2], True, True, sz[0] == 'Din A4'))
         return valid_sizes
 
-    @classmethod
-    def _draw_overview_labels(cls, ctx, map_canvas, overview_grid,
+    def _draw_overview_labels(self, ctx, map_canvas, overview_grid,
                      area_width_dots, area_height_dots):
         """
         Draw the page numbers for the overview grid.
@@ -965,9 +964,26 @@ class MultiPageRenderer(Renderer):
                                                          )/coord_delta_x
                 h = area_height_dots*(p_top_right.y - p_bottom_right.y
                                                          )/coord_delta_y
-            draw_utils.draw_text_adjusted(ctx, str(idx+4), x, y, w, h,
-                 max_char_number=len(str(len(overview_grid._pages_bbox)+3)),
-                 text_color=(0, 0, 0, 0.6))
+
+            draw_utils.draw_text_adjusted(ctx, str(idx + self._first_map_page_number),
+                                          x, y, w, h,
+                                          max_char_number=len(str(len(overview_grid._pages_bbox)+3)),
+                                          text_color=(0, 0, 0, 0.6))
+
+            ctx.save()
+            ctx.translate(x-w/2, y-h/2)
+            ctx.set_source_rgba(0,0,0,0.1)
+            try: # tag_begin() only available starting with PyCairo 1.18.0
+                ctx.tag_begin(cairo.TAG_LINK, "dest='mypage%d'" % (idx + self._first_map_page_number))
+            except Exteption:
+                pass
+            ctx.rectangle(0,0,w,h)
+            ctx.stroke()
+            try: # tag_end() only available starting with PyCairo 1.18.0
+                ctx.tag_end(cairo.TAG_LINK)
+            except Exteption:
+                pass
+            ctx.restore()
 
         ctx.restore()
 
