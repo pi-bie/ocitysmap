@@ -29,6 +29,9 @@ import draw_utils
 import ocitysmap.layoutlib.commons as UTILS
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 
+import logging
+LOG = logging.getLogger('ocitysmap')
+
 # FIXME: refactoring
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
