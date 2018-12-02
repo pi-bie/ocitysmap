@@ -713,12 +713,8 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(0, 0, 0)
         ctx.translate(-arrow_edge/2, -arrow_edge*0.45)
 
-        dest_name = "dest='mypage%d'" % number
-        try: # tag_begin() does not exist prior to pycairo 1.18
-            LOG.debug("dest_name: '%s'" % dest_name)
-            ctx.tag_begin(cairo.TAG_LINK, dest_name)
-        except Exception:
-            pass
+        dest_name = "mypage%d" % number
+        draw_utils.begin_internal_link(ctx, dest_name)
 
         ctx.line_to(0, 0)
         ctx.line_to(0, arrow_edge)
@@ -727,27 +723,18 @@ class MultiPageRenderer(Renderer):
         ctx.line_to(arrow_edge/2, -arrow_edge*.25)
         ctx.close_path()
         ctx.fill()
-        try: # tag_end() does not exist prior to pycairo 1.18
-            ctx.tag_end(cairo.TAG_LINK)
-        except Exception:
-            pass
+        draw_utils.end_link(ctx)
         ctx.restore()
 
         ctx.save()
         if reverse_text:
             ctx.rotate(math.pi)
-        try: # tag_begin() does not exist prior to pycairo 1.18
-            ctx.tag_begin(cairo.TAG_LINK, dest_name)
-        except Exception:
-            pass
+        draw_utils.begin_internal_link(ctx, dest_name)
         draw_utils.draw_text_adjusted(ctx, str(number), 0, 0, arrow_edge,
                         arrow_edge, max_char_number=max_digit_number,
                         text_color=(1, 1, 1, 1), width_adjust=0.85,
                         height_adjust=0.9)
-        try: # tag_end() does not exist prior to pycairo 1.18
-            ctx.tag_end(cairo.TAG_LINK)
-        except Exception:
-            pass
+        draw_utils.end_link(ctx)
         ctx.restore()
 
     def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,
@@ -848,6 +835,10 @@ class MultiPageRenderer(Renderer):
                               0.5 * step_horiz))
         ctx.set_source_rgba(0, 0, 0, 1)
 
+        # TODO labels can overlap with next page arrows,
+        # if they do -> hide them? or move them out of the
+        # grid center a bit?
+
         for i, label in enumerate(map_grid.horizontal_labels):
             x = i * step_horiz
 
@@ -909,13 +900,8 @@ class MultiPageRenderer(Renderer):
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
 
-            dest_tag = "name='mypage%d'" % (map_number + self._first_map_page_number)
-            LOG.debug('anchor: "%s"' % dest_tag)
-            try: # tag_begin() and tag_end() do not exist prior to pycairo 1.18
-                ctx.tag_begin(cairo.TAG_DEST, dest_tag)
-                ctx.tag_end(cairo.TAG_DEST)
-            except Exception:
-                pass
+            dest_tag = "mypage%d" % (map_number + self._first_map_page_number)
+            draw_utils.anchor(ctx, dest_tag)
 
             mapnik.render(rendered_map, ctx)
 
@@ -1040,16 +1026,10 @@ class MultiPageRenderer(Renderer):
             ctx.save()
             ctx.translate(x-w/2, y-h/2)
             ctx.set_source_rgba(0,0,0,0.1)
-            try: # tag_begin() only available starting with PyCairo 1.18.0
-                ctx.tag_begin(cairo.TAG_LINK, "dest='mypage%d'" % (idx + self._first_map_page_number))
-            except Exception:
-                pass
+            draw_utils.begin_internal_link(ctx, "mypage%d" % (idx + self._first_map_page_number))
             ctx.rectangle(0,0,w,h)
             ctx.stroke()
-            try: # tag_end() only available starting with PyCairo 1.18.0
-                ctx.tag_end(cairo.TAG_LINK)
-            except Exception:
-                pass
+            draw_utils.end_link(ctx)
             ctx.restore()
 
         ctx.restore()

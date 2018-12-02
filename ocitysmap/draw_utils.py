@@ -278,3 +278,24 @@ def render_page_number(ctx, page_number,
     draw_simpletext_center(ctx, str(page_number), 0, 0)
     ctx.restore()
 
+
+
+def begin_internal_link(ctx, target):
+    try: # tag_begin() only available starting with PyCairo 1.18.0
+        ctx.tag_begin(cairo.TAG_LINK, "dest='%s'" % target)
+    except Exception:
+        pass
+
+def end_link(ctx):
+    try: # tag_end() only available starting with PyCairo 1.18.0
+        ctx.tag_end(cairo.TAG_LINK)
+    except Exception:
+        pass
+
+def anchor(ctx, name):
+    try: # tag_begin() only available starting with PyCairo 1.18.0
+        ctx.tag_begin(cairo.TAG_DEST, "name='%s'" % name)
+        ctx.tag_end(cairo.TAG_DEST)
+    except Exception:
+        pass
+
