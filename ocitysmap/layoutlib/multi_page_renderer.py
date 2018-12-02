@@ -819,6 +819,73 @@ class MultiPageRenderer(Renderer):
                 ctx.restore()
                 break
 
+    @staticmethod
+    def _draw_labels(ctx, map_grid,
+                     map_area_width_dots, map_area_height_dots,
+                     grid_legend_margin_dots):
+        """
+        Draw the Grid labels at current position.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           map_grid (Grid): the grid objects whose labels we want to draw.
+           map_area_width_dots/map_area_height_dots (numbers): size of the
+              map (cairo units).
+           grid_legend_margin_dots (number): margin between border of
+              map and grid labels (cairo units).
+        """
+        ctx.save()
+
+        ctx.set_source_rgba(0, 0, 0, 0.7);
+
+        step_horiz = map_area_width_dots / map_grid.horiz_count
+        last_horiz_portion = math.modf(map_grid.horiz_count)[0]
+
+        step_vert = map_area_height_dots / map_grid.vert_count
+        last_vert_portion = math.modf(map_grid.vert_count)[0]
+
+        ctx.set_font_size(min(0.75 * grid_legend_margin_dots,
+                              0.5 * step_horiz))
+        ctx.set_source_rgba(0, 0, 0, 1)
+
+        for i, label in enumerate(map_grid.horizontal_labels):
+            x = i * step_horiz
+
+            if i < len(map_grid.horizontal_labels) - 1:
+                x += step_horiz/2.0
+            elif last_horiz_portion >= 0.3:
+                x += step_horiz * last_horiz_portion/2.0
+            else:
+                continue
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            x, - grid_legend_margin_dots/1.0)
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            x, map_area_height_dots +
+                                            grid_legend_margin_dots/1.0)
+
+        for i, label in enumerate(map_grid.vertical_labels):
+            y = i * step_vert
+
+            if i < len(map_grid.vertical_labels) - 1:
+                y += step_vert/2.0
+            elif last_vert_portion >= 0.3:
+                y += step_vert * last_vert_portion/2.0
+            else:
+                continue
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            -grid_legend_margin_dots, y)
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            map_area_width_dots +
+                                            grid_legend_margin_dots, y)
+
+        ctx.restore()
+
+
+
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
 
