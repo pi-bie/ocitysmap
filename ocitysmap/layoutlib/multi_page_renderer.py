@@ -362,7 +362,7 @@ class MultiPageRenderer(Renderer):
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             index = StreetIndex(self.db,
                                 inside_contour_wkt,
-                                self.rc.i18n, page_number=(i + 4))
+                                self.rc.i18n, page_number=(i + self._first_map_page_number))
 
             index.apply_grid(map_grid)
             indexes.append(index)
@@ -650,6 +650,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
+        cairo_surface.set_page_label('Front page')
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
@@ -672,6 +673,7 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background=False)
+        cairo_surface.set_page_label('Blank')
         cairo_surface.show_page()
         ctx.restore()
 
@@ -704,6 +706,8 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background = True)
+
+        cairo_surface.set_page_label('Overview')
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -935,14 +939,15 @@ class MultiPageRenderer(Renderer):
 
 
             # Render the page number
-            draw_utils.render_page_number(ctx, map_number+4,
+            draw_utils.render_page_number(ctx, map_number + self._first_map_page_number,
                                           self._usable_area_width_pt,
                                           self._usable_area_height_pt,
                                           self.grayed_margin_pt,
                                           transparent_background = True)
             self._render_neighbour_arrows(ctx, cairo_surface, map_number,
-                                          len(str(len(self.pages)+4)))
+                                          len(str(len(self.pages) + self._first_map_page_number)))
 
+            cairo_surface.set_page_label('Map page %d' % (map_number + self._first_map_page_number))
             cairo_surface.show_page()
         ctx.restore()
 
