@@ -188,9 +188,9 @@ class StreetIndex:
         for category in self._categories:
             for item in category.items:
                 item.update_location_str(grid)
-        self.group_identical_grid_locations()
+        self._group_identical_grid_locations()
 
-    def group_identical_grid_locations(self):
+    def _group_identical_grid_locations(self):
         """
         Group locations whith the same name and the same position on the grid.
 
