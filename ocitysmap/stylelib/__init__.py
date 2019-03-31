@@ -53,6 +53,7 @@ class Stylesheet:
         self.path        = None # str
         self.description = '' # str
         self.annotation  = '' # str
+        self.datasource  = '' # str
         self.url         = '' # str
         self.group       = '' # str
 
@@ -93,6 +94,7 @@ class Stylesheet:
                 'Could not find stylesheet file for stylesheet %s!' % s.name)
         assign_if_present('description')
         assign_if_present('annotation')
+        assign_if_present('datasource')
         assign_if_present('url')
         assign_if_present('group')
 

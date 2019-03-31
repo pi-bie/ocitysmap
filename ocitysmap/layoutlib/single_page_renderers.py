@@ -381,6 +381,16 @@ class SinglePageRenderer(Renderer):
                 notice+= _(u'Map styles:')
                 notice+= ' ' + '; '.join(annotations) + '\n'
 
+            datasources = set()
+            if self.rc.stylesheet.datasource != '':
+                datasources.add(self.rc.stylesheet.datasource)
+            for overlay in self._overlays:
+                if overlay.datasource != '':
+                    datasources.add(overlay.datasource)
+            if len(datasources) > 0:
+                notice+= _(u'Additional data sources:')
+                notice+= ' ' + '; '.join(list(datasources)) + '\n'
+
             notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
             notice+= ' '
             notice+= _(u'The map may be incomplete or inaccurate.')
