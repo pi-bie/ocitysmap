@@ -177,7 +177,7 @@ class OCitySMap:
         self._parser.read('/home/maposmatic/.ocitysmap.conf', encoding='utf-8')
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
-        self.__db = None
+        self.__dbs = {}
 
         # Read stylesheet configuration
         self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
@@ -190,12 +190,16 @@ class OCitySMap:
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
 
     @property
-    def _db(self):
-        if self.__db:
-            return self.__db
+    def _db(self, name='default'):
+        if name in self.__dbs:
+            return self.__dbs[name]
 
         # Database connection
-        datasource = dict(self._parser.items('datasource'))
+        if name == 'default':
+            datasource = dict(self._parser.items('datasource'))
+        else:
+            datasource = dict(self._parser.items('datasource_' + name))
+
         # The port is not a mandatory configuration option, so make
         # sure we define a default value.
         if not 'port' in datasource:
@@ -223,8 +227,8 @@ class OCitySMap:
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(db, timeout)
 
-        self.__db = db
-        return self.__db
+        self.__dbs[name] = db
+        return db
 
     def _verify_db(self, db):
         """Make sure the PostGIS DB is compatible with us."""
