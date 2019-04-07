@@ -49,7 +49,7 @@ from natsort import natsort_keygen, ns
 import time
 
 
-l = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('ocitysmap')
 
 
 iconReplacements = {
@@ -106,7 +106,7 @@ class PoiIndex:
         try:
             j = json.load(f)
         except ValueError as e:
-            l.warning('invalid json in POI file: %s' % e)
+            LOG.warning('invalid json in POI file: %s' % e)
             return False
 
         title = j['title']        
@@ -214,11 +214,11 @@ class StreetIndex:
         try:
             fd = open(output_filename, 'w', encoding='utf-8')
         except Exception as ex:
-            l.warning('error while opening destination file %s: %s'
+            LOG.warning('error while opening destination file %s: %s'
                       % (output_filename, ex))
             return
 
-        l.debug("Creating CSV file %s..." % output_filename)
+        LOG.debug("Creating CSV file %s..." % output_filename)
         writer = csv.writer(fd)
 
         # Try to treat indifferently unicode and str in CSV rows
@@ -273,7 +273,7 @@ class StreetIndex:
                  _(u"Public building")),
                 (_(u"Public buildings"), "police", _(u"Police"))]
         except NameError:
-            l.exception("i18n has to be initialized beforehand")
+            LOG.exception("i18n has to be initialized beforehand")
             return []
 
         return selected_amenities
@@ -304,7 +304,7 @@ class StreetIndex:
         try:
             locale.setlocale(locale.LC_COLLATE, self._i18n.language_code())
         except Exception:
-            l.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
+            LOG.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
 
         try:
             sorted_sl = sorted([(self._i18n.user_readable_street(name),
@@ -336,7 +336,7 @@ class StreetIndex:
                 s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
                                                linestring[11:-1].split(','))
             except (ValueError, TypeError):
-                l.exception("Error parsing %s for %s" % (repr(linestring),
+                LOG.exception("Error parsing %s for %s" % (repr(linestring),
                                                          repr(street_name)))
                 raise
             endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
@@ -362,7 +362,7 @@ class StreetIndex:
         """
 
         cursor = db.cursor()
-        l.debug("Getting streets...")
+        LOG.debug("Getting streets...")
 
         # PostGIS >= 1.5.0 for this to work:
         query = """
@@ -383,7 +383,7 @@ from
 """ % dict(wkb_limits = ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
                          % (polygon_wkt,)))
 
-        # l.debug("Street query (nogrid): %s" % query)
+        # LOG.debug("Street query (nogrid): %s" % query)
 
         try:
             cursor.execute(query % {'way':'way'})
@@ -396,7 +396,7 @@ from
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
         sl = cursor.fetchall()
 
-        l.debug("Got %d streets." % len(sl))
+        LOG.debug("Got %d streets." % len(sl))
 
         return self._convert_street_index(sl)
 
@@ -418,7 +418,7 @@ from
 
         result = []
         for catname, db_amenity, label in self._get_selected_amenities():
-            l.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
+            LOG.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
 
             # Get the current IndexCategory object, or create one if
             # different than previous
@@ -451,7 +451,7 @@ order by amenity_name""" \
                    'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4326), 3857)"
                                   % (polygon_wkt,))}
 
-            # l.debug("Amenity query for for %s/%s (nogrid): %s" \
+            # LOG.debug("Amenity query for for %s/%s (nogrid): %s" \
             #            % (catname, db_amenity, query))
             try:
                 cursor.execute(query % {'way':'way'})
@@ -469,7 +469,7 @@ order by amenity_name""" \
                     s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
                                                    linestring[11:-1].split(','))
                 except (ValueError, TypeError):
-                    l.exception("Error parsing %s for %s/%s/%s"
+                    LOG.exception("Error parsing %s for %s/%s/%s"
                                 % (repr(linestring), catname, db_amenity,
                                    repr(amenity_name)))
                     continue
@@ -481,7 +481,7 @@ order by amenity_name""" \
                                                                       endpoint2,
                                                                       self._page_number))
 
-            l.debug("Got %d amenities for %s/%s."
+            LOG.debug("Got %d amenities for %s/%s."
                     % (len(current_category.items), catname, db_amenity))
 
         return [category for category in result if category.items]
@@ -525,7 +525,7 @@ order by village_name""" \
                               % (polygon_wkt,))}
 
 
-        # l.debug("Villages query for %s (nogrid): %s" \
+        # LOG.debug("Villages query for %s (nogrid): %s" \
         #             % ('Villages', query))
 
         try:
@@ -544,7 +544,7 @@ order by village_name""" \
                 s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
                                                linestring[11:-1].split(','))
             except (ValueError, TypeError):
-                l.exception("Error parsing %s for %s/%s"
+                LOG.exception("Error parsing %s for %s/%s"
                             % (repr(linestring), 'Villages',
                                repr(village_name)))
                 continue
@@ -556,7 +556,7 @@ order by village_name""" \
                                                                   endpoint2,
                                                                   self._page_number))
 
-        l.debug("Got %d villages for %s."
+        LOG.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
 
         return [category for category in result if category.items]
