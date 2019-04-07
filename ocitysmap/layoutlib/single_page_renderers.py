@@ -556,9 +556,10 @@ class SinglePageRenderer(Renderer):
         LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
         LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
 
+        # exclude layers based on configuration setting "exclude_layers"
         for layer in rendered_map.layers:
             if layer.name in self.rc.stylesheet.exclude_layers:
-                LOG.info("Excluding layer: %s" % layer.name)
+                LOG.debug("Excluding layer: %s" % layer.name)
                 layer.status = False
 
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
