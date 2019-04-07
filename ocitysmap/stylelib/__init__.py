@@ -57,6 +57,8 @@ class Stylesheet:
         self.url         = '' # str
         self.group       = '' # str
 
+        self.exclude_layers = []
+
         self.grid_line_color = 'black'
         self.grid_line_alpha = 0.5
         self.grid_line_width = 1
@@ -87,6 +89,10 @@ class Stylesheet:
             if parser.has_option(section_name, key):
                 setattr(s, key, cast_fn(parser.get(section_name, key)))
 
+        def assign_list_if_present(key):
+            if parser.has_option(section_name, key):
+                setattr(s, key, parser.get(section_name, key).split(','))
+
         s.name = parser.get(section_name, 'name')
         s.path = parser.get(section_name, 'path')
         if not s.path.startswith('internal:') and not os.path.exists(s.path):
@@ -109,6 +115,8 @@ class Stylesheet:
         assign_if_present('shade_alpha_2', float)
 
         assign_if_present('bbox', parse_bbox)
+
+        assign_list_if_present('exclude_layers')
 
         return s
 
