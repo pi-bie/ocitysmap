@@ -122,9 +122,10 @@ class PoiIndex:
                                              ocitysmap.coords.Point(float(node['lat']),
                                                                     float(node['lon'])),
                                              icon = node['icon']));
-                    self._categories.append(c)
                 except:
                     pass
+
+            self._categories.append(c)
         return True        
 
     def write_to_csv(self, title, output_filename):
