@@ -102,9 +102,6 @@ class MultiPageRenderer(Renderer):
         GRAYED_MARGIN_MM  = 10
         OVERLAP_MARGIN_MM = 20
 
-        # Debug: show original bounding box as JS code
-        # print self.rc.bounding_box.as_javascript("original", "#00ff00")
-
         # Convert the original Bounding box into Mercator meters
         self._proj = mapnik.Projection(coords._MAPNIK_PROJECTION)
         orig_envelope = self._project_envelope(self.rc.bounding_box)
@@ -185,9 +182,6 @@ class MultiPageRenderer(Renderer):
         envelope = mapnik.Box2d(off_x, off_y, off_x + width, off_y + height)
         self._geo_bbox = self._inverse_envelope(envelope)
 
-        # Debug: show transformed bounding box as JS code
-        # print self._geo_bbox.as_javascript("extended", "#0f0f0f")
-
         # Convert the usable area on each sheet of paper into the
         # amount of Mercator meters we can render in this area.
         usable_area_merc_m_width  = commons.convert_pt_to_mm(self._usable_area_width_pt) * scale_denom / 1000
@@ -224,9 +218,6 @@ class MultiPageRenderer(Renderer):
                                    inner_bb))
                 else:
                     self.page_disposition[col].append(None)
-        # Debug: show per-page bounding boxes as JS code
-        # for i, (bb, bb_inner) in enumerate(bboxes):
-        #    print bb.as_javascript(name="p%d" % i)
 
         self.pages = []
 
