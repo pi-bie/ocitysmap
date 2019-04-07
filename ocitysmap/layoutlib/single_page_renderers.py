@@ -426,33 +426,6 @@ class SinglePageRenderer(Renderer):
         PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
-    def _draw_creator_notice(self, ctx, w_dots, h_dots, notice=None,
-                               osm_date=None):
-        """
-        Args:
-           ctx (cairo.Context): The Cairo context to use to draw.
-           w_dots,h_dots (number): Rectangle dimension (ciaro units).
-           font_face (str): Pango font specification.
-           notice (str): Optional notice to replace the default.
-        """
-
-        today = datetime.date.today()
-        notice = notice or \
-            _(u'Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  '
-                    u'Kontakt: Hartmut Holzgraefe (hartmut@php.net)')
-
-        ctx.save()
-        pc = PangoCairo.create_context(ctx)
-        layout = PangoCairo.create_layout(ctx)
-        fd = Pango.FontDescription('DejaVu')
-        fd.set_size(Pango.SCALE)
-        layout.set_font_description(fd)
-        layout.set_text(notice, -1)
-        draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
-        PangoCairo.update_layout(ctx, layout)
-        PangoCairo.show_layout(ctx, layout)
-        ctx.restore()
-
     def _marker(self, color, txt, lat, lon, ctx, dpi):
 
         marker_path = os.path.abspath(os.path.join(
