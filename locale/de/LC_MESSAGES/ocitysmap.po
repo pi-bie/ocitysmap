@@ -90,7 +90,7 @@ msgstr "Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler."
 msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
 msgstr ""
-"Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (cc-by-sa)."
+"Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (siehe http://osm.org/copyright)."
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
