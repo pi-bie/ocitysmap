@@ -65,12 +65,13 @@ class Renderer:
 
     GRID_LEGEND_MARGIN_RATIO = .02
 
-    # The DEFAULT_KM_IN_MM represents the minimum acceptable mapnik scale
+    # The DEFAULT SCALE values represents the minimum acceptable mapnik scale
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
     # see entities.xml.inc file from osm style sheet
-    DEFAULT_SCALE = 70000
+    DEFAULT_SCALE           = 70000
     DEFAULT_MULTIPAGE_SCALE = 12000
+    MAX_MULTIPAGE_MAPPAGES  = 50
 
     def __init__(self, db, rc, tmpdir, dpi):
         """
@@ -176,28 +177,6 @@ class Renderer:
 
 
     @staticmethod
-    def _get_compass_rose(ctx, height):
-        """
-        Read the compass rose image and rescale it to fit within height.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           height (number): final height of the image (cairo units).
-
-        Return a tuple (cairo group object for the image, image width in
-                        cairo units).
-        """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'compass-rose.svg'))
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'compass-rose.svg')
-
-        return Renderer._get_svg(ctx, logo_path, height)
-
-
-    @staticmethod
     def _draw_labels(ctx, map_grid,
                      map_area_width_dots, map_area_height_dots,
                      grid_legend_margin_dots):
@@ -238,12 +217,12 @@ class Renderer:
 
             # At the top clear the right corner of the horizontal label
             if (i < map_grid.horiz_count-1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, grid_legend_margin_dots/2.0)
 
             # At the bottom clear the left corner of the horizontal label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                              x, map_area_height_dots -
                                              grid_legend_margin_dots/2.0)
 
@@ -259,12 +238,12 @@ class Renderer:
 
             # On the left clear the upper corner of the vertical label
             if (i > 0):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          grid_legend_margin_dots/2.0, y)
 
             # On the right clear the bottom corner of the vertical label
             if (i < map_grid.vert_count -1):
-                draw_utils.draw_simpletext_center(ctx, label,
+                draw_utils.draw_halotext_center(ctx, label,
                                          map_area_width_dots -
                                          grid_legend_margin_dots/2.0, y)
 
@@ -324,8 +303,10 @@ class Renderer:
 
         Return a new Grid object.
         """
-        # Prepare the grid SHP
-        map_grid = Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale() * dpi / 72, self.rc.i18n.isrtl())
+
+        return Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale() * dpi / 72, self.rc.i18n.isrtl())
+
+    def _apply_grid(self, map_grid, canvas):
         grid_shape = map_grid.generate_shape_file(
             os.path.join(self.tmpdir, 'grid.shp'))
 
@@ -334,8 +315,6 @@ class Renderer:
                               self.rc.stylesheet.grid_line_color,
                               self.rc.stylesheet.grid_line_alpha,
                               self.rc.stylesheet.grid_line_width)
-
-        return map_grid
 
     def render_plugin(self, plugin_name, ctx):
         my_plugin = self.plugin_source.load_plugin(plugin_name)
@@ -383,11 +362,11 @@ class Renderer:
 
         y = bbox.get_top_left()[0] - lat
         y*= (dpi/72.0) * self._map_coords[3] / horiz_angle_span
-        y+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt, dpi)
+        y+= (dpi/72.0) * self._map_coords[1]
 
         x = lon - bbox.get_top_left()[1]
         x*= (dpi/72.0) * self._map_coords[2] / vert_angle_span
-        x+= commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
+        x+= (dpi/72.0) * self._map_coords[0]
 
         return x,y
 

@@ -29,6 +29,9 @@ import draw_utils
 import ocitysmap.layoutlib.commons as UTILS
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 
+import logging
+LOG = logging.getLogger('ocitysmap')
+
 # FIXME: refactoring
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
@@ -42,7 +45,7 @@ class MultiPageStreetIndexRenderer:
     # ctx: Cairo context
     # surface: Cairo surface
     def __init__(self, i18n, ctx, surface, index_categories, rendering_area,
-                 page_number):
+                 page_offset):
         self._i18n           = i18n
         self.ctx            = ctx
         self.surface        = surface
@@ -51,7 +54,9 @@ class MultiPageStreetIndexRenderer:
         self.rendering_area_y = rendering_area[1]
         self.rendering_area_w = rendering_area[2]
         self.rendering_area_h = rendering_area[3]
-        self.page_number      = page_number
+        self.page_offset      = page_offset
+        self.index_page_num   = 1
+        self.index_page_num = self.index_page_num
 
     def _create_layout_with_font(self, ctx, pc, font_desc):
         layout = PangoCairo.create_layout(ctx)
@@ -70,16 +75,18 @@ class MultiPageStreetIndexRenderer:
         self.ctx.save()
         self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
                            Renderer.PRINT_SAFE_MARGIN_PT)
-        draw_utils.render_page_number(self.ctx, self.page_number,
+        draw_utils.render_page_number(self.ctx,
+                                      self.index_page_num + self.page_offset,
                                       self.rendering_area_w,
                                       self.rendering_area_h,
                                       PAGE_NUMBER_MARGIN_PT,
                                       transparent_background = False)
         self.ctx.restore()
+        self.surface.set_page_label('Index page %d' % (self.index_page_num))
 
     def _new_page(self):
         self.surface.show_page()
-        self.page_number = self.page_number + 1
+        self.index_page_num = self.index_page_num + 1
         self._draw_page_number()
 
     def render(self, dpi = UTILS.PT_PER_INCH):
@@ -89,7 +96,7 @@ class MultiPageStreetIndexRenderer:
         pc = PangoCairo.create_context(self.ctx)
 
         header_fd = Pango.FontDescription("Georgia Bold 12")
-        label_column_fd  = Pango.FontDescription("DejaVu 8")
+        label_column_fd  = Pango.FontDescription("DejaVu 6")
 
         header_layout, header_fascent, header_fheight, header_em = \
             self._create_layout_with_font(self.ctx, pc, header_fd)

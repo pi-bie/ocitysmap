@@ -41,7 +41,7 @@ import ocitysmap
 from ocitysmap.layoutlib.commons import convert_pt_to_dots
 import ocitysmap.maplib.shapes
 
-l = logging.getLogger('ocitysmap')
+LOG = logging.getLogger('ocitysmap')
 
 _MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
                      "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
@@ -85,7 +85,7 @@ class MapCanvas:
 
             envelope = mapnik.Box2d(off_x, off_y, off_x+width, off_y+height)
             self._geo_bbox = self._inverse_envelope(envelope)
-            l.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
+            LOG.debug('Corrected bounding box from %s to %s, ratio: %.2f.' %
                     (bounding_box, self._geo_bbox, graphical_ratio))
         else:
             envelope = orig_envelope
@@ -103,7 +103,7 @@ class MapCanvas:
         # Added shapes to render
         self._shapes = []
 
-        l.info('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
+        LOG.debug('MapCanvas rendering map on %dx%dpx.' % (g_width, g_height))
 
     def _fix_bbox_ratio(self, off_x, off_y, width, height, dest_ratio):
         """Adjusts the area expressed by its origin's offset and its size to
@@ -139,7 +139,7 @@ class MapCanvas:
         self._shapes.append({'shape_file': shape_file,
                              'color': col,
                              'line_width': line_width})
-        l.debug('Added shape file %s to map canvas as layer %s.' %
+        LOG.debug('Added shape file %s to map canvas as layer %s.' %
                 (shape_file.get_filepath(), shape_file.get_layer_name()))
 
     def render(self):
@@ -169,7 +169,7 @@ class MapCanvas:
         return scale
 
     def _render_shape_file(self, shape_file, color, line_width):
-        l.info("render_shape_file")
+        LOG.debug("render_shape_file")
         shape_file.flush()
 
         shpid = os.path.basename(shape_file.get_filepath())
@@ -206,7 +206,7 @@ class MapCanvas:
         return mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
 
     def _inverse_envelope(self, envelope):
-        """Inverse the given cartesian envelope (in 900913) back to a 4002
+        """Inverse the given cartesian envelope (in 3587) back to a 4326
         bounding box."""
         c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))

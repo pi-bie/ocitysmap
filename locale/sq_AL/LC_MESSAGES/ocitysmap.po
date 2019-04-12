@@ -1,0 +1,125 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-10-16 22:26+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ocitysmap/indexlib/indexer.py:261
+msgid "Places of worship"
+msgstr "vendet e adhurimit"
+
+#: ocitysmap/indexlib/indexer.py:262
+msgid "Place of worship"
+msgstr "vendi i adhurimit"
+
+#: ocitysmap/indexlib/indexer.py:263 ocitysmap/indexlib/indexer.py:264
+#: ocitysmap/indexlib/indexer.py:265 ocitysmap/indexlib/indexer.py:266
+#: ocitysmap/indexlib/indexer.py:267
+msgid "Education"
+msgstr "arsim"
+
+#: ocitysmap/indexlib/indexer.py:263
+msgid "Kindergarten"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:264
+msgid "School"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:265
+msgid "College"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:266
+msgid "University"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:267
+msgid "Library"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:268 ocitysmap/indexlib/indexer.py:269
+#: ocitysmap/indexlib/indexer.py:270 ocitysmap/indexlib/indexer.py:272
+msgid "Public buildings"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:268
+msgid "Town hall"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:269
+msgid "Post office"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:271
+msgid "Public building"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:272
+msgid "Police"
+msgstr ""
+
+#: ocitysmap/indexlib/indexer.py:503
+msgid "Villages"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:584
+#: ocitysmap/layoutlib/single_page_renderers.py:368
+#, python-format
+msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:586
+#: ocitysmap/layoutlib/single_page_renderers.py:370
+#, python-format
+msgid ""
+"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:596
+#: ocitysmap/layoutlib/single_page_renderers.py:380
+msgid "Map styles:"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:599
+#: ocitysmap/layoutlib/single_page_renderers.py:383
+#, python-format
+msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:601
+#: ocitysmap/layoutlib/single_page_renderers.py:385
+msgid "The map may be incomplete or inaccurate."
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:608
+#: ocitysmap/layoutlib/single_page_renderers.py:396
+msgid "unknown"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:663
+msgid "This page is intentionally left blank."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:430
+msgid ""
+"Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
+"Holzgraefe (hartmut@php.net)"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:848
+msgid "Test gettext"
+msgstr ""

@@ -42,8 +42,6 @@ class IndexDoesNotFitError(Exception):
     graphical area, even after trying smaller font sizes."""
     pass
 
-NUMBER_CATEGORY_NAME = '0-9'
-
 class IndexCategory:
     """
     The IndexCategory represents a set of index items that belong to the same
@@ -291,7 +289,7 @@ class StreetIndexItem(IndexItem):
 
         # In case of empty label, we don't draw the dots
         if self.label != '':
-            draw_utils.draw_dotted_line(ctx, max(fheight/12, 1),
+            draw_utils.draw_dotted_line(ctx, fheight/12,
                                         line_start + fheight/4, baseline_y,
                                         line_end - line_start - fheight/2)
         ctx.restore()

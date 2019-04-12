@@ -39,6 +39,7 @@ import shapely.wkt
 import sys
 from string import Template
 from functools import cmp_to_key
+from copy import copy
 
 import ocitysmap
 import coords
@@ -47,16 +48,13 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.commons import StreetIndexCategory
 from ocitysmap.indexlib.indexer import StreetIndex
 from ocitysmap.indexlib.multi_page_renderer import MultiPageStreetIndexRenderer
-from ocitysmap import draw_utils, maplib, umap_utils
+from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
 from ocitysmap.maplib.overview_grid import OverviewGrid
+from ocitysmap.stylelib import GpxStylesheet, UmapStylesheet
 
 LOG = logging.getLogger('ocitysmap')
-
-class SimpleStylesheet:
-    def __init__(self, path):
-        self.path = os.path.abspath(os.path.join('/home/maposmatic/maposmatic/media', path))
 
 class MultiPageRenderer(Renderer):
     """
@@ -88,6 +86,11 @@ class MultiPageRenderer(Renderer):
 
         scale_denom = Renderer.DEFAULT_MULTIPAGE_SCALE
 
+        # offset to the first map page number
+        # there are currently three header pages
+        # making the first actual map detail page number 4
+        self._first_map_page_number = 4
+
         # the mapnik scale depends on the latitude. However we are
         # always using Mapnik conversion functions (lat,lon <->
         # mercator_meters) so we don't need to take into account
@@ -99,46 +102,59 @@ class MultiPageRenderer(Renderer):
         GRAYED_MARGIN_MM  = 10
         OVERLAP_MARGIN_MM = 20
 
-        # Debug: show original bounding box as JS code
-        # print self.rc.bounding_box.as_javascript("original", "#00ff00")
-
         # Convert the original Bounding box into Mercator meters
         self._proj = mapnik.Projection(coords._MAPNIK_PROJECTION)
         orig_envelope = self._project_envelope(self.rc.bounding_box)
 
-        # Extend the bounding box to take into account the lost outter
-        # margin
-        off_x  = orig_envelope.minx - (GRAYED_MARGIN_MM * scale_denom) / 1000
-        off_y  = orig_envelope.miny - (GRAYED_MARGIN_MM * scale_denom) / 1000
-        width  = orig_envelope.width() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
-        height = orig_envelope.height() + (2 * GRAYED_MARGIN_MM * scale_denom) / 1000
 
-        # Calculate the total width and height of paper needed to
-        # render the geographical area at the current scale.
-        total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
-        total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
-        self.grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
-        overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
+        while True:
+            # Extend the bounding box to take into account the lost outer
+            # margin
+            off_x  = orig_envelope.minx - GRAYED_MARGIN_MM * 9.6
+            off_y  = orig_envelope.miny - GRAYED_MARGIN_MM * 9.6
+            width  = orig_envelope.width() + (2 * GRAYED_MARGIN_MM) * 9.6
+            height = orig_envelope.height() + (2 * GRAYED_MARGIN_MM) * 9.6
 
-        # Calculate the number of pages needed in both directions
-        if total_width_pt < self._usable_area_width_pt:
-            nb_pages_width = 1
-        else:
-            nb_pages_width = \
-                (float(total_width_pt - self._usable_area_width_pt) / \
-                     (self._usable_area_width_pt - overlap_margin_pt)) + 1
+            # Calculate the total width and height of paper needed to
+            # render the geographical area at the current scale.
+            total_width_pt   = commons.convert_mm_to_pt(float(width) * 1000 / scale_denom)
+            total_height_pt  = commons.convert_mm_to_pt(float(height) * 1000 / scale_denom)
+            self.grayed_margin_pt = commons.convert_mm_to_pt(GRAYED_MARGIN_MM)
+            overlap_margin_pt = commons.convert_mm_to_pt(OVERLAP_MARGIN_MM)
 
-        if total_height_pt < self._usable_area_height_pt:
-            nb_pages_height = 1
-        else:
-            nb_pages_height = \
-                (float(total_height_pt - self._usable_area_height_pt) / \
-                     (self._usable_area_height_pt - overlap_margin_pt)) + 1
+            # Calculate the number of pages needed in both directions
+            if total_width_pt < self._usable_area_width_pt:
+                nb_pages_width = 1
+            else:
+                nb_pages_width = \
+                    (float(total_width_pt - self._usable_area_width_pt) / \
+                         (self._usable_area_width_pt - overlap_margin_pt)) + 1
 
-        # Round up the number of pages needed so that we have integer
-        # number of pages
-        self.nb_pages_width = int(math.ceil(nb_pages_width))
-        self.nb_pages_height = int(math.ceil(nb_pages_height))
+            if total_height_pt < self._usable_area_height_pt:
+                nb_pages_height = 1
+            else:
+                nb_pages_height = \
+                    (float(total_height_pt - self._usable_area_height_pt) / \
+                         (self._usable_area_height_pt - overlap_margin_pt)) + 1
+
+            # Round up the number of pages needed so that we have integer
+            # number of pages
+            self.nb_pages_width = int(math.ceil(nb_pages_width))
+            self.nb_pages_height = int(math.ceil(nb_pages_height))
+
+            total_pages = self.nb_pages_width * self.nb_pages_height
+
+            if Renderer.MAX_MULTIPAGE_MAPPAGES and \
+               total_pages < Renderer.MAX_MULTIPAGE_MAPPAGES:
+                break
+
+            new_scale_denom = scale_denom * 1.41
+
+            if new_scale_denom > Renderer.DEFAULT_SCALE:
+                break
+
+            scale_denom = new_scale_denom
+
 
         # Calculate the entire paper area available
         total_width_pt_after_extension = self._usable_area_width_pt + \
@@ -165,9 +181,6 @@ class MultiPageRenderer(Renderer):
         # Calculate what is the final global bounding box that we will render
         envelope = mapnik.Box2d(off_x, off_y, off_x + width, off_y + height)
         self._geo_bbox = self._inverse_envelope(envelope)
-
-        # Debug: show transformed bounding box as JS code
-        # print self._geo_bbox.as_javascript("extended", "#0f0f0f")
 
         # Convert the usable area on each sheet of paper into the
         # amount of Mercator meters we can render in this area.
@@ -205,54 +218,6 @@ class MultiPageRenderer(Renderer):
                                    inner_bb))
                 else:
                     self.page_disposition[col].append(None)
-        # Debug: show per-page bounding boxes as JS code
-        # for i, (bb, bb_inner) in enumerate(bboxes):
-        #    print bb.as_javascript(name="p%d" % i)
-
-        # apply GPX track
-        GPX_filename = None
-        if self.rc.gpx_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/gpx'))
-           template_file = os.path.join(template_dir, 'template.xml')
-           GPX_filename = os.path.join(self.tmpdir, 'gpx_style.xml')
-           tmpfile = open(GPX_filename, 'w')
-
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               tmpfile.write(tmpstyle.substitute(gpxfile = self.rc.gpx_file,
-                                                 svgdir = template_dir))
-
-           tmpfile.close()
-
-        # apply UMAP file
-        umap_filename = None
-        if self.rc.umap_file:
-           template_dir = os.path.realpath(
-               os.path.join(
-                   os.path.dirname(__file__),
-                   '../../templates/umap'))
-
-           json_filename = os.path.join(self.tmpdir, 'geo.json')
-           json_tmpfile = open(json_filename, 'w')
-           json_tmpfile.write(umap_utils.umap_preprocess(self.rc.umap_file, self.tmpdir))
-           json_tmpfile.close()
-
-           template_file = os.path.join(template_dir, 'template.xml')
-           umap_filename = os.path.join(self.tmpdir, 'umap_style.xml')
-           style_tmpfile = open(umap_filename, 'w')
-
-           with open(template_file, 'r') as style_template:
-               tmpstyle = Template(style_template.read())
-               style_tmpfile.write(
-                   tmpstyle.substitute(
-                       umapfile = json_filename,
-                       basedir  = template_dir
-                   ))
-
-           style_tmpfile.close()
 
         self.pages = []
 
@@ -290,10 +255,20 @@ class MultiPageRenderer(Renderer):
 
         self.overview_canvas.render()
 
+        self._overlays = copy(self.rc.overlays)
+        
+        # generate style file for GPX file
+        if self.rc.gpx_file:
+            self._overlays.append(GpxStylesheet(self.rc.gpx_file, self.tmpdir))
+
+        # denormalize UMAP json to geojson, then create style for it
+        if self.rc.umap_file:
+            self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
+
         self.overview_overlay_canvases = []
         self.overview_overlay_effects = []
         
-        for overlay in self.rc.overlays:
+        for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 self.overview_overlay_effects.append(path.lstrip('internal:'))
@@ -306,25 +281,6 @@ class MultiPageRenderer(Renderer):
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
                 self.overview_overlay_canvases.append(ov_canvas)
-
-        if self.rc.gpx_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
-                                  overview_bb,
-                                  self._usable_area_width_pt,
-                                  self._usable_area_height_pt,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self.overview_overlay_canvases.append(ov_canvas)
-
-        if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
-                                  self.rc.bounding_box,
-                                  float(self._map_coords[2]),  # W
-                                  float(self._map_coords[3]),  # H
-                                  dpi)
-            ov_canvas.render()
-            self.overview_overlay_canvases.append(ov_canvas)
 
         # Create the map canvas for each page
         indexes = []
@@ -361,7 +317,7 @@ class MultiPageRenderer(Renderer):
             # Create canvas for overlay on current page
             overlay_canvases = []
             overlay_effects  = []
-            for overlay in self.rc.overlays:
+            for overlay in self._overlays:
                 path = overlay.path.strip()
                 if path.startswith('internal:'):
                     overlay_effects.append(path.lstrip('internal:'))
@@ -370,20 +326,6 @@ class MultiPageRenderer(Renderer):
                                                bb, self._usable_area_width_pt,
                                                self._usable_area_height_pt, dpi,
                                                extend_bbox_to_ratio=False))
-
-            # apply GPX track
-            if self.rc.gpx_file:
-                overlay_canvases.append(MapCanvas(SimpleStylesheet(GPX_filename),
-                                           bb, self._usable_area_width_pt,
-                                           self._usable_area_height_pt, dpi,
-                                           extend_bbox_to_ratio=False))
-
-            # apply UMAP file
-            if self.rc.umap_file:
-                overlay_canvases.append(MapCanvas(SimpleStylesheet(umap_filename),
-                                                  bb, self._usable_area_width_pt,
-                                                  self._usable_area_height_pt, dpi,
-                                                  extend_bbox_to_ratio=False))
 
             # Create the grid
             map_grid = Grid(bb_inner, map_canvas.get_actual_scale(), self.rc.i18n.isrtl())
@@ -411,7 +353,7 @@ class MultiPageRenderer(Renderer):
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             index = StreetIndex(self.db,
                                 inside_contour_wkt,
-                                self.rc.i18n, page_number=(i + 4))
+                                self.rc.i18n, page_number=(i + self._first_map_page_number))
 
             index.apply_grid(map_grid)
             indexes.append(index)
@@ -420,7 +362,7 @@ class MultiPageRenderer(Renderer):
         self.index_categories = self._merge_page_indexes(indexes)
 
         # Prepare the small map for the front page
-        self._prepare_front_page_map(dpi, GPX_filename, umap_filename)
+        self._prepare_front_page_map(dpi)
 
     def _merge_page_indexes(self, indexes):
         # First, we split street categories and "other" categories,
@@ -516,13 +458,13 @@ class MultiPageRenderer(Renderer):
         return mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
 
     def _inverse_envelope(self, envelope):
-        """Inverse the given cartesian envelope (in 900913) back to a 4002
+        """Inverse the given cartesian envelope (in 3587) back to a 4326
         bounding box."""
         c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
-    def _prepare_front_page_map(self, dpi, GPX_filename, umap_filename):
+    def _prepare_front_page_map(self, dpi):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -552,7 +494,7 @@ class MultiPageRenderer(Renderer):
 
         self._frontpage_overlay_canvases = []
         self._frontpage_overlay_effects  = []
-        for overlay in self.rc.overlays:
+        for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 self._frontpage_overlay_effects.append(path.lstrip('internal:'))
@@ -565,26 +507,6 @@ class MultiPageRenderer(Renderer):
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
                 self._frontpage_overlay_canvases.append(ov_canvas)
-
-        if self.rc.gpx_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(GPX_filename),
-                                  self.rc.bounding_box,
-                                  front_page_map_w,
-                                  front_page_map_h,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self._frontpage_overlay_canvases.append(ov_canvas)
-
-        if self.rc.umap_file:
-            ov_canvas = MapCanvas(SimpleStylesheet(umap_filename),
-                                  self.rc.bounding_box,
-                                  front_page_map_w,
-                                  front_page_map_h,
-                                  dpi,
-                                  extend_bbox_to_ratio=True)
-            ov_canvas.render()
-            self._frontpage_overlay_canvases.append(ov_canvas)
 
     def _render_front_page_header(self, ctx, w, h):
         # Draw a grey blue block which will contain the name of the
@@ -663,7 +585,7 @@ class MultiPageRenderer(Renderer):
 
         if self.rc.stylesheet.annotation != '':
             annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self.rc.overlays:
+            for overlay in self._overlays:
                 if overlay.annotation != '':
                     annotations.append(overlay.annotation)
         if len(annotations) > 0:
@@ -719,6 +641,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
+        cairo_surface.set_page_label('Front page')
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
@@ -741,6 +664,7 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background=False)
+        cairo_surface.set_page_label('Blank')
         cairo_surface.show_page()
         ctx.restore()
 
@@ -773,6 +697,8 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background = True)
+
+        cairo_surface.set_page_label('Overview')
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -781,6 +707,10 @@ class MultiPageRenderer(Renderer):
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.translate(-arrow_edge/2, -arrow_edge*0.45)
+
+        dest_name = "mypage%d" % number
+        draw_utils.begin_internal_link(ctx, dest_name)
+
         ctx.line_to(0, 0)
         ctx.line_to(0, arrow_edge)
         ctx.line_to(arrow_edge, arrow_edge)
@@ -788,20 +718,22 @@ class MultiPageRenderer(Renderer):
         ctx.line_to(arrow_edge/2, -arrow_edge*.25)
         ctx.close_path()
         ctx.fill()
+        draw_utils.end_link(ctx)
         ctx.restore()
 
         ctx.save()
         if reverse_text:
             ctx.rotate(math.pi)
+        draw_utils.begin_internal_link(ctx, dest_name)
         draw_utils.draw_text_adjusted(ctx, str(number), 0, 0, arrow_edge,
                         arrow_edge, max_char_number=max_digit_number,
                         text_color=(1, 1, 1, 1), width_adjust=0.85,
                         height_adjust=0.9)
+        draw_utils.end_link(ctx)
         ctx.restore()
 
     def _render_neighbour_arrows(self, ctx, cairo_surface, map_number,
                                  max_digit_number):
-        nb_previous_pages = 4
         current_line, current_col = None, None
         for line_nb in range(self.nb_pages_height):
             if map_number in self.page_disposition[line_nb]:
@@ -821,7 +753,7 @@ class MultiPageRenderer(Renderer):
                 ctx.translate(self._usable_area_width_pt/2,
                     commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 self._draw_arrow(ctx, cairo_surface,
-                              north_arrow + nb_previous_pages, max_digit_number)
+                              north_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
 
@@ -835,7 +767,7 @@ class MultiPageRenderer(Renderer):
                       - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
-                      south_arrow + nb_previous_pages, max_digit_number,
+                      south_arrow + self._first_map_page_number, max_digit_number,
                       reverse_text=True)
                 ctx.restore()
                 break
@@ -850,7 +782,7 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(-math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                               west_arrow + nb_previous_pages, max_digit_number)
+                               west_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
 
@@ -865,9 +797,80 @@ class MultiPageRenderer(Renderer):
                     self._usable_area_height_pt/2)
                 ctx.rotate(math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
-                               east_arrow + nb_previous_pages, max_digit_number)
+                               east_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
                 break
+
+    @staticmethod
+    def _draw_labels(ctx, map_grid,
+                     map_area_width_dots, map_area_height_dots,
+                     grid_legend_margin_dots):
+        """
+        Draw the Grid labels at current position.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           map_grid (Grid): the grid objects whose labels we want to draw.
+           map_area_width_dots/map_area_height_dots (numbers): size of the
+              map (cairo units).
+           grid_legend_margin_dots (number): margin between border of
+              map and grid labels (cairo units).
+        """
+        ctx.save()
+
+        ctx.set_source_rgba(0, 0, 0, 0.7);
+
+        step_horiz = map_area_width_dots / map_grid.horiz_count
+        last_horiz_portion = math.modf(map_grid.horiz_count)[0]
+
+        step_vert = map_area_height_dots / map_grid.vert_count
+        last_vert_portion = math.modf(map_grid.vert_count)[0]
+
+        ctx.set_font_size(min(0.75 * grid_legend_margin_dots,
+                              0.5 * step_horiz))
+        ctx.set_source_rgba(0, 0, 0, 1)
+
+        # TODO labels can overlap with next page arrows,
+        # if they do -> hide them? or move them out of the
+        # grid center a bit?
+
+        for i, label in enumerate(map_grid.horizontal_labels):
+            x = i * step_horiz
+
+            if i < len(map_grid.horizontal_labels) - 1:
+                x += step_horiz/2.0
+            elif last_horiz_portion >= 0.3:
+                x += step_horiz * last_horiz_portion/2.0
+            else:
+                continue
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            x, - grid_legend_margin_dots/1.0)
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            x, map_area_height_dots +
+                                            grid_legend_margin_dots/1.0)
+
+        for i, label in enumerate(map_grid.vertical_labels):
+            y = i * step_vert
+
+            if i < len(map_grid.vertical_labels) - 1:
+                y += step_vert/2.0
+            elif last_vert_portion >= 0.3:
+                y += step_vert * last_vert_portion/2.0
+            else:
+                continue
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            -grid_legend_margin_dots, y)
+
+            draw_utils.draw_halotext_center(ctx, label,
+                                            map_area_width_dots +
+                                            grid_legend_margin_dots, y)
+
+        ctx.restore()
+
+
 
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
@@ -887,10 +890,14 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            LOG.info('Map page %d of %d' % (map_number, len(self.pages)))
+            LOG.info('Map page %d of %d' % (map_number + 1, len(self.pages)))
             rendered_map = canvas.get_rendered_map()
             LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
             LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
+
+            dest_tag = "mypage%d" % (map_number + self._first_map_page_number)
+            draw_utils.anchor(ctx, dest_tag)
+
             mapnik.render(rendered_map, ctx)
 
             for overlay_canvas in overlay_canvases:
@@ -923,14 +930,15 @@ class MultiPageRenderer(Renderer):
 
 
             # Render the page number
-            draw_utils.render_page_number(ctx, map_number+4,
+            draw_utils.render_page_number(ctx, map_number + self._first_map_page_number,
                                           self._usable_area_width_pt,
                                           self._usable_area_height_pt,
                                           self.grayed_margin_pt,
                                           transparent_background = True)
             self._render_neighbour_arrows(ctx, cairo_surface, map_number,
-                                          len(str(len(self.pages)+4)))
+                                          len(str(len(self.pages) + self._first_map_page_number)))
 
+            cairo_surface.set_page_label('Map page %d' % (map_number + self._first_map_page_number))
             cairo_surface.show_page()
         ctx.restore()
 
@@ -969,8 +977,7 @@ class MultiPageRenderer(Renderer):
             valid_sizes.append((sz[0], sz[1], sz[2], True, True, sz[0] == 'Din A4'))
         return valid_sizes
 
-    @classmethod
-    def _draw_overview_labels(cls, ctx, map_canvas, overview_grid,
+    def _draw_overview_labels(self, ctx, map_canvas, overview_grid,
                      area_width_dots, area_height_dots):
         """
         Draw the page numbers for the overview grid.
@@ -1006,9 +1013,20 @@ class MultiPageRenderer(Renderer):
                                                          )/coord_delta_x
                 h = area_height_dots*(p_top_right.y - p_bottom_right.y
                                                          )/coord_delta_y
-            draw_utils.draw_text_adjusted(ctx, str(idx+4), x, y, w, h,
-                 max_char_number=len(str(len(overview_grid._pages_bbox)+3)),
-                 text_color=(0, 0, 0, 0.6))
+
+            draw_utils.draw_text_adjusted(ctx, str(idx + self._first_map_page_number),
+                                          x, y, w, h,
+                                          max_char_number=len(str(len(overview_grid._pages_bbox)+3)),
+                                          text_color=(0, 0, 0, 0.6))
+
+            ctx.save()
+            ctx.translate(x-w/2, y-h/2)
+            ctx.set_source_rgba(0,0,0,0.1)
+            draw_utils.begin_internal_link(ctx, "mypage%d" % (idx + self._first_map_page_number))
+            ctx.rectangle(0,0,w,h)
+            ctx.stroke()
+            draw_utils.end_link(ctx)
+            ctx.restore()
 
         ctx.restore()
 

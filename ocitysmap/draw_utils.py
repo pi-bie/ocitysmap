@@ -146,6 +146,31 @@ def draw_simpletext_center(ctx, text, x, y):
     ctx.stroke()
     ctx.restore()
 
+def draw_halotext_center(ctx, text, x, y):
+    """
+    Draw the given text centered at x,y, with a halo below
+
+    Args:
+       ctx (cairo.Context): The cairo context to use to draw.
+       text (str): the text to draw.
+       x,y (numbers): Location of the center (cairo units).
+    """
+    xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+    ctx.save()
+    ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.set_line_width(10);
+    ctx.set_source_rgba(1, 1, 1, 0.5);
+    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+    ctx.text_path(text)
+    ctx.stroke()
+    ctx.restore()
+
+    ctx.save()
+    ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.show_text(text)
+    ctx.stroke()
+    ctx.restore()
+
 def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.set_line_width(line_width)
     ctx.set_dash([line_width, line_width*2])
@@ -252,4 +277,25 @@ def render_page_number(ctx, page_number,
     ctx.translate(x_offset, y_offset)
     draw_simpletext_center(ctx, str(page_number), 0, 0)
     ctx.restore()
+
+
+
+def begin_internal_link(ctx, target):
+    try: # tag_begin() only available starting with PyCairo 1.18.0
+        ctx.tag_begin(cairo.TAG_LINK, "dest='%s'" % target)
+    except Exception:
+        pass
+
+def end_link(ctx):
+    try: # tag_end() only available starting with PyCairo 1.18.0
+        ctx.tag_end(cairo.TAG_LINK)
+    except Exception:
+        pass
+
+def anchor(ctx, name):
+    try: # tag_begin() only available starting with PyCairo 1.18.0
+        ctx.tag_begin(cairo.TAG_DEST, "name='%s'" % name)
+        ctx.tag_end(cairo.TAG_DEST)
+    except Exception:
+        pass
 

@@ -72,9 +72,9 @@ class StreetIndexRenderingStyle:
                                                  repr(self.label_font_spec))
 
 
-class StreetIndexRenderingArea:
+class IndexRenderingArea:
     """
-    The StreetIndexRenderingArea class describes the parameters of the
+    The IndexRenderingArea class describes the parameters of the
     Cairo area and its parameters (fonts) where the index should be
     renedered. It is basically returned by
     StreetIndexRenderer::precompute_occupation_area() and used by
@@ -117,55 +117,59 @@ class PoiIndexRenderer:
         x+= w * 0.2
         w = w * 0.8
 
-        area = StreetIndexRenderingArea("default_poi_style",
-                                         x, y, w, h, 1)
+        area = IndexRenderingArea("default_poi_style",
+                                  x, y, w, h, 1)
 
         return area
 
     def _render_header(self, ctx, area, dpi, color, label, logo = None):
+        f = dpi / UTILS.PT_PER_INCH;
+
         ctx.save()
-        ctx.translate(10, 10)
+        ctx.translate(10*f, 10*f)
 
         c = Color(color);
         ctx.set_source_rgb(c.red, c.green, c.blue)
-        ctx.rectangle( 0, 0, area.w - 20, dpi * 0.8)
+        ctx.rectangle( 0, 0, (area.w - 20)*f, dpi * 0.8)
         ctx.fill()
 
-        x = 5
+        x = 5*f
 
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), '..', '..', '..', 'Font-Awesome-SVG-PNG', 'white', 'svg', logo + '.svg'))
+                os.path.dirname(__file__), '..', '..', 'templates', 'poi_markers', 'Font-Awesome-SVG-PNG', 'white', 'svg', logo + '.svg'))
 
             if os.path.isfile(logo_path):
                 rsvg = Rsvg.Handle()
                 svg = rsvg.new_from_file(logo_path)
 
                 scale = dpi * 0.6 / svg.props.height;
-                x += svg.props.width * scale + 10
+                x += svg.props.width * scale + 10*f
 
                 ctx.save()
-                ctx.translate(5, 5)
+                ctx.translate(5*f, 5*f)
                 ctx.scale(scale, scale)
                 svg.render_cairo(ctx)
                 ctx.restore()
             else:
-                LOG.debug("icon not found %s" % logo_path)
+                LOG.warning("icon not found %s" % logo_path)
 
         ctx.set_source_rgb(1, 1, 1)
         ctx.select_font_face("Droid Sans Bold",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 
-        ctx.set_font_size(dpi - 30)
+        ctx.set_font_size(dpi*0.6)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
-        ctx.move_to(x, 10 - y_bearing)
+        ctx.move_to(x, 10*f - y_bearing)
         ctx.show_text(label)
         ctx.restore()
 
         return dpi * 0.8
 
     def _render_item(self, ctx, area, dpi, color, number, label, gridlabel, logo = None):
-        x = 5
+        f = dpi / UTILS.PT_PER_INCH;
+
+        x = 5*f
 
         marker_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
@@ -183,8 +187,8 @@ class PoiIndexRenderer:
         rsvg = Rsvg.Handle()
         svg = rsvg.new_from_data(data.encode())
 
-        scale = 50.0 / svg.props.height;
-        x += 35
+        scale = 50.0 * f/ svg.props.height;
+        x += 35*f
 
         ctx.save()
 
@@ -199,38 +203,39 @@ class PoiIndexRenderer:
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 
         x_bearing, y_bearing, width, height = ctx.text_extents(number)[:4]
-        ctx.set_font_size((dpi - 30)/(len(number)+1))
-        ctx.move_to(20 - width/2, 25)
+        ctx.set_font_size((dpi*0.6)/(len(number)+1))
+        ctx.move_to(20*f - f*width/2, 25*f)
         ctx.show_text(number)
         ctx.restore()
 
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), '..', '..', '..', 'Font-Awesome-SVG-PNG', 'black', 'svg', logo + '.svg'))
+                os.path.dirname(__file__), '..', '..', 'templates', 'poi_markers', 'Font-Awesome-SVG-PNG', 'black', 'svg', logo + '.svg'))
 
             if os.path.isfile(logo_path):
-                svg = rsvg.Handle(logo_path)
+                rsvg = Rsvg.Handle()
+                svg = rsvg.new_from_file(logo_path)
 
                 scale = min(dpi * 0.6 / svg.props.height, dpi * 0.6 / svg.props.width);
 
                 ctx.save()
-                ctx.translate(x + 5, 5)
+                ctx.translate(x + 5, 5*f)
                 ctx.scale(scale, scale)
                 svg.render_cairo(ctx)
                 ctx.restore()
                 
-                x += svg.props.width * scale + 10
+                x += svg.props.width * scale + 10*f
             else:
-                LOG.debug("icon not found %s" % logo_path)
+                LOG.warning("icon not found %s" % logo_path)
 
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Droid Sans",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
-        ctx.set_font_size(dpi - 30)
+        ctx.set_font_size(dpi*0.6)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
-        ctx.move_to(x, 10 - y_bearing)
+        ctx.move_to(x, 10*f - y_bearing)
         ctx.show_text(label)
 
         ctx.select_font_face("Droid Sans Mono",
@@ -240,7 +245,7 @@ class PoiIndexRenderer:
         gridlabel = gridParts.group(1) + '-' + gridParts.group(2)
 
         x_bearing, y_bearing, width, height = ctx.text_extents(gridlabel)[:4]
-        ctx.move_to(area.w - width - 15, 10 + height)
+        ctx.move_to((area.w - 15)*f - width, 10*f + height)
         ctx.show_text(gridlabel)
 
         ctx.restore()
@@ -248,10 +253,12 @@ class PoiIndexRenderer:
         return dpi * 0.7
 
     def render(self, ctx, area, dpi = UTILS.PT_PER_INCH):
+        f = dpi / UTILS.PT_PER_INCH;
+
         ctx.save()
-        ctx.translate(area.x, area.y)
+        ctx.translate(area.x*f, area.y*f)
         ctx.set_source_rgb(1, 1, 1)
-        ctx.rectangle(0, 0, area.w, area.h)
+        ctx.rectangle(0, 0, area.w*f, area.h*f)
         ctx.fill()
 
         n = 0
@@ -276,27 +283,27 @@ class StreetIndexRenderer:
 
     def __init__(self, i18n, index_categories,
                  street_index_rendering_styles \
-                     = [ StreetIndexRenderingStyle('Georgia Bold 16',
+                     = [ StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 16',
                                                    'DejaVu 12'),
-                         StreetIndexRenderingStyle('Georgia Bold 14',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 14',
                                                    'DejaVu 10'),
-                         StreetIndexRenderingStyle('Georgia Bold 12',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 12',
                                                    'DejaVu 8'),
-                         StreetIndexRenderingStyle('Georgia Bold 10',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 10',
                                                    'DejaVu 7'),
-                         StreetIndexRenderingStyle('Georgia Bold 8',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 8',
                                                    'DejaVu 6'),
-                         StreetIndexRenderingStyle('Georgia Bold 6',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 6',
                                                    'DejaVu 5'),
-                         StreetIndexRenderingStyle('Georgia Bold 5',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 5',
                                                    'DejaVu 4'),
-                         StreetIndexRenderingStyle('Georgia Bold 4',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 4',
                                                    'DejaVu 3'),
-                         StreetIndexRenderingStyle('Georgia Bold 3',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 3',
                                                    'DejaVu 2'),
-                         StreetIndexRenderingStyle('Georgia Bold 2',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 2',
                                                    'DejaVu 2'),
-                         StreetIndexRenderingStyle('Georgia Bold 1',
+                         StreetIndexRenderingStyle('DejaVu Sans Condensed Bold 1',
                                                    'DejaVu 1'), ] ):
         self._i18n             = i18n
         self._index_categories = index_categories
@@ -321,7 +328,7 @@ class StreetIndexRenderer:
                 of 'height', 'left' or 'right' for 'width'. Tells which side to
                 stick the index to.
 
-        Returns the actual graphical StreetIndexRenderingArea defining
+        Returns the actual graphical IndexRenderingArea defining
         how and where the index should be rendered. Raise
         IndexDoesNotFitError when the provided area's surface is not
         enough to hold the index.
@@ -380,9 +387,9 @@ class StreetIndexRenderer:
         if alignment == 'right':
             base_offset_x = w - index_width
 
-        area = StreetIndexRenderingArea(rendering_style,
-                                        x+base_offset_x, y+base_offset_y,
-                                        index_width, index_height, n_cols)
+        area = IndexRenderingArea(rendering_style,
+                                  x+base_offset_x, y+base_offset_y,
+                                  index_width, index_height, n_cols)
         LOG.debug("Will be able to render index in %s" % area)
         return area
 
@@ -396,7 +403,7 @@ class StreetIndexRenderer:
 
         Args:
             ctx (cairo.Context): the cairo context to use for the rendering.
-            rendering_area (StreetIndexRenderingArea): the result from
+            rendering_area (IndexRenderingArea): the result from
                 precompute_occupation_area().
             dpi (number): resolution of the target device.
         """
