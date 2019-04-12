@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # E, 2013
 msgid ""
@@ -11,11 +11,12 @@ msgstr ""
 "POT-Creation-Date: 2018-10-16 22:26+0200\n"
 "PO-Revision-Date: 2013-11-20 09:54+0000\n"
 "Last-Translator: E\n"
-"Language-Team: Lingala (http://www.transifex.com/dittaeva/maposmatic/language/ln/)\n"
+"Language-Team: Lingala (http://www.transifex.com/dittaeva/maposmatic/"
+"language/ln/)\n"
+"Language: ln\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ln\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ocitysmap/indexlib/indexer.py:261
@@ -89,7 +90,8 @@ msgstr "Copyright © %(year)d dévelopeurs MapOSMatic/OCitySMap."
 msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
 msgstr ""
-"Dáte ya mwángo ya mokili © %(year)d OpenStreetMap.org mpé contributeurs (see http://osm.org/copyright)"
+"Dáte ya mwángo ya mokili © %(year)d OpenStreetMap.org mpé contributeurs (see "
+"http://osm.org/copyright)"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
@@ -118,11 +120,23 @@ msgstr "Lonkásá óyo ezalí na ɛlɔ́kɔ tɛ. "
 
 #: ocitysmap/layoutlib/single_page_renderers.py:430
 msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr "Copyright © %(year)d dévelopeurs MapOSMatic/OCitySMap. Dáte ya mwángo ya mokili © %(year)d OpenStreetMap.org mpé contributeurs (cc-by-sa).⏎\nMwángo rendered o: %(date)s. Dáte OSM botî sika: %(osmdate)s. Mwángo ya mokili ekokí kosála ndámbo tǒ na mabúngá. Bokokí kobákisa tǒ kobongisa mwángo ya mokili óyo. Tála mpé http://wiki.openstreetmap.org"
+"Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
+"Holzgraefe (hartmut@php.net)"
+msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:848
 msgid "Test gettext"
 msgstr "Bomekimeki gettext"
 
+#~ msgid ""
+#~ "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+#~ "OpenStreetMap.org and contributors (cc-by-sa).\n"
+#~ "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may "
+#~ "be incomplete or inaccurate. You can contribute to improve this map. See "
+#~ "http://wiki.openstreetmap.org"
+#~ msgstr ""
+#~ "Copyright © %(year)d dévelopeurs MapOSMatic/OCitySMap. Dáte ya mwángo ya "
+#~ "mokili © %(year)d OpenStreetMap.org mpé contributeurs (cc-by-sa).⏎\n"
+#~ "Mwángo rendered o: %(date)s. Dáte OSM botî sika: %(osmdate)s. Mwángo ya "
+#~ "mokili ekokí kosála ndámbo tǒ na mabúngá. Bokokí kobákisa tǒ kobongisa "
+#~ "mwángo ya mokili óyo. Tála mpé http://wiki.openstreetmap.org"

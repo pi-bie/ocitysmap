@@ -1,7 +1,7 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# 
+#
 # Translators:
 # niconil <laurent.combe@free.fr>, 2017
 # Maxime Petazzoni <maxime.petazzoni@bulix.org>, 2013
@@ -18,7 +18,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: ocitysmap/indexlib/indexer.py:261
@@ -92,7 +91,8 @@ msgstr "Copyright © %(year)d développeurs MapOSMatic/OCitySMap."
 msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
 msgstr ""
-"Données cartographiques ® %(year)d OpenStreetMap.org et contributeurs (see http://osm.org/copyright)"
+"Données cartographiques ® %(year)d OpenStreetMap.org et contributeurs (see "
+"http://osm.org/copyright)"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
@@ -121,10 +121,24 @@ msgstr "Cette page est laissée intentionnellement vide."
 
 #: ocitysmap/layoutlib/single_page_renderers.py:430
 msgid ""
-"Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d OpenStreetMap.org and contributors (cc-by-sa).\n"
-"Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may be incomplete or inaccurate. You can contribute to improve this map. See http://wiki.openstreetmap.org"
-msgstr "Copyright © %(year)d développeurs MapOSMatic/OCitySMap. Données cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-sa).\nCarte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s. Cette carte peut être incomplète ou imprécise. Vous pouvez contribuer à améliorer cette carte. Voir http://wiki.openstreetmap.org"
+"Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
+"Holzgraefe (hartmut@php.net)"
+msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:848
 msgid "Test gettext"
 msgstr "Test de gettext"
+
+#~ msgid ""
+#~ "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
+#~ "OpenStreetMap.org and contributors (cc-by-sa).\n"
+#~ "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s. The map may "
+#~ "be incomplete or inaccurate. You can contribute to improve this map. See "
+#~ "http://wiki.openstreetmap.org"
+#~ msgstr ""
+#~ "Copyright © %(year)d développeurs MapOSMatic/OCitySMap. Données "
+#~ "cartographiques ® %(year)d OpenStreetMap.org et contributeurs (cc-by-"
+#~ "sa).\n"
+#~ "Carte générée le: %(date)s. Mise à jour OSM du: %(osmdate)s. Cette carte "
+#~ "peut être incomplète ou imprécise. Vous pouvez contribuer à améliorer "
+#~ "cette carte. Voir http://wiki.openstreetmap.org"
