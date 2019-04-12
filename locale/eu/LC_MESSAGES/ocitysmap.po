@@ -7,78 +7,81 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-16 22:26+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2019-04-12 09:39+0000\n"
+"Last-Translator: Gari Araolaza <garaolaza@codesyntax.com>\n"
+"Language-Team: Basque <http://translate.get-map.org/projects/maposmatic/"
+"ocitysmap/eu/>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.5.1\n"
 
 #: ocitysmap/indexlib/indexer.py:261
 msgid "Places of worship"
-msgstr ""
+msgstr "Otoitzerako lekuak"
 
 #: ocitysmap/indexlib/indexer.py:262
 msgid "Place of worship"
-msgstr ""
+msgstr "Otoitzerako lekua"
 
 #: ocitysmap/indexlib/indexer.py:263 ocitysmap/indexlib/indexer.py:264
 #: ocitysmap/indexlib/indexer.py:265 ocitysmap/indexlib/indexer.py:266
 #: ocitysmap/indexlib/indexer.py:267
 msgid "Education"
-msgstr ""
+msgstr "Hezkuntza"
 
 #: ocitysmap/indexlib/indexer.py:263
 msgid "Kindergarten"
-msgstr ""
+msgstr "Haurreskola"
 
 #: ocitysmap/indexlib/indexer.py:264
 msgid "School"
-msgstr ""
+msgstr "Eskola"
 
 #: ocitysmap/indexlib/indexer.py:265
 msgid "College"
-msgstr ""
+msgstr "Institutua"
 
 #: ocitysmap/indexlib/indexer.py:266
 msgid "University"
-msgstr ""
+msgstr "Unibertsitatea"
 
 #: ocitysmap/indexlib/indexer.py:267
 msgid "Library"
-msgstr ""
+msgstr "Liburutegia"
 
 #: ocitysmap/indexlib/indexer.py:268 ocitysmap/indexlib/indexer.py:269
 #: ocitysmap/indexlib/indexer.py:270 ocitysmap/indexlib/indexer.py:272
 msgid "Public buildings"
-msgstr ""
+msgstr "Eraikin publikoak"
 
 #: ocitysmap/indexlib/indexer.py:268
 msgid "Town hall"
-msgstr ""
+msgstr "Udaletxea"
 
 #: ocitysmap/indexlib/indexer.py:269
 msgid "Post office"
-msgstr ""
+msgstr "Posta bulegoa"
 
 #: ocitysmap/indexlib/indexer.py:271
 msgid "Public building"
-msgstr ""
+msgstr "Eraikin publikoa"
 
 #: ocitysmap/indexlib/indexer.py:272
 msgid "Police"
-msgstr ""
+msgstr "Polizia"
 
 #: ocitysmap/indexlib/indexer.py:503
 msgid "Villages"
-msgstr ""
+msgstr "Herrixkak"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:584
 #: ocitysmap/layoutlib/single_page_renderers.py:368
 #, python-format
 msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
-msgstr ""
+msgstr "Copyright-a © %(year)d1 MapOSMatic/OCitySMap-en garatzaileek."
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:586
 #: ocitysmap/layoutlib/single_page_renderers.py:370
@@ -86,38 +89,42 @@ msgstr ""
 msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
 msgstr ""
+"Mapako datuen © %(year)d1 OpenStreetMap-eko  parte-hartzaileek (ikus "
+"http://osm.org/copyright)"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
 msgid "Map styles:"
-msgstr ""
+msgstr "Mapa estiloak:"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:599
 #: ocitysmap/layoutlib/single_page_renderers.py:383
 #, python-format
 msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
-msgstr ""
+msgstr "Maparen sorkuntza data: %(date)s. OSM datuen eguneraketa: %(osmdate)s."
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:601
 #: ocitysmap/layoutlib/single_page_renderers.py:385
 msgid "The map may be incomplete or inaccurate."
-msgstr ""
+msgstr "Baliteke mapa bukatu edo zehaztu gabea egotea."
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:608
 #: ocitysmap/layoutlib/single_page_renderers.py:396
 msgid "unknown"
-msgstr ""
+msgstr "ezezaguna"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:663
 msgid "This page is intentionally left blank."
-msgstr ""
+msgstr "Orri hau nahita dago hutsik."
 
 #: ocitysmap/layoutlib/single_page_renderers.py:430
 msgid ""
 "Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
 "Holzgraefe (hartmut@php.net)"
 msgstr ""
+"http://umgebungsplaene.osm-baustelle.de/ -rekin sortua.  Harremanetarako: "
+"Hartmut Holzgraefe (hartmut@php.net)"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:848
 msgid "Test gettext"
-msgstr ""
+msgstr "Gettext frogatzen"
