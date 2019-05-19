@@ -55,7 +55,7 @@ class MapCanvas:
     their respective alpha levels.
     """
 
-    def __init__(self, stylesheet, bounding_box, _width, _height, dpi,
+    def __init__(self, stylesheet, bounding_box, _width, _height, dpi=72.0,
                  extend_bbox_to_ratio=True):
         """Initialize the map canvas for rendering.
 
@@ -63,12 +63,14 @@ class MapCanvas:
             stylesheet (Stylesheet): map stylesheet.
             bounding_box (coords.BoundingBox): geographic bounding box.
             graphical_ratio (float): ratio of the map area (width/height).
+            dpi (float): map resolution (default: 72dpi)
             extend_bbox_to_ratio (boolean): allow MapCanvas to extend
             the bounding box to make it match the ratio of the
             provided rendering area. Needed by SinglePageRenderer.
         """
 
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
+        self._dpi  = dpi
 
         # This is where the magic of the map canvas happens. Given an original
         # bounding box and a graphical ratio for the output, the bounding box
@@ -165,7 +167,7 @@ class MapCanvas:
         lat = self._geo_bbox.get_top_left()[0]
         scale *= math.cos(math.radians(lat))
         # by convention, the scale denominator uses 90 ppi whereas cairo uses 72 ppi
-        scale *= float(72) / 90
+        scale *= float(self._dpi) / 90
         return scale
 
     def _render_shape_file(self, shape_file, color, line_width):

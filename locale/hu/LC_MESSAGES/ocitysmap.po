@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-16 22:26+0200\n"
-"PO-Revision-Date: 2019-04-12 09:39+0000\n"
+"PO-Revision-Date: 2019-05-07 10:44+0000\n"
 "Last-Translator: Gábor Babos <gabor.babos@gmail.com>\n"
 "Language-Team: Hungarian <http://translate.get-map.org/projects/maposmatic/"
 "ocitysmap/hu/>\n"
@@ -76,7 +76,7 @@ msgstr "Rendőrség"
 
 #: ocitysmap/indexlib/indexer.py:503
 msgid "Villages"
-msgstr "Falvak"
+msgstr "Dűlők, falvak"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:584
 #: ocitysmap/layoutlib/single_page_renderers.py:368
