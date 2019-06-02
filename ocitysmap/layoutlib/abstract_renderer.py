@@ -336,6 +336,11 @@ class Renderer:
     def get_compatible_output_formats():
         return [ "png", "svgz", "pdf", "csv" ]
 
+    def _has_multipage_format(self):
+        if self.rc.output_format == 'pdf':
+            return True
+        return False
+
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, scale):
         """Returns a list of the compatible paper sizes for the given bounding

@@ -82,7 +82,7 @@ class SinglePageRenderer(Renderer):
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            index_position (str): None or 'side' (index on side),
-              'bottom' (index at bottom).
+              'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
@@ -103,6 +103,8 @@ class SinglePageRenderer(Renderer):
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
 
+        self.index_position = index_position
+
         if self.rc.title:
             self._title_margin_pt = 0.05 * self.paper_height_pt
         else:
@@ -121,12 +123,12 @@ class SinglePageRenderer(Renderer):
         if ( index_position and self.street_index
              and self.street_index.categories ):
             self._index_renderer, self._index_area \
-                = self._create_index_rendering(index_position == "side")
+                = self._create_index_rendering(index_position)
         else:
             self._index_renderer, self._index_area = None, None
 
         # Prepare the layout of the whole page
-        if not self._index_area:
+        if not self._index_area or index_position == 'extra_page':
             # No index displayed
             self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
                                  ( Renderer.PRINT_SAFE_MARGIN_PT
@@ -216,15 +218,17 @@ class SinglePageRenderer(Renderer):
         for overlay_canvas in self._overlay_canvases:
            overlay_canvas.render()
 
-    def _create_index_rendering(self, on_the_side):
+    def _create_index_rendering(self, index_position):
         """
         Prepare to render the Street index.
 
         Args:
-           on_the_side (bool): True=index on the side, False=at bottom.
-
+           index_position (string): None, side, bottom or extra_page
         Return a couple (StreetIndexRenderer, StreetIndexRenderingArea).
         """
+
+        index_area = None
+
         # Now we determine the actual occupation of the index
         if self.rc.poi_file:
             index_renderer = PoiIndexRenderer(self.rc.i18n,
@@ -239,7 +243,7 @@ class SinglePageRenderer(Renderer):
                                         self.paper_width_pt,
                                         self.paper_height_pt)
 
-        if on_the_side:
+        if index_position == 'side':
             index_max_width_pt \
                 = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_width_pt
 
@@ -262,7 +266,7 @@ class SinglePageRenderer(Renderer):
                     index_max_width_pt,
                     self._usable_area_height_pt,
                     'width', 'left')
-        else:
+        elif index_position == 'bottom':
             # Index at the bottom of the page
             index_max_height_pt \
                 = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_height_pt
@@ -547,7 +551,7 @@ class SinglePageRenderer(Renderer):
             ctx.restore()
 
         # Place the vertical and horizontal square labels
-        if self.grid and self._index_area:
+        if self.grid and self.index_position:
             self._draw_labels(ctx, self.grid,
                               map_coords_dots[2],
                               map_coords_dots[3],
@@ -629,9 +633,38 @@ class SinglePageRenderer(Renderer):
           self.render_plugin(effect, ctx)
         ctx.restore()
 
+        if self._has_multipage_format() and self.index_position == 'extra_page':
+            cairo_surface.show_page()
 
+            # We use a fake vector device to determine the actual
+            # rendering characteristics
+            fake_surface = cairo.PDFSurface(None,
+                                            self.paper_width_pt,
+                                            self.paper_height_pt)
 
-        cairo_surface.flush()
+            usable_area_width_pt = (self.paper_width_pt -
+                                          2 * Renderer.PRINT_SAFE_MARGIN_PT)
+            usable_area_height_pt = (self.paper_height_pt -
+                                           2 * Renderer.PRINT_SAFE_MARGIN_PT)
+
+            index_area = self._index_renderer.precompute_occupation_area(
+                fake_surface,
+                Renderer.PRINT_SAFE_MARGIN_PT,
+                ( self.paper_height_pt
+                  - Renderer.PRINT_SAFE_MARGIN_PT
+                  - usable_area_height_pt
+                ),
+                usable_area_width_pt,
+                usable_area_height_pt,
+                'width', 'left')
+
+            ctx.save()
+            self._index_renderer.render(ctx, index_area, dpi)
+            ctx.restore()
+
+            cairo_surface.show_page()
+        else:
+            cairo_surface.flush()
 
     @staticmethod
     def _generic_get_compatible_paper_sizes(bounding_box,
@@ -644,7 +677,7 @@ class SinglePageRenderer(Renderer):
             bounding_box (coords.BoundingBox): the map geographic bounding box.
             scale (int): minimum mapnik scale of the map.
            index_position (str): None or 'side' (index on side),
-              'bottom' (index at bottom).
+              'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok, is_default). Paper sizes are

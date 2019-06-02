@@ -1,9 +1,8 @@
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
-from ocitysmap.layoutlib.single_page_renderer.no_index import SinglePageRendererNoIndex
 
-class SinglePageRendererIndexExtraPage(SinglePageRendererNoIndex):
+class SinglePageRendererIndexExtraPage(SinglePageRenderer):
 
     name = 'single_page_index_extra_page'
     description = 'Full-page layout with index on extra page.'
@@ -16,8 +15,7 @@ class SinglePageRendererIndexExtraPage(SinglePageRendererNoIndex):
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, None)
-
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'extra_page')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
