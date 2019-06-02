@@ -206,7 +206,7 @@ class SinglePageRenderer(Renderer):
             self._apply_grid(self.grid, self._map_canvas)
 
         # Update the street_index to reflect the grid's actual position
-        if self.grid and self.street_index:
+        if self.grid and self.street_index and index_position is not None:
             self.street_index.apply_grid(self.grid)
 
             # Dump the CSV street index
