@@ -1,26 +1,27 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Translators:
 # , 2010
 # jmontane, 2013
 # jmontane, 2012
 # Joan Montané <joan--sense-spam--montane.cat>, 2010
+# Joan Montané <joan@montane.cat>, 2019.
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-16 22:26+0200\n"
-"PO-Revision-Date: 2013-11-20 09:54+0000\n"
-"Last-Translator: jmontane <joan@montane.cat>\n"
-"Language-Team: Catalan (http://www.transifex.com/dittaeva/maposmatic/"
-"language/ca/)\n"
+"PO-Revision-Date: 2019-05-07 10:44+0000\n"
+"Last-Translator: Joan Montané <joan@montane.cat>\n"
+"Language-Team: Catalan <http://translate.get-map.org/projects/maposmatic/"
+"ocitysmap/ca/>\n"
 "Language: ca\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.5.1\n"
 
 #: ocitysmap/indexlib/indexer.py:261
 msgid "Places of worship"
@@ -79,7 +80,7 @@ msgstr "Policia"
 
 #: ocitysmap/indexlib/indexer.py:503
 msgid "Villages"
-msgstr "Viles"
+msgstr "Pobles"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:584
 #: ocitysmap/layoutlib/single_page_renderers.py:368
@@ -99,7 +100,7 @@ msgstr ""
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
 msgid "Map styles:"
-msgstr ""
+msgstr "Estils de mapa:"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:599
 #: ocitysmap/layoutlib/single_page_renderers.py:383
@@ -111,7 +112,7 @@ msgstr ""
 #: ocitysmap/layoutlib/multi_page_renderer.py:601
 #: ocitysmap/layoutlib/single_page_renderers.py:385
 msgid "The map may be incomplete or inaccurate."
-msgstr "El mapa pot ser incomplet o no acurat."
+msgstr "El mapa pot ser incomplet o inexacte."
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:608
 #: ocitysmap/layoutlib/single_page_renderers.py:396
@@ -120,13 +121,15 @@ msgstr "desconegut"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:663
 msgid "This page is intentionally left blank."
-msgstr "Aquesta pàgina és buida intencionadament"
+msgstr "Aquesta pàgina és en blanc intencionadament."
 
 #: ocitysmap/layoutlib/single_page_renderers.py:430
 msgid ""
 "Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
 "Holzgraefe (hartmut@php.net)"
 msgstr ""
+"Creat amb http://umgebungsplaene.osm-baustelle.de/  -  Contacte: Hartmut "
+"Holzgraefe (hartmut@php.net)"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:848
 msgid "Test gettext"

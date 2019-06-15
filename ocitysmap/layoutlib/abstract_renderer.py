@@ -304,7 +304,7 @@ class Renderer:
         Return a new Grid object.
         """
 
-        return Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale() * dpi / 72, self.rc.i18n.isrtl())
+        return Grid(canvas.get_actual_bounding_box(), canvas.get_actual_scale(), self.rc.i18n.isrtl())
 
     def _apply_grid(self, map_grid, canvas):
         grid_shape = map_grid.generate_shape_file(
@@ -335,6 +335,11 @@ class Renderer:
     @staticmethod
     def get_compatible_output_formats():
         return [ "png", "svgz", "pdf", "csv" ]
+
+    def _has_multipage_format(self):
+        if self.rc.output_format == 'pdf':
+            return True
+        return False
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, scale):
