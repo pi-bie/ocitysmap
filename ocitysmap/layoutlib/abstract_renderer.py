@@ -359,7 +359,10 @@ class Renderer:
 
     # convert geo into pixel coordinates for direct rendering of geo features
     # mostly needed by rendering overlay plugins
-    def _latlon2xy(self, lat, lon, dpi):
+    def _latlon2xy(self, lat, lon, dpi = None):
+        if dpi is None:
+            dpi = self.dpi
+
         bbox = self._map_canvas.get_actual_bounding_box()
 
         vert_angle_span  = abs(bbox.get_top_left()[1] - bbox.get_bottom_right()[1])
