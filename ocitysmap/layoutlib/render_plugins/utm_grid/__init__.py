@@ -37,6 +37,47 @@ def render(renderer, ctx):
         else:
             return 'epsg:327%02d' % number
 
+    def superscript(i):
+        if i == 0:
+            return '\N{SUPERSCRIPT ZERO}'
+        if i == 1:
+            return '\N{SUPERSCRIPT ONE}'
+        elif i == 2:
+            return '\N{SUPERSCRIPT TWO}'
+        elif i == 3:
+            return '\N{SUPERSCRIPT THREE}'
+        elif i == 4:
+            return '\N{SUPERSCRIPT FOUR}'
+        elif i == 5:
+            return '\N{SUPERSCRIPT FIVE}'
+        elif i == 6:
+            return '\N{SUPERSCRIPT SIX}'
+        elif i == 7:
+            return '\N{SUPERSCRIPT SEVEN}'
+        elif i == 8:
+            return '\N{SUPERSCRIPT EIGHT}'
+        elif i == 9:
+            return '\N{SUPERSCRIPT NINE}'
+        else:
+            return i
+
+    def beautify_km(km):
+        txt = ''
+
+        t1 = int(km/100)
+        t2 = int(km)%100
+
+        t11 =int(t1/10)
+        t12 =int(t1)%10
+
+        if t11 > 0:
+            txt = txt + superscript(t11)
+        txt = txt + superscript(t12)
+
+        txt = txt + ("%02d" % t2)
+
+        return txt
+
     def utm_zonefield2proj(number, letter):
         if letter.upper() <= 'M':
             south = '+south '
@@ -46,9 +87,9 @@ def render(renderer, ctx):
         return '+proj=utm +zone=%d %s +ellps=WGS84 +datum=WGS84 +units=m +no_defs' % (number, south)
 
     def show_grid(lat1, lon1, lat2, lon2):
-        if (lat1 > 0 and lat2 < 0) or (lat1 < 0 and lat2 > 0):
-            show_grid(lat1, lon1, 0, lon2)
-            show_grid(0, lon1, lat2, lon2)
+        if (lat1 > 0 and lat2 < 0):
+            show_grid(lat1, lon1, 0.000001, lon2)
+            show_grid(-0.000001, lon1, lat2, lon2)
             return
 
         (west, north, zone1_number, zone1_letter) = utm.from_latlon(lat1, lon1)
@@ -69,12 +110,17 @@ def render(renderer, ctx):
             show_grid(lat1, split_lon+0.000001, lat2, lon2)
             return
 
-        w_km = int(west/1000)
-        e_km = int(east/1000)
-        n_km = int(north/1000)
-        s_km = int(south/1000)
+        (x1, y1) = renderer._latlon2xy(lat1, lon1)
+        (x2, y2) = renderer._latlon2xy(lat2, lon2)
 
-        LOG.warning("foo %f %f - %f %f - %d %d" % (lat1, lon1, lat2, lon2, n_km, s_km))
+        ctx.save()
+        ctx.rectangle(x1, y1, x2, y2)
+        ctx.clip()
+
+        w_km = math.floor(west/1000)
+        e_km = math.ceil(east/1000)
+        n_km = math.ceil(north/1000)
+        s_km = math.floor(south/1000)
 
         for v in range(w_km, e_km):
             (lat1, lon1) = utm.to_latlon(v * 1000, n_km * 1000, zone1_number, zone1_letter)
@@ -85,6 +131,31 @@ def render(renderer, ctx):
             (lat1, lon1) = utm.to_latlon(w_km * 1000, h * 1000, zone1_number, zone1_letter)
             (lat2, lon2) = utm.to_latlon(e_km * 1000, h * 1000, zone1_number, zone1_letter)
             grid_line(lat1, lon1, lat2, lon2)
+
+        ctx.save()
+        ctx.set_source_rgba(0, 0, 0.5, 0.5)
+        draw_simpletext_center(ctx, ("%d%s" % (zone1_number, zone1_letter)), 27, 20)
+        ctx.restore()
+
+        for v in range(w_km, e_km):
+            (lat1, lon1) = utm.to_latlon(v * 1000, n_km * 1000, zone1_number, zone1_letter)
+            (x1, y1) = renderer._latlon2xy(lat1, lon1)
+
+            ctx.save()
+            ctx.set_source_rgba(0, 0, 0.5, 0.5)
+            draw_simpletext_center(ctx, beautify_km(v), x1 + 12, 20)
+            ctx.restore()
+
+        for h in range(s_km, n_km):
+            (lat1, lon1) = utm.to_latlon(w_km * 1000, h * 1000, zone1_number, zone1_letter)
+            (x1, y1) = renderer._latlon2xy(lat1, lon1)
+
+            ctx.save()
+            ctx.set_source_rgba(0, 0, 0.5, 0.5)
+            draw_simpletext_center(ctx, beautify_km(h), 27, y1 + 5)
+            ctx.restore()
+
+        ctx.restore()
 
     bbox = renderer._map_canvas.get_actual_bounding_box()
 
