@@ -353,6 +353,8 @@ SELECT ST_AsText(ST_LongestLine(
         for style in self.STYLESHEET_REGISTRY:
             if style.name == name:
                 return style
+            if name in style.aliases:
+                return style
         raise LookupError( 'The requested stylesheet %s was not found!' % name)
 
     def get_all_overlay_configurations(self):

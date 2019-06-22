@@ -56,6 +56,7 @@ class Stylesheet:
         self.datasource  = '' # str
         self.url         = '' # str
         self.group       = '' # str
+        self.aliases     = [] # array of str
 
         self.exclude_layers = []
 
@@ -103,6 +104,7 @@ class Stylesheet:
         assign_if_present('datasource')
         assign_if_present('url')
         assign_if_present('group')
+        assign_list_if_present('aliases')
 
         assign_if_present('grid_line_color')
         assign_if_present('grid_line_alpha', float)
