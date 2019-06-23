@@ -668,7 +668,9 @@ class SinglePageRenderer(Renderer):
 
     @staticmethod
     def _generic_get_compatible_paper_sizes(bounding_box,
-                                            scale=Renderer.DEFAULT_SCALE, index_position = None):
+                                            paper_sizes,
+                                            scale=Renderer.DEFAULT_SCALE,
+                                            index_position = None):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
@@ -733,7 +735,8 @@ class SinglePageRenderer(Renderer):
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
         valid_sizes = []
-        for name, w, h in ocitysmap.layoutlib.PAPER_SIZES:
+        for name, w, h in paper_sizes:
+            LOG.debug("is %s compatible" % name)
             if w is None: 
                 continue
 

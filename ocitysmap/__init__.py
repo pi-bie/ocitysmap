@@ -93,7 +93,7 @@ from . import coords
 from . import i18n
 from .indexlib.indexer import StreetIndex
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
-from .layoutlib import PAPER_SIZES, renderers
+from .layoutlib import renderers
 from .layoutlib import commons
 from .stylelib import Stylesheet
 
@@ -153,6 +153,8 @@ class OCitySMap:
 
     OVERLAY_REGISTRY = []
 
+    PAPER_SIZES = []
+
     def __init__(self, config_files=None):
         """Instanciate a new configured OCitySMap instance.
 
@@ -172,6 +174,8 @@ class OCitySMap:
                  ', '.join(config_files))
 
         self._parser = configparser.ConfigParser()
+        self._parser.optionxform = str # make option names case sensitive
+
         # if not self._parser.read(['/home/maposmatic/.ocitysmap.conf']):
         #    raise IOError('None of the configuration files could be read!')
         self._parser.read('/home/maposmatic/.ocitysmap.conf', encoding='utf-8')
@@ -188,6 +192,21 @@ class OCitySMap:
 
         self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
+
+        if self._parser.has_section('paper_sizes'):
+            self.PAPER_SIZES = []
+            for key in self._parser['paper_sizes']:
+                value = self._parser['paper_sizes'][key]
+                LOG.warning("%s -> %s" % (key, value ))
+                (w,h) = value.split('x')
+                self.PAPER_SIZES.append((key, int(w), int(h)))
+        else:
+            # minimal fallback configuration
+            self.PAPER_SIZES = [('DinA4',     210, 297),
+                                ('US_letter', 216, 279),
+                               ]
+
+        self.PAPER_SIZES.append(('Best fit', None, None))
 
     @property
     def _db(self, name='default'):
@@ -388,19 +407,20 @@ SELECT ST_AsText(ST_LongestLine(
             renderer_names.append(r.name)
         return renderer_names;
 
-    @staticmethod
-    def get_all_paper_sizes():
-        return PAPER_SIZES
+    # @staticmethod
+    def get_all_paper_sizes(self):
+        return self.PAPER_SIZES
 
-    @staticmethod
-    def get_all_paper_size_names():
+    # @staticmethod
+    def get_all_paper_size_names(self):
         paper_names = []
-        for p in PAPER_SIZES:
+        for p in self.PAPER_SIZES:
             paper_names.append(p[0])
+        return paper_names
 
-    @staticmethod
-    def get_paper_size_by_name(name):
-        for p in PAPER_SIZES:
+    # @staticmethod
+    def get_paper_size_by_name(self, name):
+        for p in self.PAPER_SIZES:
             if p[0] == name:
                 return [p[1], p[2]]
         raise LookupError( 'The requested paper size %s was not found!' % name)
@@ -454,7 +474,7 @@ SELECT ST_AsText(ST_LongestLine(
 
         osm_date = self.get_osm_database_last_update()
 
-        # Create a temporary directory for all our shape files
+        # Create a temporary directory for all our temporary helper files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
         try:
             LOG.debug('Rendering in temporary directory %s' % tmpdir)

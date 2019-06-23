@@ -966,11 +966,12 @@ class MultiPageRenderer(Renderer):
     # TODO make separate format lists so that things don't break again on name changes
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
+                                   paper_sizes,
                                    scale=Renderer.DEFAULT_MULTIPAGE_SCALE,
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
         acceptable_formats = [ 'Din A5', 'Din A4', 'US letter' ]
-        for sz in ocitysmap.layoutlib.PAPER_SIZES:
+        for sz in paper_sizes:
             # Skip unsupported paper formats
             if sz[0] not in acceptable_formats:
                 continue
