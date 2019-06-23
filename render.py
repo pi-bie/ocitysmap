@@ -62,7 +62,7 @@ def main():
                       action='append')
     parser.add_option('-t', '--title', dest='output_title', metavar='TITLE',
                       help='specify the title displayed in the output files.',
-                      default="My Map")
+                      default="")
     parser.add_option('--osmid', dest='osmid', metavar='OSMID',
                       help='OSM ID representing the polygon of the city '
                       'to render.', type="int"),
