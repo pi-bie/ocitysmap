@@ -174,6 +174,9 @@ class StreetIndex:
     def categories(self):
         return self._categories
 
+    def add_category(self, name, items=None, is_street=False):
+        self._categories.append(commons.StreetIndexCategory(name, items, is_street))
+
     def apply_grid(self, grid):
         """
         Update the location_str field of the streets and amenities by
