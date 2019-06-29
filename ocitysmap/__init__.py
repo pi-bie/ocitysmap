@@ -155,6 +155,8 @@ class OCitySMap:
 
     PAPER_SIZES = []
 
+    MULTIPAGE_PAPER_SIZES = []
+
     def __init__(self, config_files=None):
         """Instanciate a new configured OCitySMap instance.
 
@@ -197,7 +199,6 @@ class OCitySMap:
             self.PAPER_SIZES = []
             for key in self._parser['paper_sizes']:
                 value = self._parser['paper_sizes'][key]
-                LOG.warning("%s -> %s" % (key, value ))
                 (w,h) = value.split('x')
                 self.PAPER_SIZES.append((key, int(w), int(h)))
         else:
@@ -207,6 +208,18 @@ class OCitySMap:
                                ]
 
         self.PAPER_SIZES.append(('Best fit', None, None))
+
+        if self._parser.has_section('multipage_paper_sizes'):
+            self.MULTIPAGE_PAPER_SIZES = []
+            for key in self._parser['multipage_paper_sizes']:
+                value = self._parser['multipage_paper_sizes'][key]
+                (w,h) = value.split('x')
+                self.MULTIPAGE_PAPER_SIZES.append((key, int(w), int(h)))
+        else:
+            # minimal fallback configuration
+            self.MULTIPAGE_PAPER_SIZES = [('DinA4',     210, 297),
+                                          ('US_letter', 216, 279),
+                                         ]
 
     @property
     def _db(self, name='default'):
@@ -407,20 +420,21 @@ SELECT ST_AsText(ST_LongestLine(
             renderer_names.append(r.name)
         return renderer_names;
 
-    # @staticmethod
-    def get_all_paper_sizes(self):
-        return self.PAPER_SIZES
+    def get_all_paper_sizes(self, section = None):
+        if section is None:
+            return self.PAPER_SIZES
+        else:
+            # TODO allow for more than two sections
+            return self.MULTIPAGE_PAPER_SIZES
 
-    # @staticmethod
-    def get_all_paper_size_names(self):
+    def get_all_paper_size_names(self, section = None):
         paper_names = []
-        for p in self.PAPER_SIZES:
+        for p in self.get_all_paper_sizes(section):
             paper_names.append(p[0])
         return paper_names
 
-    # @staticmethod
-    def get_paper_size_by_name(self, name):
-        for p in self.PAPER_SIZES:
+    def get_paper_size_by_name(self, name, section = None):
+        for p in self.get_all_paper_sizes(section):
             if p[0] == name:
                 return [p[1], p[2]]
         raise LookupError( 'The requested paper size %s was not found!' % name)
