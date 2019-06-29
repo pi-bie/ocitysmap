@@ -18,7 +18,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'bottom')
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, paper_sizes,
+    def get_compatible_paper_sizes(bounding_box, render_context,
                                    scale=Renderer.DEFAULT_SCALE):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
@@ -34,5 +34,5 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
         portrait mode.
         """
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
-            bounding_box, paper_sizes, scale, 'bottom')
+            bounding_box, render_context.get_all_paper_sizes(), scale, 'bottom')
 
