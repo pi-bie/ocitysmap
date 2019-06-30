@@ -22,6 +22,9 @@ import logging
 LOG = logging.getLogger('ocitysmap')
 
 def render(renderer, ctx):
+    if not hasattr(renderer, 'street_index'):
+        return
+
     bbox = renderer._map_canvas.get_actual_bounding_box()
     url  = ("https://api.openstreetmap.org/api/0.6/notes.json?closed=0&bbox=%f,%f,%f,%f"
             % (bbox.get_left(), bbox.get_bottom(), bbox.get_right(), bbox.get_top()))
@@ -48,7 +51,7 @@ def render(renderer, ctx):
         return 
 
     index_items = []
-    
+
     n = 0
     for note in notes['features']:
         n = n + 1
@@ -58,7 +61,7 @@ def render(renderer, ctx):
         point = Point(lat, lon)
 
         index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
-        
+
         index_items.append(StreetIndexItem(index_text[0:50], point, point, None))
 
         renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
