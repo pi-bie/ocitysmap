@@ -450,15 +450,16 @@ class SinglePageRenderer(Renderer):
 
         x,y = self._latlon2xy(lat, lon, dpi)
 
-        scale = 50.0 / svg.props.height;
+        scale1 = 50.0  / svg.props.height 
+        scale2 = scale1 * dpi / 72.0
 
-        x-= svg.props.width  * scale/2
-        y-= svg.props.height * scale
+        x-= svg.props.width  * scale2/2
+        y-= svg.props.height * scale2
 
         ctx.save()
         ctx.translate(x, y)
 
-        ctx.scale(scale, scale)
+        ctx.scale(scale2, scale2)
         svg.render_cairo(ctx)
 
         pc = PangoCairo.create_context(ctx)
@@ -469,7 +470,7 @@ class SinglePageRenderer(Renderer):
         layout.set_text(txt, -1)
         draw_utils.adjust_font_size(layout, fd, svg.props.width/3, svg.props.width/3)
         ink, logical = layout.get_extents()
-        ctx.translate(svg.props.width/2 - ink.width * scale/50, svg.props.height/5)
+        ctx.translate(svg.props.width/2 - logical.width * scale1/50, svg.props.height/5)
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
 
