@@ -28,7 +28,7 @@ def render(renderer, ctx):
     bbox = renderer._map_canvas.get_actual_bounding_box()
     url  = ("https://api.openstreetmap.org/api/0.6/notes.json?closed=0&bbox=%f,%f,%f,%f"
             % (bbox.get_left(), bbox.get_bottom(), bbox.get_right(), bbox.get_top()))
-    LOG.warning("notes URL: %s" % url)
+    LOG.info("OSM Notes URL: %s" % url)
 
     req = Request(url)
     try:

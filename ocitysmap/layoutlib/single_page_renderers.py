@@ -85,6 +85,8 @@ class SinglePageRenderer(Renderer):
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
+        self.file_prefix = file_prefix
+
         # Prepare the index
         if rc.poi_file:
             self.street_index = PoiIndex(rc.poi_file)
@@ -198,23 +200,16 @@ class SinglePageRenderer(Renderer):
         if self.rc.poi_file:
             self._overlay_effects.append('poi_markers')
 
-        # Prepare the grid
-        self.grid = self._create_grid(self._map_canvas, dpi)
-        if index_position:
-            self._apply_grid(self.grid, self._map_canvas)
-
-        # Update the street_index to reflect the grid's actual position
-        if self.grid and self.street_index and index_position is not None:
-            self.street_index.apply_grid(self.grid)
-
-            # Dump the CSV street index
-            self.street_index.write_to_csv(rc.title, '%s.csv' % file_prefix)
-
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
 
         for overlay_canvas in self._overlay_canvases:
            overlay_canvas.render()
+
+        # Prepare the grid
+        self.grid = self._create_grid(self._map_canvas, dpi)
+        if index_position:
+            self._apply_grid(self.grid, self._map_canvas)
 
     def _create_index_rendering(self, index_position):
         """
@@ -529,9 +524,26 @@ class SinglePageRenderer(Renderer):
                              title_margin_dots, 'Droid Sans Bold')
             ctx.restore()
 
+        # apply effect overlays
+        ctx.save()
+        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.clip()
+
+        for effect in self._overlay_effects:
+          self.render_plugin(effect, ctx)
+        ctx.restore()
+
         ##
         ## Draw the index, when applicable
         ##
+
+        # Update the street_index to reflect the grid's actual position
+        if self.grid and self.street_index and self.index_position is not None:
+            self.street_index.apply_grid(self.grid)
+
+            # Dump the CSV street index
+            self.street_index.write_to_csv(self.rc.title, '%s.csv' % self.file_prefix)
+
         if self._index_renderer and self._index_area:
             ctx.save()
 
@@ -575,15 +587,6 @@ class SinglePageRenderer(Renderer):
         self._draw_copyright_notice(ctx, usable_area_width_dots,
                                     copyright_margin_dots,
                                     osm_date=osm_date)
-        ctx.restore()
-
-        # apply effect overlays
-        ctx.save()
-        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
-        ctx.clip()
-        
-        for effect in self._overlay_effects:
-          self.render_plugin(effect, ctx)
         ctx.restore()
 
         if self._has_multipage_format() and self.index_position == 'extra_page':
