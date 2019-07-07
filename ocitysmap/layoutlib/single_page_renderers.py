@@ -200,16 +200,16 @@ class SinglePageRenderer(Renderer):
         if self.rc.poi_file:
             self._overlay_effects.append('poi_markers')
 
+        # Prepare the grid
+        self.grid = self._create_grid(self._map_canvas, dpi)
+        if index_position:
+            self._apply_grid(self.grid, self._map_canvas)
+
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
 
         for overlay_canvas in self._overlay_canvases:
            overlay_canvas.render()
-
-        # Prepare the grid
-        self.grid = self._create_grid(self._map_canvas, dpi)
-        if index_position:
-            self._apply_grid(self.grid, self._map_canvas)
 
     def _create_index_rendering(self, index_position):
         """
