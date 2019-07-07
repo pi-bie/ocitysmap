@@ -187,6 +187,11 @@ class SinglePageRenderer(Renderer):
         if self.rc.umap_file:
             self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
 
+        # add special POI marker overlay if a POI file is given
+        # TODO: refactor this special case
+        if self.rc.poi_file:
+            self._overlay_effects.append('poi_markers')
+
         # Prepare map overlays
         self._overlay_canvases = []
         self._overlay_effects  = []
@@ -200,11 +205,6 @@ class SinglePageRenderer(Renderer):
                                               float(self._map_coords[2]),  # W
                                               float(self._map_coords[3]),  # H
                                               dpi))
-
-        # add special POI marker overlay if a POI file is given
-        # TODO: refactor this special case
-        if self.rc.poi_file:
-            self._overlay_effects.append('poi_markers')
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
