@@ -190,7 +190,7 @@ class SinglePageRenderer(Renderer):
         # add special POI marker overlay if a POI file is given
         # TODO: refactor this special case
         if self.rc.poi_file:
-            self._overlay_effects.append('poi_markers')
+            self._overlay_effects.append(self.get_plugin('poi_markers'))
 
         # Prepare map overlays
         self._overlay_canvases = []
@@ -198,7 +198,7 @@ class SinglePageRenderer(Renderer):
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
-                self._overlay_effects.append(path.lstrip('internal:'))
+                self._overlay_effects.append(self.get_plugin(path.lstrip('internal:')))
             else:
                 self._overlay_canvases.append(MapCanvas(overlay,
                                               self.rc.bounding_box,
@@ -543,7 +543,7 @@ class SinglePageRenderer(Renderer):
 
         # apply effect plugin overlays
         for effect in self._overlay_effects:
-          self.render_plugin(effect, ctx)
+            effect.render(self, ctx)
         ctx.restore()
 
         ##
