@@ -3,6 +3,12 @@ OCitySMap installation instructions
 
 These instructions refer to software dependencies by using Ubuntu Bionic (18.04LTS) package names. Minor adaptations might be needed for other distributions or for the precise Debian or Ubuntu release you are using. They have been tested on several x86_64 hosts.
 
+If you are fine with running OCitySMap and MapOSMatic in a Vagrant virtual machine, plese have a look at the MapOSMatic Vagrant repository:
+
+https://github.com/hholzgra/maposmatic-vagrant
+
+Its provisioning shell scripts may also help as a guide to install things on a non-virtual machine.
+
  ## Installation of required packages
 
 ```bash
