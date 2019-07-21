@@ -66,7 +66,9 @@ osm2pgsql -s -a -d maposmatic -m -U maposmatic -W \
 
 ## Install Openstreetmap Carto style
 
-TODO
+TODO, for now please refer to the original OSM Carto install file:
+
+https://github.com/gravitystorm/openstreetmap-carto/blob/master/INSTALL.md
 
 ## Installation of OCitySMap
 
