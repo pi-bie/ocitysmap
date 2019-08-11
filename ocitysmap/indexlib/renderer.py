@@ -394,7 +394,7 @@ class StreetIndexRenderer:
         return area
 
 
-    def render(self, ctx, rendering_area, dpi = UTILS.PT_PER_INCH):
+    def render(self, ctx, p_rendering_area, dpi = UTILS.PT_PER_INCH):
         """
         Render the street and amenities index at the given (x,y)
         coordinates into the provided Cairo surface. The index must
@@ -407,6 +407,12 @@ class StreetIndexRenderer:
                 precompute_occupation_area().
             dpi (number): resolution of the target device.
         """
+
+        rendering_area = p_rendering_area
+        rendering_area.x = rendering_area.x + 1
+        rendering_area.y = rendering_area.y + 1
+        rendering_area.w = rendering_area.w - 2
+        rendering_area.h = rendering_area.h - 2
 
         if not self._index_categories:
             raise commons.IndexEmptyError
