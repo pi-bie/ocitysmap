@@ -187,24 +187,25 @@ class SinglePageRenderer(Renderer):
         if self.rc.umap_file:
             self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
 
-        # add special POI marker overlay if a POI file is given
-        # TODO: refactor this special case
-        if self.rc.poi_file:
-            self._overlay_effects.append(self.get_plugin('poi_markers'))
-
         # Prepare map overlays
         self._overlay_canvases = []
-        self._overlay_effects  = []
+        self._overlay_effects  = {}
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
-                self._overlay_effects.append(self.get_plugin(path.lstrip('internal:')))
+                plugin_name = path.lstrip('internal:')
+                self._overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 self._overlay_canvases.append(MapCanvas(overlay,
                                               self.rc.bounding_box,
                                               float(self._map_coords[2]),  # W
                                               float(self._map_coords[3]),  # H
                                               dpi))
+
+        # add special POI marker overlay if a POI file is given
+        # TODO: refactor this special case
+        if self.rc.poi_file:
+            self._overlay_effects['poi_markers'] = self.get_plugin('poi_markers')
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)
@@ -542,8 +543,12 @@ class SinglePageRenderer(Renderer):
         ctx.clip()
 
         # apply effect plugin overlays
-        for effect in self._overlay_effects:
-            effect.render(self, ctx)
+        for plugin_name, effect in self._overlay_effects.items():
+            try:
+                effect.render(self, ctx)
+            except Exception as e:
+                # TODO better logging
+                LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
         ctx.restore()
 
         ##

@@ -266,12 +266,13 @@ class MultiPageRenderer(Renderer):
             self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
 
         self.overview_overlay_canvases = []
-        self.overview_overlay_effects = []
+        self.overview_overlay_effects  = {}
         
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
-                self.overview_overlay_effects.append(self.get_plugin(path.lstrip('internal:')))
+                plugin_name = path.lstrip('internal:')
+                self.overview_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       overview_bb,
@@ -316,11 +317,12 @@ class MultiPageRenderer(Renderer):
 
             # Create canvas for overlay on current page
             overlay_canvases = []
-            overlay_effects  = []
+            overlay_effects  = {}
             for overlay in self._overlays:
                 path = overlay.path.strip()
+                plugin_name = path.lstrip('internal:')
                 if path.startswith('internal:'):
-                    overlay_effects.append(self.get_plugin(path.lstrip('internal:')))
+                    overlay_effects[plugin_name] = self.get_plugin(plugin_name)
                 else:
                     overlay_canvases.append(MapCanvas(overlay,
                                                bb, self._usable_area_width_pt,
@@ -493,11 +495,12 @@ class MultiPageRenderer(Renderer):
         self._front_page_map = front_page_map
 
         self._frontpage_overlay_canvases = []
-        self._frontpage_overlay_effects  = []
+        self._frontpage_overlay_effects  = {}
         for overlay in self._overlays:
             path = overlay.path.strip()
+            plugin_name = path.lstrip('internal:')
             if path.startswith('internal:'):
-                self._frontpage_overlay_effects.append(self.get_plugin(path.lstrip('internal:')))
+                self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       self.rc.bounding_box,
@@ -542,8 +545,12 @@ class MultiPageRenderer(Renderer):
         # we have to undo border adjustments here
         ctx.translate(0, -(0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT))
         self._map_canvas = self._front_page_map;
-        for effect in self._frontpage_overlay_effects:
-            effect.render(self, ctx)
+        for plugin_name, effect in self._frontpage_overlay_effects.items():
+            try:
+                effect.render(self, ctx)
+            except Exception as e:
+                # TODO better logging
+                LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
         ctx.restore()
     
 
@@ -683,8 +690,13 @@ class MultiPageRenderer(Renderer):
                 -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
                 -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
         self._map_canvas = self.overview_canvas;
-        for effect in self.overview_overlay_effects:
-            effect.render(self, ctx)
+        for plugin_name, effect in self.overview_overlay_effects.items():
+            try:
+                effect.render(self, ctx)
+            except Exception as e:
+                # TODO better logging
+                LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
+
         ctx.restore()
             
         # draw pages numbers
@@ -923,9 +935,14 @@ class MultiPageRenderer(Renderer):
             ctx.translate(-commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
                       -commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
             self._map_canvas = canvas;
-            for effect in overlay_effects:
+            for plugin_name, effect in overlay_effects.items():
                 self.grid = grid
-                effect.render(self, ctx)
+                try:
+                    effect.render(self, ctx)
+                except Exception as e:
+                    # TODO better logging
+                    LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
+                    effect.render(self, ctx)
             ctx.restore()
 
 
