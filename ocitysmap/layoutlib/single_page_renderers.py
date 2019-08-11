@@ -181,11 +181,21 @@ class SinglePageRenderer(Renderer):
 
         # generate style file for GPX file
         if self.rc.gpx_file:
-            self._overlays.append(GpxStylesheet(self.rc.gpx_file, self.tmpdir))
+            try:
+                gpx_style = GpxStylesheet(self.rc.gpx_file, self.tmpdir)
+            except Exception as e:
+                LOG.warning("GPX stylesheet error: %s" % e)
+            else:
+                self._overlays.append(gpx_style)
 
         # denormalize UMAP json to geojson, then create style for it
         if self.rc.umap_file:
-            self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
+            try:
+                umap_style = UmapStylesheet(self.rc.umap_file, self.tmpdir)
+            except Exception as e:
+                LOG.warning("UMAP stylesheet error: %s" % e)
+            else:
+                self._overlays.append(umap_style)
 
         # Prepare map overlays
         self._overlay_canvases = []

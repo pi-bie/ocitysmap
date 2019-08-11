@@ -259,11 +259,21 @@ class MultiPageRenderer(Renderer):
         
         # generate style file for GPX file
         if self.rc.gpx_file:
-            self._overlays.append(GpxStylesheet(self.rc.gpx_file, self.tmpdir))
+            try:
+                gpx_style = GpxStylesheet(self.rc.gpx_file, self.tmpdir)
+            except Exception as e:
+                LOG.warning("GPX stylesheet error: %s" % e)
+            else:
+                self._overlays.append(gpx_style)
 
         # denormalize UMAP json to geojson, then create style for it
         if self.rc.umap_file:
-            self._overlays.append(UmapStylesheet(self.rc.umap_file, self.tmpdir))
+            try:
+                umap_style = UmapStylesheet(self.rc.umap_file, self.tmpdir)
+            except Exception as e:
+                LOG.warning("Umap_stylesheet error: %s" % e)
+            else:
+                self._overlays.append(umap_style)
 
         self.overview_overlay_canvases = []
         self.overview_overlay_effects  = {}
