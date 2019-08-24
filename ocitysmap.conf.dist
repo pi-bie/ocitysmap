@@ -1,7 +1,7 @@
 [datasource]
 host=localhost
 user=maposmatic
-password=mysecurepasswd
+password=secret
 dbname=maposmatic
 # Optional database port, defaults to 5432
 # port=5432
