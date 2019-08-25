@@ -564,21 +564,24 @@ SELECT ST_AsText(ST_LongestLine(
                                        renderer.paper_width_pt, renderer.paper_height_pt)
             surface.restrict_to_version(cairo.PDFVersion.VERSION_1_5);
 
-            surface.set_metadata(cairo.PDFMetadata.CREATOR,
-                                 'MyOSMatic <https://print.get-map.org/>')
+            try:
+                surface.set_metadata(cairo.PDFMetadata.CREATOR,
+                                     'MyOSMatic <https://print.get-map.org/>')
 
-            surface.set_metadata(cairo.PDFMetadata.TITLE,
-                                 config.title)
+                surface.set_metadata(cairo.PDFMetadata.TITLE,
+                                     config.title)
 
-            surface.set_metadata(cairo.PDFMetadata.AUTHOR,
-                                 "Copyright © 2018 MapOSMatic/OCitySMap developers. \n" +
-                                 "Map data © 2018 OpenStreetMap contributors (see http://osm.org/copyright)")
+                surface.set_metadata(cairo.PDFMetadata.AUTHOR,
+                                     "Copyright © 2018 MapOSMatic/OCitySMap developers. \n" +
+                                     "Map data © 2018 OpenStreetMap contributors (see http://osm.org/copyright)")
 
-            surface.set_metadata(cairo.PDFMetadata.SUBJECT,
-                                 renderer.description) # TODO add style annotations here
+                surface.set_metadata(cairo.PDFMetadata.SUBJECT,
+                                     renderer.description) # TODO add style annotations here
 
-            surface.set_metadata(cairo.PDFMetadata.KEYWORDS,
-                                 "OpenStreetMap, MapOSMatic, OCitysMap")
+                surface.set_metadata(cairo.PDFMetadata.KEYWORDS,
+                                     "OpenStreetMap, MapOSMatic, OCitysMap")
+            except:
+              LOG.warning("Installed Cairo version does not support PDF annotations yet")
 
         elif output_format == 'ps':
             surface = cairo.PSSurface(output_filename,
