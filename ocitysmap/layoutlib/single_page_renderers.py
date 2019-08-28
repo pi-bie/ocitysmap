@@ -719,6 +719,7 @@ class SinglePageRenderer(Renderer):
 
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
+        is_default = True
         valid_sizes = []
         for name, w, h in paper_sizes:
             LOG.debug("is %s compatible" % name)
@@ -729,20 +730,29 @@ class SinglePageRenderer(Renderer):
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 
             if portrait_ok or landscape_ok:
-                valid_sizes.append([name, w, h, portrait_ok, landscape_ok, False, paper_width_mm > paper_height_mm])
+                valid_sizes.append({
+                    "name": name,
+                    "width": w,
+                    "height": h,
+                    "portrait_ok": portrait_ok,
+                    "landscape_ok": landscape_ok,
+                    "default": is_default,
+                    "landscape_preferred": paper_width_mm > paper_height_mm
+                })
+
+            is_default = False
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
-        valid_sizes.append(['Best fit',
-                            min(paper_width_mm, paper_height_mm),
-                            max(paper_width_mm, paper_height_mm),
-                            paper_width_mm < paper_height_mm,
-                            paper_width_mm > paper_height_mm,
-                            False,
-                            paper_width_mm > paper_height_mm])
-
-        # select the first one as default
-        valid_sizes[0][5] = True
+        valid_sizes.append({
+            "name": 'Best fit',
+            "width": min(paper_width_mm, paper_height_mm),
+            "height": max(paper_width_mm, paper_height_mm),
+            "portrait_ok": paper_width_mm < paper_height_mm,
+            "landscape_ok": paper_width_mm > paper_height_mm,
+            "default": False,
+            "landscape_preferred": paper_width_mm > paper_height_mm
+        })
 
         return valid_sizes
 

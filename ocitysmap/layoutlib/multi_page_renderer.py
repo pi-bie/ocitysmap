@@ -994,7 +994,19 @@ class MultiPageRenderer(Renderer):
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
         LOG.warning("getting multipage paper size options")
+        is_default = True
         for sz in renderer_context.get_all_paper_sizes('multipage'):
+            valid_sizes.append({
+                    "name": sz[0],
+                    "width": sz[1],
+                    "height": sz[2],
+                    "portrait_ok": True,
+                    "landscape_ok": True,
+                    "default": is_default,
+                    "landscape_preferred": False
+                })
+            is_default = False
+
             valid_sizes.append((sz[0], sz[1], sz[2], True, True, sz[0] == 'Din A4'))
         return valid_sizes
 
