@@ -215,30 +215,30 @@ def main():
 
     paper_descr = None
     if options.paper_format == 'default':
-        for p in compat_papers:
-            if p[5]: # TODO: why 5?
+        for paper in compat_papers:
+            if paper['default']:
                 paper_descr = p
                 break
     else:
         # Make sure the requested paper size is in list
-        for p in compat_papers:
-            if p[0] == options.paper_format:
-                paper_descr = p
+        for paper in compat_papers:
+            if paper['name'] == options.paper_format:
+                paper_descr = paper
                 break
     if not paper_descr:
         parser.error("Requested paper format not compatible with rendering. Compatible paper formats are:\n\t%s."
              % ',\n\t'.join(map(lambda p: "%s (%.1fx%.1fcm²)"
-                % (p[0], p[1]/10., p[2]/10.),
+                % (p['name'], p['width']/10., p['height']/10.),
                 compat_papers)))
-    assert paper_descr[3] or paper_descr[4] # Portrait or Landscape accepted
+    assert paper_descr['portrait_ok'] or paper_descr['landscape_ok']
 
     # Validate requested orientation
     if options.orientation not in KNOWN_PAPER_ORIENTATIONS:
         parser.error("Invalid paper orientation. Allowed orientations: %s"
                      % KNOWN_PAPER_ORIENTATIONS)
 
-    if (options.orientation == 'portrait' and not paper_descr[3]) or \
-        (options.orientation == 'landscape' and not paper_descr[4]):
+    if (options.orientation == 'portrait' and not paper_descr['portrait_ok']) or \
+        (options.orientation == 'landscape' and not paper_descr['landscape_ok']):
         parser.error("Requested paper orientation %s not compatible with this rendering at this paper size." % options.orientation)
 
     # Prepare the rendering config
@@ -253,11 +253,11 @@ def main():
     rc.gpx_file     = options.gpx_file
     rc.umap_file     = options.umap_file
     if options.orientation == 'portrait':
-        rc.paper_width_mm  = paper_descr[1]
-        rc.paper_height_mm = paper_descr[2]
+        rc.paper_width_mm  = paper_descr['width']
+        rc.paper_height_mm = paper_descr['height']
     else:
-        rc.paper_width_mm  = paper_descr[2]
-        rc.paper_height_mm = paper_descr[1]
+        rc.paper_width_mm  = paper_descr['height']
+        rc.paper_height_mm = paper_descr['width']
 
     # Go !...
     mapper.render(rc, cls_renderer.name, options.output_formats,
