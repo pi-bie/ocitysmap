@@ -25,7 +25,7 @@ sudo apt-get --yes install postgresql postgresql-contrib postgis osm2pgsql \
                            python3-mapnik python3-cairo python3-psycopg2 \
 			   python3-shapely python3-natsort python3-colour \
 			   python3-gdal python3-pluginbase python3-gpxpy \
-			   gir1.2-pango-1.0 gir1.2-rsvg-2.0 
+			   python3-gi-cairo gir1.2-pango-1.0 gir1.2-rsvg-2.0 
 ```
 
  ## Creation of a new PostgreSQL user
