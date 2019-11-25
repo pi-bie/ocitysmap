@@ -32,6 +32,7 @@ import tempfile
 import logging
 from string import Template
 import codecs
+import copy
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -169,8 +170,9 @@ class UmapStylesheet(Stylesheet):
                             else:
                                 LOG.info("Umap: fetching icon from URL: %s" % iconUrl)
                                 try:
+                                    filename, file_extension = os.path.splitext(iconUrl)
                                     response = http.request('GET', iconUrl)
-                                    iconFile = tempfile.NamedTemporaryFile(suffix='.png', delete=False, mode='wb', dir=tmpdir)
+                                    iconFile = tempfile.NamedTemporaryFile(suffix=file_extension, delete=False, mode='wb', dir=tmpdir)
                                     iconFile.write(response.data)
                                     iconFile.close()
 
