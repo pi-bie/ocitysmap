@@ -123,16 +123,15 @@ class UmapStylesheet(Stylesheet):
         icon_cache = {}
 
         for layer in layers:
+            layer_defaults = copy.deepcopy(umap_defaults)
+
+            for name in ['_storage', '_storage_options', '_umap_options']:
+                if name in layer:
+                    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
+                        if prop in layer[name]:
+                            layer_defaults[prop] = layer[name][prop]
+
             for feature in layer['features']:
-                layer_defaults = umap_defaults
-
-                for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
-                    try:
-                        if prop in layer['_storage']:
-                            layer_defaults[prop] = layer['_storage'][prop]
-                    except:
-                        pass
-
                 new_props = {}
                 for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
                     new_props[prop] = layer_defaults[prop]
@@ -141,19 +140,21 @@ class UmapStylesheet(Stylesheet):
                             new_props[prop] = feature['properties'][prop]
                         elif prop in feature['properties']['_storage_options']:
                             new_props[prop] = feature['properties']['_storage_options'][prop]
+                        elif prop in feature['properties']['_umap_options']:
+                            new_props[prop] = feature['properties']['_umap_options'][prop]
                     except:
                         pass
 
                 if feature['geometry']['type'] == 'Point':
-                    try:
-                        iconClass = feature['properties']['_storage_options']['iconClass']
-                    except:
-                        iconClass = layer_defaults['iconClass']
+                    iconClass = layer_defaults['iconClass']
+                    iconUrl = layer_defaults['iconUrl']
 
-                    try:
-                        iconUrl = feature['properties']['_storage_options']['iconUrl']
-                    except:
-                        iconUrl = layer_defaults['iconUrl']
+                    for name in ['_storage', '_storage_options', '_umap_options']:
+                        if name in feature['properties']:
+                            if 'iconClass' in feature['properties'][name]:
+                                iconClass = feature['properties'][name]['iconClass']
+                            if 'iconUrl' in feature['properties'][name]:
+                                iconUrl = feature['properties'][name]['iconUrl']
 
                     new_props['iconClass'] = iconClass
 
@@ -169,7 +170,6 @@ class UmapStylesheet(Stylesheet):
                             if iconUrl in icon_cache:
                                 new_props['iconUrl'] = icon_cache[iconUrl]
                             else:
-                                LOG.info("Umap: fetching icon from URL: %s" % iconUrl)
                                 try:
                                     filename, file_extension = os.path.splitext(iconUrl)
                                     response = http.request('GET', iconUrl)
