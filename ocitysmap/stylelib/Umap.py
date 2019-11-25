@@ -85,6 +85,7 @@ class UmapStylesheet(Stylesheet):
         }
 
         marker_offsets = {
+            'Default': -18,
             'Square': -18,
             'Drop'  : -18,
             'Circle': 0,
@@ -156,7 +157,7 @@ class UmapStylesheet(Stylesheet):
 
                     new_props['iconClass'] = iconClass
 
-                    if iconClass == 'Square' or iconClass == 'Drop':
+                    if iconClass == 'Square' or iconClass == 'Drop' or iconClass == 'Default':
                         m = re.match(r'/uploads/pictogram/(.*)-24(.*)\.png', iconUrl)
                         if m:
                             new_props['iconUrl']  = icon_dir + '/' +  m.group(1) + "-15.svg"
