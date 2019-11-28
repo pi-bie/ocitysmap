@@ -68,7 +68,6 @@ class UmapStylesheet(Stylesheet):
         self.name = "UMAP overlay"
         self.path = style_filename
 
-
     def umap_preprocess(self, umap_file, tmpdir):
         umap_defaults = {
             'color'      :   'blue',
@@ -132,19 +131,12 @@ class UmapStylesheet(Stylesheet):
                             layer_defaults[prop] = layer[name][prop]
 
             for feature in layer['features']:
-                new_props = {}
-                for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
-                    new_props[prop] = layer_defaults[prop]
-                    try:
-                        if prop in feature['properties']:
-                            new_props[prop] = feature['properties'][prop]
-                        elif prop in feature['properties']['_storage_options']:
-                            new_props[prop] = feature['properties']['_storage_options'][prop]
-                        elif prop in feature['properties']['_umap_options']:
-                            new_props[prop] = feature['properties']['_umap_options'][prop]
-                    except:
-                        pass
-
+                new_props = copy.deepcopy(layer_defaults)
+                for name in ['_storage', '_storage_options', '_umap_options']:
+                    if name in feature['properties']:
+                        for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
+                            if prop in feature['properties'][name]:
+                                new_props[prop] = feature['properties'][name][prop]
                 if feature['geometry']['type'] == 'Point':
                     iconClass = layer_defaults['iconClass']
                     iconUrl = layer_defaults['iconUrl']
