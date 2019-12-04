@@ -6,6 +6,21 @@ dbname=maposmatic
 # Optional database port, defaults to 5432
 # port=5432
 
+[paper_sizes]
+Din A4: 210x297
+Din A3: 297x420
+Din A2: 420x594
+Din A1: 594x841
+Din A0: 841x1189
+2x A0: 1189x1682
+US letter: 216x279
+
+# multi page paper sizes need to be a subset of
+# the single page paper formats for now
+[multipage_paper_sizes]
+Din A4: 210x297
+US letter: 216x279
+
 [rendering]
 # List of available stylesheets, each needs to be described by an eponymous
 # configuration section in this file.

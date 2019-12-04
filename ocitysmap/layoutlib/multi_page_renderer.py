@@ -1007,7 +1007,6 @@ class MultiPageRenderer(Renderer):
                 })
             is_default = False
 
-            valid_sizes.append((sz[0], sz[1], sz[2], True, True, sz[0] == 'Din A4'))
         return valid_sizes
 
     def _draw_overview_labels(self, ctx, map_canvas, overview_grid,
