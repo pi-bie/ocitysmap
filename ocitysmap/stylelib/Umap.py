@@ -33,8 +33,14 @@ import logging
 from string import Template
 import codecs
 import copy
+from colour import Color
+
 
 LOG = logging.getLogger('ocitysmap')
+
+def color2hex(name):
+    c = Color(name)
+    return c.hex_l
 
 
 class UmapStylesheet(Stylesheet):
@@ -70,9 +76,9 @@ class UmapStylesheet(Stylesheet):
 
     def umap_preprocess(self, umap_file, tmpdir):
         umap_defaults = {
-            'color'      :   'blue',
+            'color'      :'#0000ff',
             'opacity'    :      0.5,
-            'fillColor'  :   'blue',
+            'fillColor'  :'#0000ff',
             'fillOpacity':      0.2,
             'weight'     :        3,
             'dashArray'  :       '',
@@ -113,7 +119,10 @@ class UmapStylesheet(Stylesheet):
 
         for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
             if prop in umap['properties']:
-                umap_defaults[prop] = umap['properties'][prop]
+                val = umap['properties'][prop]
+                if prop in ['color', 'fillColor']:
+                    val = color2hex(val)
+                umap_defaults[prop] = val
 
         layers = umap['layers']
 
@@ -128,7 +137,10 @@ class UmapStylesheet(Stylesheet):
                 if name in layer:
                     for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                         if prop in layer[name]:
-                            layer_defaults[prop] = layer[name][prop]
+                            val = layer[name][prop]
+                            if prop in ['color', 'fillColor']:
+                                val = color2hex(val)
+                            layer_defaults[prop] = val
 
             for feature in layer['features']:
                 new_props = copy.deepcopy(layer_defaults)
@@ -136,7 +148,10 @@ class UmapStylesheet(Stylesheet):
                     if name in feature['properties']:
                         for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
                             if prop in feature['properties'][name]:
-                                new_props[prop] = feature['properties'][name][prop]
+                                val = feature['properties'][name][prop]
+                                if prop in ['color', 'fillColor']:
+                                    val = color2hex(val)
+                                new_props[prop] = val
                 if feature['geometry']['type'] == 'Point':
                     iconClass = layer_defaults['iconClass']
                     iconUrl = layer_defaults['iconUrl']
