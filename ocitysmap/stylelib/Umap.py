@@ -39,8 +39,12 @@ from colour import Color
 LOG = logging.getLogger('ocitysmap')
 
 def color2hex(name):
-    c = Color(name)
-    return c.hex_l
+    try:
+        c = Color(name)
+        return c.hex_l
+    except:
+        LOG.warning("Can't resolve color: %s" % name)
+        return name
 
 
 class UmapStylesheet(Stylesheet):
