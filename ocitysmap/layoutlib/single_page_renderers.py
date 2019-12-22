@@ -618,7 +618,7 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # render index on 2nd page if requested, and output format supports it
-        if self.index_position == 'extra_page' and self._has_multipage_format():
+        if self.index_position == 'extra_page' and self._has_multipage_format() and self._index_renderer is not None:
             cairo_surface.show_page()
 
             # We use a fake vector device to determine the actual
