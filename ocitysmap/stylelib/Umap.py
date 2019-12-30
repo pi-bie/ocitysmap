@@ -112,23 +112,27 @@ class UmapStylesheet(Stylesheet):
 
         umap = json.load(fp)
 
-        if 'licence' in umap['properties'] or 'shortCredit' in umap['properties']:
-            licence = ''
-            try:
-              licence = umap['properties']['licence']['name']
-            except:
-              pass
-            credit = umap['properties']['shortCredit'] if 'shortCredit' in umap['properties'] else ''
-            self.annotation = "Umap overlay © %s %s" % (licence, credit)
+        if 'properties' in umap:
+            if 'licence' in umap['properties'] or 'shortCredit' in umap['properties']:
+                licence = ''
+                try:
+                  licence = umap['properties']['licence']['name']
+                except:
+                  pass
+                credit = umap['properties']['shortCredit'] if 'shortCredit' in umap['properties'] else ''
+                self.annotation = "Umap overlay © %s %s" % (licence, credit)
 
-        for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
-            if prop in umap['properties']:
-                val = umap['properties'][prop]
-                if prop in ['color', 'fillColor']:
-                    val = color2hex(val)
-                umap_defaults[prop] = val
+            for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
+                if prop in umap['properties']:
+                    val = umap['properties'][prop]
+                    if prop in ['color', 'fillColor']:
+                        val = color2hex(val)
+                    umap_defaults[prop] = val
 
-        layers = umap['layers']
+        if 'layers' in umap:
+            layers = umap['layers']
+        else:
+            layers = [ umap ]
 
         new_features = []
 
@@ -148,24 +152,26 @@ class UmapStylesheet(Stylesheet):
 
             for feature in layer['features']:
                 new_props = copy.deepcopy(layer_defaults)
-                for name in ['_storage', '_storage_options', '_umap_options']:
-                    if name in feature['properties']:
-                        for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
-                            if prop in feature['properties'][name]:
-                                val = feature['properties'][name][prop]
-                                if prop in ['color', 'fillColor']:
-                                    val = color2hex(val)
-                                new_props[prop] = val
+                if 'properties' in feature:
+                    for name in ['_storage', '_storage_options', '_umap_options']:
+                        if name in feature['properties']:
+                            for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
+                                if prop in feature['properties'][name]:
+                                    val = feature['properties'][name][prop]
+                                    if prop in ['color', 'fillColor']:
+                                        val = color2hex(val)
+                                    new_props[prop] = val
                 if feature['geometry']['type'] == 'Point':
                     iconClass = layer_defaults['iconClass']
                     iconUrl = layer_defaults['iconUrl']
 
-                    for name in ['_storage', '_storage_options', '_umap_options']:
-                        if name in feature['properties']:
-                            if 'iconClass' in feature['properties'][name]:
-                                iconClass = feature['properties'][name]['iconClass']
-                            if 'iconUrl' in feature['properties'][name]:
-                                iconUrl = feature['properties'][name]['iconUrl']
+                    if 'properties' in feature:
+                        for name in ['_storage', '_storage_options', '_umap_options']:
+                            if name in feature['properties']:
+                                if 'iconClass' in feature['properties'][name]:
+                                    iconClass = feature['properties'][name]['iconClass']
+                                if 'iconUrl' in feature['properties'][name]:
+                                    iconUrl = feature['properties'][name]['iconUrl']
 
                     new_props['iconClass'] = iconClass
 
