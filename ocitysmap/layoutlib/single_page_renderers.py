@@ -739,8 +739,7 @@ class SinglePageRenderer(Renderer):
                     "default": is_default,
                     "landscape_preferred": paper_width_mm > paper_height_mm
                 })
-
-            is_default = False
+                is_default = False
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
@@ -750,7 +749,7 @@ class SinglePageRenderer(Renderer):
             "height": max(paper_width_mm, paper_height_mm),
             "portrait_ok": paper_width_mm < paper_height_mm,
             "landscape_ok": paper_width_mm > paper_height_mm,
-            "default": False,
+            "default": is_default,
             "landscape_preferred": paper_width_mm > paper_height_mm
         })
 
