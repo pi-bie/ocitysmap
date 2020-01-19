@@ -706,8 +706,6 @@ class SinglePageRenderer(Renderer):
         paper_width_mm  = int(math.ceil(paper_width_mm))
         paper_height_mm = int(math.ceil(paper_height_mm))
 
-        LOG.debug('Best fit is %.1fx%.1fcm.' % (paper_width_mm/10., paper_height_mm/10.))
-
         # TODO make min. width / height configurable
         if paper_width_mm < 100:
             paper_height_mm = paper_height_mm * 100 / paper_width_mm
@@ -715,6 +713,8 @@ class SinglePageRenderer(Renderer):
         if paper_height_mm < 100:
             paper_width_mm = paper_width_mm * 100 / paper_height_mm
             paper_height_mm = 100
+
+        LOG.info('Best fit is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
 
         # Test both portrait and landscape orientations when checking for paper
