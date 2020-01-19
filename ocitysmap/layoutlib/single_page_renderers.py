@@ -513,7 +513,7 @@ class SinglePageRenderer(Renderer):
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
 
-        # Draw the rescaled Overlay
+        # Draw the rescaled Overlays
         for overlay_canvas in self._overlay_canvases:
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
@@ -751,6 +751,15 @@ class SinglePageRenderer(Renderer):
             "landscape_ok": paper_width_mm > paper_height_mm,
             "default": is_default,
             "landscape_preferred": paper_width_mm > paper_height_mm
+        })
+        valid_sizes.append({
+            "name": 'Custom',
+            "width": 0,
+            "height": 0,
+            "portrait_ok": True,
+            "landscape_ok": False,
+            "default": False,
+            "landscape_preferred": False
         })
 
         return valid_sizes

@@ -208,6 +208,7 @@ class OCitySMap:
                                ]
 
         self.PAPER_SIZES.append(('Best fit', None, None))
+        self.PAPER_SIZES.append(('Custom', None, None))
 
         if self._parser.has_section('multipage_paper_sizes'):
             self.MULTIPAGE_PAPER_SIZES = []
