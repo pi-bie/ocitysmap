@@ -702,10 +702,6 @@ class SinglePageRenderer(Renderer):
         paper_width_mm /= 1 - Renderer.GRID_LEGEND_MARGIN_RATIO
         paper_height_mm /= 1 - (Renderer.GRID_LEGEND_MARGIN_RATIO + 0.05 + 0.02)
 
-        # Transform the values into integers
-        paper_width_mm  = int(math.ceil(paper_width_mm))
-        paper_height_mm = int(math.ceil(paper_height_mm))
-
         # TODO make min. width / height configurable
         if paper_width_mm < 100:
             paper_height_mm = paper_height_mm * 100 / paper_width_mm
@@ -713,6 +709,10 @@ class SinglePageRenderer(Renderer):
         if paper_height_mm < 100:
             paper_width_mm = paper_width_mm * 100 / paper_height_mm
             paper_height_mm = 100
+
+        # Transform the values into integers
+        paper_width_mm  = int(math.ceil(paper_width_mm))
+        paper_height_mm = int(math.ceil(paper_height_mm))
 
         LOG.info('Best fit is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
