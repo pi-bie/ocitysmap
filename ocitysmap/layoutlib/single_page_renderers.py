@@ -683,8 +683,8 @@ class SinglePageRenderer(Renderer):
         paper_height_mm = geo_height_m * 1000 / scale
 
         LOG.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
-                  'on paper.' % (geo_width_m, geo_height_m,
-                                 paper_width_mm/10., paper_height_mm/10.))
+                  'on paper at scale %f.' % (geo_width_m, geo_height_m,
+                                             paper_width_mm/10., paper_height_mm/10., scale))
 
         # Take index into account, when applicable
         if index_position == 'side':
