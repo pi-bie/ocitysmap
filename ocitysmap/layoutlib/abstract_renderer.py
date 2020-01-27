@@ -65,7 +65,12 @@ class Renderer:
     PRINT_SAFE_MARGIN_PT = 15
 
     GRID_LEGEND_MARGIN_RATIO = .02
+    TITLE_MARGIN_RATIO       = .05
+    ANNOTATION_MARGIN_RATIO  = .03
 
+    MIN_PAPER_WIDTH  = 100
+    MIN_PAPER_HEIGHT = 100
+    
     # The DEFAULT SCALE values represents the minimum acceptable mapnik scale
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher

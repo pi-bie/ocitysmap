@@ -107,12 +107,12 @@ class SinglePageRenderer(Renderer):
 
         # reserve space for the page title if given
         if self.rc.title:
-            self._title_margin_pt = 0.05 * self.paper_height_pt
+            self._title_margin_pt = Renderer.TITLE_MARGIN_RATIO * self.paper_height_pt
         else:
             self._title_margin_pt = 0
 
         # reserve space for the page footer
-        self._copyright_margin_pt = 0.03 * self.paper_height_pt
+        self._copyright_margin_pt = Renderer.ANNOTATION_MARGIN_RATIO * self.paper_height_pt
 
         # calculate remaining usable paper space after taking header
         # and footer into account
@@ -700,15 +700,17 @@ class SinglePageRenderer(Renderer):
 
         # Take grid legend, title and copyright into account
         paper_width_mm /= 1 - Renderer.GRID_LEGEND_MARGIN_RATIO
-        paper_height_mm /= 1 - (Renderer.GRID_LEGEND_MARGIN_RATIO + 0.05 + 0.02)
+        paper_height_mm /= 1 - (Renderer.GRID_LEGEND_MARGIN_RATIO
+                                + Renderer.TITLE_MARGIN_RATIO
+                                + Renderer.ANNOTATION_MARGIN_RATIO)
 
         # TODO make min. width / height configurable
-        if paper_width_mm < 100:
-            paper_height_mm = paper_height_mm * 100 / paper_width_mm
-            paper_width_mm = 100
-        if paper_height_mm < 100:
-            paper_width_mm = paper_width_mm * 100 / paper_height_mm
-            paper_height_mm = 100
+        if paper_width_mm < Renderer.MIN_PAPER_WIDTH:
+            paper_height_mm = paper_height_mm * Renderer.MIN_PAPER_WIDTH / paper_width_mm
+            paper_width_mm = Renderer.MIN_PAPER_WIDTH
+        if paper_height_mm < Renderer.MIN_PAPER_HEIGHT:
+            paper_width_mm = paper_width_mm * Renderer.MIN_PAPER_HEIGHT / paper_height_mm
+            paper_height_mm = Renderer.MIN_PAPER_HEIGHT
 
         # Transform the values into integers
         paper_width_mm  = int(math.ceil(paper_width_mm))
