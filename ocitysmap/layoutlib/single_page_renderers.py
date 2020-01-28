@@ -119,9 +119,9 @@ class SinglePageRenderer(Renderer):
         self._usable_area_width_pt = (self.paper_width_pt -
                                       2 * Renderer.PRINT_SAFE_MARGIN_PT)
         self._usable_area_height_pt = (self.paper_height_pt -
-                                       (2 * Renderer.PRINT_SAFE_MARGIN_PT +
-                                        self._title_margin_pt +
-                                        self._copyright_margin_pt))
+                                       2 * Renderer.PRINT_SAFE_MARGIN_PT -
+                                       self._title_margin_pt -
+                                       self._copyright_margin_pt)
 
         # Prepare the Index (may raise a IndexDoesNotFitError)
         if ( index_position and self.street_index
@@ -131,50 +131,14 @@ class SinglePageRenderer(Renderer):
         else:
             self._index_renderer, self._index_area = None, None
 
-        # Prepare the layout of the whole page
-        if not self._index_area or index_position == 'extra_page':
-            # No index displayed
-            self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
-                                 ( Renderer.PRINT_SAFE_MARGIN_PT
-                                   + self._title_margin_pt ),
-                                 self._usable_area_width_pt,
-                                 self._usable_area_height_pt )
-        elif index_position == 'side':
-            # Index present, displayed on the side
-            if self._index_area.x > Renderer.PRINT_SAFE_MARGIN_PT:
-                # Index on the right -> map on the left
-                self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
-                                     ( Renderer.PRINT_SAFE_MARGIN_PT
-                                       + self._title_margin_pt ),
-                                     ( self._usable_area_width_pt
-                                       - self._index_area.w ),
-                                     self._usable_area_height_pt )
-            else:
-                # Index on the left -> map on the right
-                self._map_coords = ( self._index_area.x + self._index_area.w,
-                                     ( Renderer.PRINT_SAFE_MARGIN_PT
-                                       + self._title_margin_pt ),
-                                     ( self._usable_area_width_pt
-                                       - self._index_area.w ),
-                                     self._usable_area_height_pt )
-        elif index_position == 'bottom':
-            # Index present, displayed at the bottom -> map on top
-            self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
-                                 ( Renderer.PRINT_SAFE_MARGIN_PT
-                                   + self._title_margin_pt ),
-                                 self._usable_area_width_pt,
-                                 ( self._usable_area_height_pt
-                                   - self._index_area.h ) )
-        else:
-            raise AssertionError("Invalid index position %s"
-                                 % repr(index_position))
+        self._map_coords = self._get_map_coords(index_position if self._index_area else None)
 
         # Prepare the map
         self._map_canvas = self._create_map_canvas(
             float(self._map_coords[2]),  # W
             float(self._map_coords[3]),  # H
             dpi,
-            rc.osmid != None )
+            rc.osmid is not None )
 
         # Prepare overlay styles for uploaded files
         self._overlays = copy(self.rc.overlays)
@@ -226,6 +190,32 @@ class SinglePageRenderer(Renderer):
         self._map_canvas.render()
         for overlay_canvas in self._overlay_canvases:
            overlay_canvas.render()
+
+    def _get_map_coords(self, index_position):
+        # Prepare the layout of the whole page
+
+        x = Renderer.PRINT_SAFE_MARGIN_PT
+        y = Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt
+        w = self._usable_area_width_pt
+        h = self._usable_area_height_pt
+
+        if index_position is None or index_position == 'extra_page':
+            # No index displayed
+            pass
+        elif index_position == 'side':
+            # Index present, displayed on the side
+            w = w - self._index_area.w
+            if self._index_area.x == Renderer.PRINT_SAFE_MARGIN_PT:
+                # Index on the left -> map on the right
+                x = x + self._index_area.w
+        elif index_position == 'bottom':
+            # Index present, displayed at the bottom -> map on top
+            h = h - self._index_area.h
+        else:
+            raise AssertionError("Invalid index position %s"
+                                 % repr(index_position))
+
+        return (x, y, w, h)
 
     def _create_index_rendering(self, index_position):
         """
