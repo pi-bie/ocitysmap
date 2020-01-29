@@ -361,6 +361,50 @@ class Renderer:
         """
         raise NotImplementedError
 
+    @staticmethod
+    def scaleDenominator2zoom(scale_denom):
+        if scale_denom < 500:
+            return 20
+        if scale_denom < 1250:
+            return 19
+        if scale_denom < 2500:
+            return 18
+        if scale_denom < 5000:
+            return 17
+        if scale_denom < 12500:
+            return 16
+        if scale_denom < 25000:
+            return 15
+        if scale_denom < 50000:
+            return 14
+        if scale_denom < 100000:
+            return 13
+        if scale_denom < 200000:
+            return 12
+        if scale_denom < 400000:
+            return 11
+        if scale_denom < 750000:
+            return 10
+        if scale_denom < 1500000:
+            return 9
+        if scale_denom < 3000000:
+            return 8
+        if scale_denom < 6500000:
+            return 7
+        if scale_denom < 12500000:
+            return 6
+        if scale_denom < 25000000:
+            return 5
+        if scale_denom < 50000000:
+            return 4
+        if scale_denom < 100000000:
+            return 3
+        if scale_denom < 200000000:
+            return 2
+        if scale_denom < 500000000:
+            return 1
+        return 0
+
     # convert geo into pixel coordinates for direct rendering of geo features
     # mostly needed by rendering overlay plugins
     def _latlon2xy(self, lat, lon, dpi = None):
