@@ -489,10 +489,10 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         scale_factor = int(dpi / 72)
         rendered_map = self._map_canvas.get_rendered_map()
-        LOG.debug('Map:')
-        LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
-        LOG.debug('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
-        LOG.debug('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
+        LOG.info('Map:')
+        LOG.info('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+        LOG.info('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
+        LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
 
         # exclude layers based on configuration setting "exclude_layers"
         for layer in rendered_map.layers:
@@ -670,13 +670,16 @@ class SinglePageRenderer(Renderer):
         scale *= float(72) / 90
 
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
-        paper_width_mm = geo_width_m * 1000 / scale
-        paper_height_mm = geo_height_m * 1000 / scale
+        canvas_width_mm = geo_width_m * 1000 / scale
+        canvas_height_mm = geo_height_m * 1000 / scale
 
-        LOG.debug('Map represents %dx%dm, needs at least %.1fx%.1fcm '
-                  'on paper at scale %f.' % (geo_width_m, geo_height_m,
-                                             paper_width_mm/10., paper_height_mm/10., scale))
+        LOG.info('Map represents %dx%dm, needs at least %.0fx%.fmm '
+                 'on paper at scale %f.' % (geo_width_m, geo_height_m,
+                                            canvas_width_mm, canvas_height_mm, scale))
 
+        paper_width_mm  = canvas_width_mm
+        paper_height_mm = canvas_height_mm
+        
         # Take index into account, when applicable
         if index_position == 'side':
             paper_width_mm /= (1. -
@@ -707,7 +710,7 @@ class SinglePageRenderer(Renderer):
         paper_width_mm  = int(math.ceil(paper_width_mm))
         paper_height_mm = int(math.ceil(paper_height_mm))
 
-        LOG.info('Best fit is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
+        LOG.info('Best fit including decorations is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
 
         # Test both portrait and landscape orientations when checking for paper
@@ -715,7 +718,6 @@ class SinglePageRenderer(Renderer):
         is_default = True
         valid_sizes = []
         for name, w, h in paper_sizes:
-            LOG.debug("is %s compatible" % name)
             if w is None: 
                 continue
 
