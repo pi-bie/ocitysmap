@@ -698,7 +698,7 @@ class SinglePageRenderer(Renderer):
                                 + Renderer.TITLE_MARGIN_RATIO
                                 + Renderer.ANNOTATION_MARGIN_RATIO)
 
-        # TODO make min. width / height configurable
+        # enforce minimal paper size
         if paper_width_mm < Renderer.MIN_PAPER_WIDTH:
             paper_height_mm = paper_height_mm * Renderer.MIN_PAPER_WIDTH / paper_width_mm
             paper_width_mm = Renderer.MIN_PAPER_WIDTH
@@ -713,10 +713,20 @@ class SinglePageRenderer(Renderer):
         LOG.info('Best fit including decorations is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
 
+        valid_sizes = []
+
+        # Add a 'Custom' paper format to the list that perfectly matches the
+        # bounding box.
+        valid_sizes.append({
+            "name": 'Best fit',
+            "width": paper_width_mm,
+            "height": paper_height_mm,
+            "portrait_ok": paper_width_mm < paper_height_mm,
+            "landscape_ok": paper_width_mm > paper_height_mm,
+        })
+
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
-        is_default = True
-        valid_sizes = []
         for name, w, h in paper_sizes:
             if w is None: 
                 continue
@@ -731,24 +741,7 @@ class SinglePageRenderer(Renderer):
                     "height": h,
                     "portrait_ok": portrait_ok,
                     "landscape_ok": landscape_ok,
-                    "default": is_default,
-                    "landscape_preferred": paper_width_mm > paper_height_mm
                 })
-                is_default = False
-
-        # Add a 'Custom' paper format to the list that perfectly matches the
-        # bounding box.
-        valid_sizes.append({
-            "name": 'Best fit',
-            "width": paper_width_mm,
-            "height": paper_height_mm,
-            "portrait_ok": paper_width_mm < paper_height_mm,
-            "landscape_ok": paper_width_mm > paper_height_mm,
-            "default": is_default,
-            "landscape_preferred": paper_width_mm > paper_height_mm,
-            "scale": scale,
-            "zoom_factor": Renderer.scaleDenominator2zoom(scale)
-        })
 
         return valid_sizes
 
