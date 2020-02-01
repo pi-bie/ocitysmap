@@ -743,16 +743,9 @@ class SinglePageRenderer(Renderer):
             "portrait_ok": paper_width_mm < paper_height_mm,
             "landscape_ok": paper_width_mm > paper_height_mm,
             "default": is_default,
-            "landscape_preferred": paper_width_mm > paper_height_mm
-        })
-        valid_sizes.append({
-            "name": 'Custom',
-            "width": 0,
-            "height": 0,
-            "portrait_ok": True,
-            "landscape_ok": False,
-            "default": False,
-            "landscape_preferred": False
+            "landscape_preferred": paper_width_mm > paper_height_mm,
+            "scale": scale,
+            "zoom_factor": Renderer.scaleDenominator2zoom(scale)
         })
 
         return valid_sizes
