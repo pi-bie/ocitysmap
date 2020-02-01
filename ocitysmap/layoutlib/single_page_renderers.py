@@ -738,8 +738,8 @@ class SinglePageRenderer(Renderer):
         # bounding box.
         valid_sizes.append({
             "name": 'Best fit',
-            "width": min(paper_width_mm, paper_height_mm),
-            "height": max(paper_width_mm, paper_height_mm),
+            "width": paper_width_mm,
+            "height": paper_height_mm,
             "portrait_ok": paper_width_mm < paper_height_mm,
             "landscape_ok": paper_width_mm > paper_height_mm,
             "default": is_default,
