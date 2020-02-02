@@ -567,7 +567,7 @@ class SinglePageRenderer(Renderer):
             ctx.save()
 
             # NEVER use ctx.scale() here because otherwise pango will
-            # choose different dont metrics which may be incompatible
+            # choose different font metrics which may be incompatible
             # with what has been computed by __init__(), which may
             # require more columns than expected !  Instead, we have
             # to trick pangocairo into believing it is rendering to a
@@ -717,12 +717,17 @@ class SinglePageRenderer(Renderer):
 
         # Add a 'Custom' paper format to the list that perfectly matches the
         # bounding box.
+        best_fit_is_portrait = paper_width_mm < paper_height_mm
         valid_sizes.append({
             "name": 'Best fit',
             "width": paper_width_mm,
             "height": paper_height_mm,
-            "portrait_ok": paper_width_mm < paper_height_mm,
-            "landscape_ok": paper_width_mm > paper_height_mm,
+            "portrait_ok": best_fit_is_portrait,
+            "portrait_scale": scale if best_fit_is_portrait else None,
+            "portrait_zoom": Renderer.scaleDenominator2zoom(scale) if best_fit_is_portrait else None,
+            "landscape_ok": not best_fit_is_portrait,
+            "landscape_scale": scale if not best_fit_is_portrait else None,
+            "landscape_zoom": Renderer.scaleDenominator2zoom(scale) if not best_fit_is_portrait else None,
         })
 
         # Test both portrait and landscape orientations when checking for paper
@@ -734,13 +739,31 @@ class SinglePageRenderer(Renderer):
             portrait_ok  = paper_width_mm <= w and paper_height_mm <= h
             landscape_ok = paper_width_mm <= h and paper_height_mm <= w
 
+            if portrait_ok:
+                portrait_scale = scale / min(w / paper_width_mm, h / paper_height_mm)
+                portrait_zoom = Renderer.scaleDenominator2zoom(portrait_scale)
+            else:
+                portrait_scale = None
+                portrait_zoom = None
+
+            if landscape_ok:
+                landscape_scale = scale / min(h / paper_width_mm, w / paper_height_mm)
+                landscape_zoom = Renderer.scaleDenominator2zoom(landscape_scale)
+            else:
+                landscape_scale = None
+                landscape_zoom = None
+
             if portrait_ok or landscape_ok:
                 valid_sizes.append({
                     "name": name,
                     "width": w,
                     "height": h,
                     "portrait_ok": portrait_ok,
+                    "portrait_scale": portrait_scale,
+                    "portrait_zoom": portrait_zoom,
                     "landscape_ok": landscape_ok,
+                    "landscape_scale": landscape_scale,
+                    "landscape_zoom": landscape_zoom,
                 })
 
         return valid_sizes
