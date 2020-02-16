@@ -143,23 +143,29 @@ class SinglePageRenderer(Renderer):
         # Prepare overlay styles for uploaded files
         self._overlays = copy(self.rc.overlays)
 
-        # generate style file for GPX file
-        if self.rc.gpx_file:
-            try:
-                gpx_style = GpxStylesheet(self.rc.gpx_file, self.tmpdir)
-            except Exception as e:
-                LOG.warning("GPX stylesheet error: %s" % e)
-            else:
-                self._overlays.append(gpx_style)
-
-        # denormalize UMAP json to geojson, then create style for it
-        if self.rc.umap_file:
-            try:
-                umap_style = UmapStylesheet(self.rc.umap_file, self.tmpdir)
-            except Exception as e:
-                LOG.warning("UMAP stylesheet error: %s" % e)
-            else:
-                self._overlays.append(umap_style)
+        # Prepare overlays for all additional import files
+        if self.rc.import_files:
+            for (file_type, import_file) in self.rc.import_files:
+                if file_type == 'gpx':
+                    try:
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("GPX stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(gpx_style)
+                elif file_type == 'umap':
+                    try:
+                        umap_style = UmapStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("UMAP stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(umap_style)
+                elif file_type == 'poi':
+                    # TODO: refactor this special case
+                    self._overlay_effects['poi_markers'] = self.get_plugin('poi_markers')
+                    self.rc.poi_file = import_file
+                else:
+                    LOG.warning("Unsupported file type '%s' for file '%s" % (file_type, import_file))
 
         # Prepare map overlays
         self._overlay_canvases = []
@@ -175,11 +181,6 @@ class SinglePageRenderer(Renderer):
                                               float(self._map_coords[2]),  # W
                                               float(self._map_coords[3]),  # H
                                               dpi))
-
-        # add special POI marker overlay if a POI file is given
-        # TODO: refactor this special case
-        if self.rc.poi_file:
-            self._overlay_effects['poi_markers'] = self.get_plugin('poi_markers')
 
         # Prepare the grid
         self.grid = self._create_grid(self._map_canvas, dpi)

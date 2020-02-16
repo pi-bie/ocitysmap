@@ -132,9 +132,11 @@ class RenderingConfiguration:
         self.i18n            = None # i18n object
 
         # Extra upload files
-        self.poi_file        = None
+        self.import_files    = []
+        # TODO: eventually remove these legacy files
         self.gpx_file        = None
         self.umap_file       = None
+        self.poi_file        = None
 
         # custom QRcode text
         self.qrcode_text     = None
@@ -459,6 +461,14 @@ SELECT ST_AsText(ST_LongestLine(
         output_formats = map(lambda x: x.lower(), output_formats)
         config.i18n = i18n.install_translation(config.language,
                                                self._locale_path)
+
+        # legacy import file processing
+        if config.gpx_file:
+            config.import_files.append(('gpx', config.gpx_file))
+        if config.umap_file:
+            config.import_files.append(('umap', config.umap_file))
+        if config.poi_file:
+            config.import_files.append(('poi', config.poi_file))
 
         LOG.info('Rendering with renderer %s in language: %s (rtl: %s).' %
                  (renderer_name, config.i18n.language_code(),

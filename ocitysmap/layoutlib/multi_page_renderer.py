@@ -257,23 +257,26 @@ class MultiPageRenderer(Renderer):
 
         self._overlays = copy(self.rc.overlays)
         
-        # generate style file for GPX file
-        if self.rc.gpx_file:
-            try:
-                gpx_style = GpxStylesheet(self.rc.gpx_file, self.tmpdir)
-            except Exception as e:
-                LOG.warning("GPX stylesheet error: %s" % e)
-            else:
-                self._overlays.append(gpx_style)
+        # Prepare overlays for all additional import files
+        if self.rc.import_files:
+            for (file_type, import_file) in self.rc.import_files:
+                if file_type == 'gpx':
+                    try:
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("GPX stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(gpx_style)
+                elif file_type == 'umap':
+                    try:
+                        umap_style = UmapStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("UMAP stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(umap_style)
+                else:
+                    LOG.warning("Unsupported file type '%s' for file '%s" % (file_type, import_file))
 
-        # denormalize UMAP json to geojson, then create style for it
-        if self.rc.umap_file:
-            try:
-                umap_style = UmapStylesheet(self.rc.umap_file, self.tmpdir)
-            except Exception as e:
-                LOG.warning("Umap_stylesheet error: %s" % e)
-            else:
-                self._overlays.append(umap_style)
 
         self.overview_overlay_canvases = []
         self.overview_overlay_effects  = {}
