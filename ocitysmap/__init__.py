@@ -463,11 +463,11 @@ SELECT ST_AsText(ST_LongestLine(
                                                self._locale_path)
 
         # legacy import file processing
-        if config.gpx_file:
+        if config.gpx_file and ('gpx', config.gpx_file) not in config.import_files:
             config.import_files.append(('gpx', config.gpx_file))
-        if config.umap_file:
+        if config.umap_file and ('umap', config.umap_file) not in config.import_files:
             config.import_files.append(('umap', config.umap_file))
-        if config.poi_file:
+        if config.poi_file and ('poi', config.poi_file) not in config.import_files:
             config.import_files.append(('poi', config.poi_file))
 
         LOG.info('Rendering with renderer %s in language: %s (rtl: %s).' %
