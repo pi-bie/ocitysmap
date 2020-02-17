@@ -25,10 +25,14 @@
 from . import Stylesheet
 
 import os
+import tempfile
 from string import Template
 import gpxpy
 import gpxpy.gpx
 import codecs
+import logging
+
+LOG = logging.getLogger('ocitysmap')
 
 class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir):
@@ -48,7 +52,7 @@ class GpxStylesheet(Stylesheet):
                 '../../templates/gpx'))
 
         template_file = os.path.join(template_dir, 'template.xml')
-        GPX_filename = os.path.join(tmpdir, 'gpx_style.xml')
+        GPX_filename = tempfile.mktemp(suffix='.xml', dir=tmpdir)
         tmpfile = open(GPX_filename, 'w')
 
         with open(template_file, 'r') as style_template:

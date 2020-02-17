@@ -56,13 +56,13 @@ class UmapStylesheet(Stylesheet):
                 os.path.dirname(__file__),
                 '../../templates/umap'))
 
-        json_filename = os.path.join(tmpdir, 'geo.json')
+        json_filename = tempfile.mktemp(suffix='.json', dir=tmpdir)
         json_tmpfile = open(json_filename, 'w')
         json_tmpfile.write(self.umap_preprocess(umap_file, tmpdir))
         json_tmpfile.close()
 
         template_file = os.path.join(template_dir, 'template.xml')
-        style_filename = os.path.join(tmpdir, 'umap_style.xml')
+        style_filename = tempfile.mktemp(suffix='.xml', dir=tmpdir)
         style_tmpfile = open(style_filename, 'w')
 
         with open(template_file, 'r') as style_template:
