@@ -90,7 +90,7 @@ class UmapStylesheet(Stylesheet):
             'stroke'     :    'yes',
             'name'       :       '',
             'iconClass'  : 'Square',
-            'iconUrl'    : '/uploads/pictogram/circle-24_1.png'
+            'iconUrl'    : icon_dir + '/circle-15.svg',
         }
 
         marker_offsets = {
