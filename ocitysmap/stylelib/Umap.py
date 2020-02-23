@@ -79,6 +79,11 @@ class UmapStylesheet(Stylesheet):
         self.path = style_filename
 
     def umap_preprocess(self, umap_file, tmpdir):
+        icon_dir = os.path.realpath(
+            os.path.join(
+                os.path.dirname(__file__),
+                '../../templates/umap/maki/icons'))
+
         umap_defaults = {
             'color'      :'#0000ff',
             'opacity'    :      0.5,
@@ -100,11 +105,6 @@ class UmapStylesheet(Stylesheet):
             'Circle': 0,
             'Ball'  : -16
         }
-
-        icon_dir = os.path.realpath(
-            os.path.join(
-                os.path.dirname(__file__),
-                '../../templates/umap/maki/icons'))
 
         http = urllib3.PoolManager()
 
