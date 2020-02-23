@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
 # Copyright (C) 2010  David Decotigny
@@ -142,6 +142,7 @@ class SinglePageRenderer(Renderer):
 
         # Prepare overlay styles for uploaded files
         self._overlays = copy(self.rc.overlays)
+        self._overlay_effects  = {}
 
         # Prepare overlays for all additional import files
         if self.rc.import_files:
@@ -169,7 +170,6 @@ class SinglePageRenderer(Renderer):
 
         # Prepare map overlays
         self._overlay_canvases = []
-        self._overlay_effects  = {}
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
