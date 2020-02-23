@@ -149,7 +149,7 @@ class OCitySMap:
 
     DEFAULT_REQUEST_TIMEOUT_MIN = 15 # TODO make this a config file setting 
 
-    DEFAULT_RENDERING_PNG_DPI = 72 # TODO make this a config file setting
+    DEFAULT_RENDERING_PNG_DPI = 300 # TODO make this a config file setting
 
     STYLESHEET_REGISTRY = []
 
