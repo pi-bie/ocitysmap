@@ -29,6 +29,7 @@ import tempfile
 from string import Template
 import gpxpy
 import gpxpy.gpx
+from shapely.geometry import LineString
 import codecs
 import logging
 
@@ -38,14 +39,22 @@ class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir):
         super().__init__()
 
+        self.linestrings = []
+
         gpx_fp = codecs.open(gpx_file, 'r', 'utf-8-sig')
         gpx = gpxpy.parse(gpx_fp)
+        gpx_fp.close()
 
         if gpx.copyright_year or gpx.copyright_author or gpx.copyright_license:
             self.annotation = "GPX track © %s %s %s" % (gpx.copyright_year, gpx.copyright_author, gpx.copyright_license)
         
-        gpx_fp.close()
-        
+
+        for track in gpx.tracks:
+            for segment in track.segments:
+                l = LineString([(x.longitude, x.latitude)
+                                for x in segment.points])
+                self.linestrings.append(l)
+
         template_dir = os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__),

@@ -189,6 +189,31 @@ class MultiPageRenderer(Renderer):
         grayed_margin_merc_m      = (GRAYED_MARGIN_MM * scale_denom) / 1000
         overlap_margin_merc_m     = (OVERLAP_MARGIN_MM * scale_denom) / 1000
 
+        # Prepare overlays for all additional import files
+        self._overlays = copy(self.rc.overlays)
+        track_linestrings = []
+        if self.rc.import_files:
+            for (file_type, import_file) in self.rc.import_files:
+                if file_type == 'gpx':
+                    try:
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("GPX stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(gpx_style)
+                        for l in gpx_style.linestrings:
+                            track_linestrings.append(l)
+                elif file_type == 'umap':
+                    try:
+                        umap_style = UmapStylesheet(import_file, self.tmpdir)
+                    except Exception as e:
+                        LOG.warning("UMAP stylesheet error: %s" % e)
+                    else:
+                        self._overlays.append(umap_style)
+                else:
+                    LOG.warning("Unsupported file type '%s' for file '%s" % (file_type, import_file))
+
+
         # Calculate all the bounding boxes that correspond to the
         # geographical area that will be rendered on each sheet of
         # paper.
@@ -211,8 +236,17 @@ class MultiPageRenderer(Renderer):
                                               cur_x + usable_area_merc_m_width  - grayed_margin_merc_m,
                                               cur_y + usable_area_merc_m_height - grayed_margin_merc_m)
                 inner_bb = self._inverse_envelope(envelope_inner)
-                if not area_polygon.disjoint(shapely.wkt.loads(
-                                                inner_bb.as_wkt())):
+                inner_bb_shp = shapely.wkt.loads(inner_bb.as_wkt())
+                show_page = False
+                if len(track_linestrings) > 0:
+                    for l in track_linestrings:
+                        if l.intersects(inner_bb_shp):
+                            show_page = True
+                            break
+                elif not area_polygon.disjoint(inner_bb_shp):
+                    show_page = True
+
+                if show_page:
                     self.page_disposition[col].append(map_number)
                     map_number += 1
                     bboxes.append((self._inverse_envelope(envelope),
@@ -255,29 +289,6 @@ class MultiPageRenderer(Renderer):
                                   self.rc.stylesheet.grid_line_width)
 
         self.overview_canvas.render()
-
-        self._overlays = copy(self.rc.overlays)
-        
-        # Prepare overlays for all additional import files
-        if self.rc.import_files:
-            for (file_type, import_file) in self.rc.import_files:
-                if file_type == 'gpx':
-                    try:
-                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
-                    except Exception as e:
-                        LOG.warning("GPX stylesheet error: %s" % e)
-                    else:
-                        self._overlays.append(gpx_style)
-                elif file_type == 'umap':
-                    try:
-                        umap_style = UmapStylesheet(import_file, self.tmpdir)
-                    except Exception as e:
-                        LOG.warning("UMAP stylesheet error: %s" % e)
-                    else:
-                        self._overlays.append(umap_style)
-                else:
-                    LOG.warning("Unsupported file type '%s' for file '%s" % (file_type, import_file))
-
 
         self.overview_overlay_canvases = []
         self.overview_overlay_effects  = {}
