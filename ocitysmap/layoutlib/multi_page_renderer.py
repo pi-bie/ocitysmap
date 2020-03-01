@@ -194,7 +194,8 @@ class MultiPageRenderer(Renderer):
         # paper.
         area_polygon = shapely.wkt.loads(self.rc.polygon_wkt)
         bboxes = []
-        self.page_disposition, map_number = {}, 0
+        self.page_disposition = {}
+        map_number = 0
         for j in reversed(range(0, self.nb_pages_height)):
             col = self.nb_pages_height - j - 1
             self.page_disposition[col] = []
@@ -661,7 +662,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
-        cairo_surface.set_page_label('Front page')
+        cairo_surface.set_page_label(_(u'Front page'))
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
@@ -684,7 +685,7 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background=False)
-        cairo_surface.set_page_label('Blank')
+        cairo_surface.set_page_label(_(u'Blank'))
         cairo_surface.show_page()
         ctx.restore()
 
@@ -723,7 +724,7 @@ class MultiPageRenderer(Renderer):
                                       self.grayed_margin_pt,
                                       transparent_background = True)
 
-        cairo_surface.set_page_label('Overview')
+        cairo_surface.set_page_label(_(u'Overview'))
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -968,7 +969,7 @@ class MultiPageRenderer(Renderer):
             self._render_neighbour_arrows(ctx, cairo_surface, map_number,
                                           len(str(len(self.pages) + self._first_map_page_number)))
 
-            cairo_surface.set_page_label('Map page %d' % (map_number + self._first_map_page_number))
+            cairo_surface.set_page_label(_(u'Map page %d') % (map_number + self._first_map_page_number))
             cairo_surface.show_page()
         ctx.restore()
 

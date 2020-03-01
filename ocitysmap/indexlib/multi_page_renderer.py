@@ -55,8 +55,7 @@ class MultiPageStreetIndexRenderer:
         self.rendering_area_w = rendering_area[2]
         self.rendering_area_h = rendering_area[3]
         self.page_offset      = page_offset
-        self.index_page_num   = 1
-        self.index_page_num = self.index_page_num
+        self.index_page_num   = 0
 
     def _create_layout_with_font(self, ctx, pc, font_desc):
         layout = PangoCairo.create_layout(ctx)
@@ -82,12 +81,13 @@ class MultiPageStreetIndexRenderer:
                                       PAGE_NUMBER_MARGIN_PT,
                                       transparent_background = False)
         self.ctx.restore()
-        self.surface.set_page_label('Index page %d' % (self.index_page_num))
+        self.surface.set_page_label(_(u'Index page %d') % (self.index_page_num + 1))
 
     def _new_page(self):
-        self.surface.show_page()
-        self.index_page_num = self.index_page_num + 1
+        if self.index_page_num > 0:
+            self.surface.show_page()
         self._draw_page_number()
+        self.index_page_num = self.index_page_num + 1
 
     def render(self, dpi = UTILS.PT_PER_INCH):
         self.ctx.save()
@@ -169,8 +169,7 @@ class MultiPageStreetIndexRenderer:
         actual_n_cols = 0
         offset_y = margin/2.
 
-        # page number of first page
-        self._draw_page_number()
+        self._new_page()
 
         for category in self.index_categories:
             if ( offset_y + header_fheight + label_fheight
