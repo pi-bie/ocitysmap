@@ -662,7 +662,10 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
-        cairo_surface.set_page_label(_(u'Front page'))
+        try: # set_page_label() does not exist in older pycairo versions
+            cairo_surface.set_page_label(_(u'Front page'))
+        except:
+            pass
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
@@ -685,7 +688,10 @@ class MultiPageRenderer(Renderer):
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
                                       transparent_background=False)
-        cairo_surface.set_page_label(_(u'Blank'))
+        try: # set_page_label() does not exist in older pycairo versions
+            cairo_surface.set_page_label(_(u'Blank'))
+        except:
+            pass
         cairo_surface.show_page()
         ctx.restore()
 
@@ -724,7 +730,10 @@ class MultiPageRenderer(Renderer):
                                       self.grayed_margin_pt,
                                       transparent_background = True)
 
-        cairo_surface.set_page_label(_(u'Overview'))
+        try: # set_page_label() does not exist in older pycairo versions
+            cairo_surface.set_page_label(_(u'Overview'))
+        except:
+            pass
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -969,7 +978,10 @@ class MultiPageRenderer(Renderer):
             self._render_neighbour_arrows(ctx, cairo_surface, map_number,
                                           len(str(len(self.pages) + self._first_map_page_number)))
 
-            cairo_surface.set_page_label(_(u'Map page %d') % (map_number + self._first_map_page_number))
+            try: # set_page_label() does not exist in older pycairo versions
+                cairo_surface.set_page_label(_(u'Map page %d') % (map_number + self._first_map_page_number))
+            except:
+                pass
             cairo_surface.show_page()
         ctx.restore()
 

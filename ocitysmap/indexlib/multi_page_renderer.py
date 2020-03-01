@@ -36,6 +36,8 @@ LOG = logging.getLogger('ocitysmap')
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
+
+
 class MultiPageStreetIndexRenderer:
     """
     The MultiPageStreetIndexRenderer class encapsulates all the logic
@@ -81,7 +83,10 @@ class MultiPageStreetIndexRenderer:
                                       PAGE_NUMBER_MARGIN_PT,
                                       transparent_background = False)
         self.ctx.restore()
-        self.surface.set_page_label(_(u'Index page %d') % (self.index_page_num + 1))
+        try:
+            self.surface.set_page_label(_(u'Index page %d') % (self.index_page_num + 1))
+        except:
+            pass
 
     def _new_page(self):
         if self.index_page_num > 0:
