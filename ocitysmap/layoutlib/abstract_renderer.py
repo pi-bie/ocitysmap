@@ -221,6 +221,9 @@ class Renderer:
             else:
                 continue
 
+            if map_grid.rtl:
+                x = map_area_width_dots - x
+
             # At the top clear the right corner of the horizontal label
             if (i < map_grid.horiz_count-1):
                 draw_utils.draw_halotext_center(ctx, label,

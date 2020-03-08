@@ -109,11 +109,16 @@ class Grid:
         self._vert_unit_angle  = (self._vert_angle_span / self.vert_count)
 
         self._horizontal_lines = [ ( self._bbox.get_top_left()[0] -
-                                    (x+1) * self._vert_unit_angle)
-                                  for x in range(int(math.floor(self.vert_count)))]
-        self._vertical_lines   = [ (self._bbox.get_top_left()[1] +
-                                    (x+1) * self._horiz_unit_angle)
-                                   for x in range(int(math.floor(self.horiz_count)))]
+                                     (x+1) * self._vert_unit_angle)
+                                   for x in range(int(math.floor(self.vert_count)))]
+        if rtl:
+            self._vertical_lines   = [ (self._bbox.get_bottom_right()[1] -
+                                        (x+1) * self._horiz_unit_angle)
+                                       for x in range(int(math.floor(self.horiz_count)))]
+        else:
+            self._vertical_lines   = [ (self._bbox.get_top_left()[1] +
+                                        (x+1) * self._horiz_unit_angle)
+                                       for x in range(int(math.floor(self.horiz_count)))]
 
         self.horizontal_labels = list(map(self._gen_horizontal_square_label,
                                       range(int(math.ceil(self.horiz_count)))))
@@ -156,8 +161,6 @@ class Grid:
             28 -> AB
             ...
         """
-        if self.rtl:
-            x = len(self._vertical_lines) - x
 
         label = ''
         while x != -1:
@@ -175,8 +178,13 @@ class Grid:
         Translate the given lattitude/longitude (EPSG:4326) into a
         string of the form "CA42"
         """
-        hdelta = min(abs(longitude - self._bbox.get_top_left()[1]),
-                     self._horiz_angle_span)
+        if self.rtl:
+            hdelta = min(abs(self._bbox.get_bottom_right()[1]-longitude),
+                         self._horiz_angle_span)
+        else:
+            hdelta = min(abs(longitude - self._bbox.get_top_left()[1]),
+                         self._horiz_angle_span)
+
         hlabel = self.horizontal_labels[int(hdelta / self._horiz_unit_angle)]
 
         vdelta = min(abs(lattitude - self._bbox.get_top_left()[0]),

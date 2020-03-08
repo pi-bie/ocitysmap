@@ -890,6 +890,9 @@ class MultiPageRenderer(Renderer):
             else:
                 continue
 
+            if map_grid.rtl:
+                x = map_area_width_dots - x
+
             draw_utils.draw_halotext_center(ctx, label,
                                             x, - grid_legend_margin_dots/1.0)
 
