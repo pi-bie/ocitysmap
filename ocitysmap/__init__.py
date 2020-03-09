@@ -197,12 +197,17 @@ class OCitySMap:
         self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
 
+        r_paper = re.compile('^\s*(\d+)\s*x\s*(\d+)\s*$')
+
         if self._parser.has_section('paper_sizes'):
             self.PAPER_SIZES = []
             for key in self._parser['paper_sizes']:
                 value = self._parser['paper_sizes'][key]
-                (w,h) = value.split('x')
-                self.PAPER_SIZES.append((key, int(w), int(h)))
+                try:
+                    (w,h) = r_paper.match(value).groups()
+                    self.PAPER_SIZES.append((key, int(w), int(h)))
+                except:
+                    LOG.warning("Ignoring invalid paper size '%s' for format '%s'" % (key, value))
         else:
             # minimal fallback configuration
             self.PAPER_SIZES = [('DinA4',     210, 297),
@@ -216,8 +221,11 @@ class OCitySMap:
             self.MULTIPAGE_PAPER_SIZES = []
             for key in self._parser['multipage_paper_sizes']:
                 value = self._parser['multipage_paper_sizes'][key]
-                (w,h) = value.split('x')
-                self.MULTIPAGE_PAPER_SIZES.append((key, int(w), int(h)))
+                try:
+                    (w,h) = r_paper.match(value).groups()
+                    self.MULTIPAGE_PAPER_SIZES.append((key, int(w), int(h)))
+                except Exception as e:
+                    LOG.warning("Ignoring invalid paper size '%s' for multi page format '%s'" % (key, value))
         else:
             # minimal fallback configuration
             self.MULTIPAGE_PAPER_SIZES = [('DinA4',     210, 297),
