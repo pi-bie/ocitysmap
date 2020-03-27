@@ -203,6 +203,12 @@ def main():
     # check paper-format option if given
     if options.paper_format and options.paper_format != 'default':
         paper_format_names = mapper.get_all_paper_size_names()
+        for format_name in paper_format_names:
+            name1 = format_name.lower().replace(" ","")
+            name2 = options.paper_format.lower().replace(" ","")
+            if name1 == name2:
+                options.paper_format = format_name
+                break
         if not options.paper_format in paper_format_names:
             parser.error("Requested paper format %s not found. Compatible paper formats are:\n\t%s."
                          % ( options.paper_format,
