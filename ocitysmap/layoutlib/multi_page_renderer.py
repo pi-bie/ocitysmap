@@ -1018,6 +1018,10 @@ class MultiPageRenderer(Renderer):
         return [ "pdf" ]
 
     @staticmethod
+    def get_minimal_paper_size(bounding_box, scale=None):
+        return (100, 100)
+
+    @staticmethod
     def get_compatible_paper_sizes(bounding_box,
                                    renderer_context,
                                    scale=Renderer.DEFAULT_MULTIPAGE_SCALE,

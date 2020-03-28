@@ -644,24 +644,9 @@ class SinglePageRenderer(Renderer):
             cairo_surface.flush()
 
     @staticmethod
-    def _generic_get_compatible_paper_sizes(bounding_box,
-                                            paper_sizes,
-                                            scale=Renderer.DEFAULT_SCALE,
-                                            index_position = None):
-        """Returns a list of the compatible paper sizes for the given bounding
-        box. The list is sorted, smaller papers first, and a "custom" paper
-        matching the dimensions of the bounding box is added at the end.
-
-        Args:
-            bounding_box (coords.BoundingBox): the map geographic bounding box.
-            scale (int): minimum mapnik scale of the map.
-           index_position (str): None or 'side' (index on side),
-              'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
-
-        Returns a list of tuples (paper name, width in mm, height in
-        mm, portrait_ok, landscape_ok, is_default). Paper sizes are
-        represented in portrait mode.
-        """
+    def _generic_get_minimal_paper_size(bounding_box,
+                                        scale=Renderer.DEFAULT_SCALE,
+                                        index_position = None):
 
         # the mapnik scale depends on the latitude
         lat = bounding_box.get_top_left()[0]
@@ -711,6 +696,29 @@ class SinglePageRenderer(Renderer):
         paper_width_mm  = int(math.ceil(paper_width_mm))
         paper_height_mm = int(math.ceil(paper_height_mm))
 
+        return (paper_width_mm, paper_height_mm)
+
+    @staticmethod
+    def _generic_get_compatible_paper_sizes(bounding_box,
+                                            paper_sizes,
+                                            scale=Renderer.DEFAULT_SCALE,
+                                            index_position = None):
+        """Returns a list of the compatible paper sizes for the given bounding
+        box. The list is sorted, smaller papers first, and a "custom" paper
+        matching the dimensions of the bounding box is added at the end.
+
+        Args:
+            bounding_box (coords.BoundingBox): the map geographic bounding box.
+            scale (int): minimum mapnik scale of the map.
+           index_position (str): None or 'side' (index on side),
+              'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
+
+        Returns a list of tuples (paper name, width in mm, height in
+        mm, portrait_ok, landscape_ok, is_default). Paper sizes are
+        represented in portrait mode.
+        """
+
+        paper_width_mm, paper_height_mm = SinglePageRenderer._generic_get_minimal_paper_size(bounding_box, scale, index_position)
         LOG.info('Best fit including decorations is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
 

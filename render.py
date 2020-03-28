@@ -28,6 +28,7 @@ import logging
 import optparse
 import os
 import sys
+import re
 
 import ocitysmap
 import ocitysmap.layoutlib.renderers
@@ -93,8 +94,9 @@ def main():
                      )
     parser.add_option('--paper-format', metavar='FMT',
                       help='set the output paper format. Either "default", '
-                           '"Best fit", or one of the paper size names '
-                           'defined in the configuration file',
+                           '"Best fit", one of the paper size names '
+                           'defined in the configuration file, '
+                           'or a custom size in millimeters like e.g. 100x100',
                       default='default')
     parser.add_option('--orientation', metavar='ORIENTATION',
                       help='set the output paper orientation. Either '
@@ -201,51 +203,65 @@ def main():
                          (format, cls_renderer.name))
 
     # check paper-format option if given
+    paper_width = None
+    paper_height = None
     if options.paper_format and options.paper_format != 'default':
-        paper_format_names = mapper.get_all_paper_size_names()
-        for format_name in paper_format_names:
-            name1 = format_name.lower().replace(" ","")
-            name2 = options.paper_format.lower().replace(" ","")
-            if name1 == name2:
-                options.paper_format = format_name
-                break
-        if not options.paper_format in paper_format_names:
-            parser.error("Requested paper format %s not found. Compatible paper formats are:\n\t%s."
-                         % ( options.paper_format,
-                             ', '.join(paper_format_names)))
+        matches = re.search('^(\d+)[x\*](\d+)$', options.paper_format)
+        if bool(matches):
+            paper_width  = int(matches.group(1))
+            paper_height = int(matches.group(2))
+        else:
+            paper_format_names = mapper.get_all_paper_size_names()
+            for format_name in paper_format_names:
+                name1 = format_name.lower().replace(" ","")
+                name2 = options.paper_format.lower().replace(" ","")
+                if name1 == name2:
+                    options.paper_format = format_name
+                    break
+            if not options.paper_format in paper_format_names:
+                parser.error("Requested paper format %s not found. Compatible paper formats are:\n\t%s."
+                             % ( options.paper_format,
+                                 ', '.join(paper_format_names)))
 
     # Determine actual paper size
-    compat_papers = cls_renderer.get_compatible_paper_sizes(bbox, mapper)
-    if not compat_papers:
-        parser.error("No paper size compatible with this rendering.")
 
-    paper_descr = None
-    if options.paper_format == 'default':
-        for paper in compat_papers:
-            if paper['default']:
-                paper_descr = p
-                break
+    if paper_width and paper_height:
+        min_width, min_height = cls_renderer.get_minimal_paper_size(bbox)
+        if paper_width < min_width or paper_height < min_height:
+            parser.error("Given paper size %dmm x %dmm is too small, minimal required size is: %dmm x %dmm" %
+                         (paper_width, paper_height, min_width, min_height))
     else:
-        # Make sure the requested paper size is in list
-        for paper in compat_papers:
-            if paper['name'] == options.paper_format:
-                paper_descr = paper
-                break
-    if not paper_descr:
-        parser.error("Requested paper format not compatible with rendering. Compatible paper formats are:\n\t%s."
-             % ',\n\t'.join(map(lambda p: "%s (%.1fx%.1fcm²)"
-                % (p['name'], p['width']/10., p['height']/10.),
-                compat_papers)))
-    assert paper_descr['portrait_ok'] or paper_descr['landscape_ok']
+        compat_papers = cls_renderer.get_compatible_paper_sizes(bbox, mapper)
+        if not compat_papers:
+            parser.error("No paper size compatible with this rendering.")
 
-    # Validate requested orientation
-    if options.orientation not in KNOWN_PAPER_ORIENTATIONS:
-        parser.error("Invalid paper orientation. Allowed orientations: %s"
-                     % KNOWN_PAPER_ORIENTATIONS)
+        paper_descr = None
+        if options.paper_format == 'default':
+            for paper in compat_papers:
+                if paper['default']:
+                    paper_descr = p
+                    break
+        else:
+            # Make sure the requested paper size is in list
+            for paper in compat_papers:
+                if paper['name'] == options.paper_format:
+                    paper_descr = paper
+                    break
+        if not paper_descr:
+            parser.error("Requested paper format not compatible with rendering. Compatible paper formats are:\n\t%s."
+                         % ',\n\t'.join(map(lambda p: "%s (%.1fx%.1fcm²)"
+                                            % (p['name'], p['width']/10., p['height']/10.),
+                                            compat_papers)))
+        assert paper_descr['portrait_ok'] or paper_descr['landscape_ok']
 
-    if (options.orientation == 'portrait' and not paper_descr['portrait_ok']) or \
-        (options.orientation == 'landscape' and not paper_descr['landscape_ok']):
-        parser.error("Requested paper orientation %s not compatible with this rendering at this paper size." % options.orientation)
+        # Validate requested orientation
+        if options.orientation not in KNOWN_PAPER_ORIENTATIONS:
+            parser.error("Invalid paper orientation. Allowed orientations: %s"
+                         % KNOWN_PAPER_ORIENTATIONS)
+
+        if (options.orientation == 'portrait' and not paper_descr['portrait_ok']) or \
+           (options.orientation == 'landscape' and not paper_descr['landscape_ok']):
+            parser.error("Requested paper orientation %s not compatible with this rendering at this paper size." % options.orientation)
 
     # Prepare the rendering config
     rc              = ocitysmap.RenderingConfiguration()
@@ -257,8 +273,11 @@ def main():
     rc.overlays     = overlays
     rc.poi_file     = options.poi_file
     rc.gpx_file     = options.gpx_file
-    rc.umap_file     = options.umap_file
-    if options.orientation == 'portrait':
+    rc.umap_file    = options.umap_file
+    if paper_width and paper_height:
+        rc.paper_width_mm  = paper_width
+        rc.paper_height_mm = paper_height
+    elif options.orientation == 'portrait':
         rc.paper_width_mm  = paper_descr['width']
         rc.paper_height_mm = paper_descr['height']
     else:

@@ -349,7 +349,7 @@ class Renderer:
         return False
 
     @staticmethod
-    def get_compatible_paper_sizes(bounding_box, scale):
+    def get_compatible_paper_sizes(bounding_box, scale=None):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
@@ -361,6 +361,13 @@ class Renderer:
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok, is_default). Paper sizes are
         represented in portrait mode.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def get_minimal_paper_size(bounding_box, scale=None):
+        """Retruns the minimal paper width and height needed to render the
+        given map selection
         """
         raise NotImplementedError
 

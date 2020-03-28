@@ -36,3 +36,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
         return SinglePageRenderer._generic_get_compatible_paper_sizes(
             bounding_box, render_context.get_all_paper_sizes(), scale, 'bottom')
 
+    @staticmethod
+    def get_minimal_paper_size(bounding_box, scale=Renderer.DEFAULT_SCALE):
+        return SinglePageRenderer._generic_get_minimal_paper_size(
+            bounding_box, scale, 'bottom')
