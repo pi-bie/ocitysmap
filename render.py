@@ -271,9 +271,13 @@ def main():
     rc.language     = options.language
     rc.stylesheet   = stylesheet
     rc.overlays     = overlays
-    rc.poi_file     = options.poi_file
-    rc.gpx_file     = options.gpx_file
-    rc.umap_file    = options.umap_file
+    if (options.poi_file):
+        rc.poi_file     = os.path.realpath(options.poi_file)
+    if (options.gpx_file):
+        rc.gpx_file     = os.path.realpath(options.gpx_file)
+    if (options.umap_file):
+        rc.umap_file    = os.path.realpath(options.umap_file)
+    # rc.import_files = options.import_file
     if paper_width and paper_height:
         rc.paper_width_mm  = paper_width
         rc.paper_height_mm = paper_height
