@@ -109,6 +109,8 @@ def main():
                       help='a GPX track to be put on top of the rendered map.')
     parser.add_option('--umap-file', metavar='FILE',
                       help='a Umap export file to be put on top of the rendered map.')
+    parser.add_option('--import-file', metavar='FILE', action='append',
+                      help='import file, any of GPX, Umap, GeoJson or POI file, can be used multiple times')
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -277,7 +279,11 @@ def main():
         rc.gpx_file     = os.path.realpath(options.gpx_file)
     if (options.umap_file):
         rc.umap_file    = os.path.realpath(options.umap_file)
-    # rc.import_files = options.import_file
+    rc.import_files = []
+    for import_file in options.import_file:
+        import_file = os.path.realpath(import_file)
+        file_type = ocitysmap.guess_filetype(import_file)
+        rc.import_files.append((file_type, import_file))
     if paper_width and paper_height:
         rc.paper_width_mm  = paper_width
         rc.paper_height_mm = paper_height

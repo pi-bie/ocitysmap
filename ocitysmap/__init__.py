@@ -103,6 +103,32 @@ LOG = logging.getLogger('ocitysmap')
 def get_mapnik_major_version():
     return int(mapnik.mapnik_version_string().split('.')[0])
 
+def guess_filetype(import_file):
+    try:
+        if type(import_file) == str:
+            file_name = import_file
+            import_file = open(import_file, 'rb')
+        else:
+            file_name = import_file.name
+            import_file.open()
+
+        first_line = import_file.readline(100).decode('utf-8-sig')
+        if first_line.startswith('<?xml'):
+            result = "gpx"
+        elif first_line.startswith('{'):
+            second_line = import_file.readline(100).decode('utf-8-sig')
+            # TODO - support generic GeoJSON, too
+            if second_line.strip().startswith('"title":'):
+                result = "poi"
+            else:
+                result = "umap"
+        else:
+            raise RuntimeError("Can't determine import file type for %s" % file_name)
+    except Exception as e:
+        raise RuntimeError("Error processing import file %s" % e)
+
+    import_file.close()
+    return result
 
 class RenderingConfiguration:
     """
