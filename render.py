@@ -280,10 +280,11 @@ def main():
     if (options.umap_file):
         rc.umap_file    = os.path.realpath(options.umap_file)
     rc.import_files = []
-    for import_file in options.import_file:
-        import_file = os.path.realpath(import_file)
-        file_type = ocitysmap.guess_filetype(import_file)
-        rc.import_files.append((file_type, import_file))
+    if options.import_file:
+        for import_file in options.import_file:
+            import_file = os.path.realpath(import_file)
+            file_type = ocitysmap.guess_filetype(import_file)
+            rc.import_files.append((file_type, import_file))
     if paper_width and paper_height:
         rc.paper_width_mm  = paper_width
         rc.paper_height_mm = paper_height
