@@ -508,6 +508,9 @@ SELECT ST_AsText(ST_LongestLine(
                  (renderer_name, config.i18n.language_code(),
                   config.i18n.isrtl()))
 
+        if 'PGAPPNAME' not in os.environ:
+            os.environ['PGAPPNAME'] = "ocitysmap"
+
         os.environ['PGOPTIONS'] = "-c mapnik.language=" + config.language[:2] + " -c mapnik.locality=" + config.language[:5] + " -c mapnik.country=" + config.language[3:5]
         LOG.debug("PGOPTIONS '%s'" % os.environ.get('PGOPTIONS', 'not set'))
 
