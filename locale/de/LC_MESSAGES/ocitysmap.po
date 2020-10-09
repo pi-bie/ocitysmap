@@ -4,13 +4,14 @@
 # Translators:
 # Hakan Tandogan <hakan.tandogan@gmail.com>, 2013
 # Hartmut Holzgraefe <hartmut@php.net>, 2019.
+# Weblate Admin <admin@example.com>, 2020.
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-10-16 22:26+0200\n"
-"PO-Revision-Date: 2019-04-10 11:07+0000\n"
-"Last-Translator: Hartmut Holzgraefe <hartmut@php.net>\n"
+"PO-Revision-Date: 2020-07-05 14:13+0000\n"
+"Last-Translator: Weblate Admin <admin@example.com>\n"
 "Language-Team: German <http://translate.get-map.org/projects/maposmatic/"
 "ocitysmap/de/>\n"
 "Language: de\n"
@@ -92,7 +93,7 @@ msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
 msgstr ""
 "Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (siehe http://osm."
-"org/copyright)."
+"org/copyright)"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:596
 #: ocitysmap/layoutlib/single_page_renderers.py:380
