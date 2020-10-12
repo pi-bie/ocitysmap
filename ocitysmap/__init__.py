@@ -91,7 +91,6 @@ import shapely.geometry
 
 from . import coords
 from . import i18n
-from .indexlib.indexer import StreetIndex
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 from .layoutlib import renderers
 from .layoutlib import commons

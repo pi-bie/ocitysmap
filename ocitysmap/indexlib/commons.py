@@ -8,6 +8,7 @@
 # Copyright (C) 2010  Maxime Petazzoni
 # Copyright (C) 2010  Thomas Petazzoni
 # Copyright (C) 2010  Gaël Utard
+# Copyright (C) 2020 Hartmut Holzgraefe
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -74,71 +75,6 @@ class IndexCategory:
     def get_all_item_squares(self):
         return [x.squares for x in self.items]
 
-class StreetIndexCategory(IndexCategory):
-    """
-    The IndexCategory represents a set of index items that belong to the same
-    category (their first letter is the same or they are of the same amenity
-    type).
-    """
-
-    def __init__(self, name, items=None, is_street=True):
-        IndexCategory.__init__(self, name, items, is_street)
-
-    def draw(self, rtl, ctx, pc, layout, fascent, fheight,
-             baseline_x, baseline_y):
-        """Draw this category header.
-
-        Args:
-            rtl (boolean): whether to draw right-to-left or not.
-            ctx (cairo.Context): the Cairo context to draw to.
-            pc (pangocairo.CairoContext): the PangoCairo context.
-            layout (pango.layout): the Pango layout to draw text into.
-            fascent (int): font ascent.
-            fheight (int): font height.
-            baseline_x (int): base X axis position.
-            baseline_y (int): base Y axis position.
-        """
-
-        ctx.save()
-        ctx.set_source_rgb(0.9, 0.9, 0.9)
-        ctx.rectangle(baseline_x, baseline_y - fascent,
-                      layout.get_width() / Pango.SCALE, fheight)
-        ctx.fill()
-
-        ctx.set_source_rgb(0.0, 0.0, 0.0)
-        draw_utils.draw_text_center(ctx, pc, layout, fascent, fheight,
-                                    baseline_x, baseline_y, self.name)
-        ctx.restore()
-
-
-class PoiIndexCategory(IndexCategory):
-    name  = None
-    color = None
-    col_r = 0
-    col_g = 0
-    col_b = 0
-    icon  = None
-    items = None
-
-    def __init__(self, name, items=None, color=None, icon=None):
-        IndexCategory.__init__(self, name, items)
-        self.color = color
-
-        c = Color(color)
-        self.col_r = c.red
-        self.col_g = c.green
-        self.col_b = c.blue
-
-        self.icon  = icon
-
-
-    def draw(self, rtl, ctx, pc, layout, fascent, fheight,
-             baseline_x, baseline_y):
-        ctx.save()
-
-        ctx.set_source_rgb(self.col_r, self.col_g, self.col_b)
-
-        ctx.restore()
 
 class IndexItem:
     """
@@ -213,99 +149,6 @@ class IndexItem:
                                                 self.location_str)
 
 
-class StreetIndexItem(IndexItem):
-    """
-    An IndexItem represents one item in the index (a street or a POI). It
-    contains the item label (street name, POI name or description) and the
-    humanized squares description.
-    """
-
-    def label_drawing_width(self, layout):
-        layout.set_text(self.label, -1)
-        return float(layout.get_size()[0]) / Pango.SCALE
-
-    def label_drawing_height(self, layout):
-        layout.set_text(self.label, -1)
-        return float(layout.get_size()[1]) / Pango.SCALE
-
-    def location_drawing_width(self, layout):
-        layout.set_text(self.location_str, -1)
-        return float(layout.get_size()[0]) / Pango.SCALE
-
-    def draw(self, rtl, ctx, pc, column_layout, fascent, fheight,
-             baseline_x, baseline_y,
-             label_layout=None, label_height=0, location_width=0):
-        """Draw this index item to the provided Cairo context. It prints the
-        label, the squares definition and the dotted line, with respect to the
-        RTL setting.
-
-        Args:
-            rtl (boolean): right-to-left localization.
-            ctx (cairo.Context): the Cairo context to draw to.
-            pc (pangocairo.PangoCairo): the PangoCairo context for text
-                drawing.
-            column_layout (pango.Layout): the Pango layout to use for text
-                rendering, pre-configured with the appropriate font.
-            fascent (int): font ascent.
-            fheight (int): font height.
-            baseline_x (int): X axis coordinate of the baseline.
-            baseline_y (int): Y axis coordinate of the baseline.
-        Optional args (in case of label wrapping):
-            label_layout (pango.Layout): the Pango layout to use for text
-                rendering, in case the label should be wrapped
-            label_height (int): height of the big label
-            location_width (int): width of the 'location' part
-        """
-
-        # Fallbacks in case we dont't have a wrapping label
-        if label_layout == None:
-            label_layout = column_layout
-        if label_height == 0:
-            label_height = fheight
-
-        if not self.location_str:
-            location_str = '???'
-        else:
-            location_str = self.location_str
-
-        ctx.save()
-        if not rtl:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, label_layout,
-                                                         fascent, fheight,
-                                                         baseline_x, baseline_y,
-                                                         self.label)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, column_layout,
-                                                        fascent, fheight,
-                                                        baseline_x, baseline_y,
-                                                        location_str)
-        else:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, column_layout,
-                                                         fascent, fheight,
-                                                         baseline_x, baseline_y,
-                                                         location_str)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, label_layout,
-                                                        fascent, fheight,
-                                                        (baseline_x
-                                                         + location_width),
-                                                        baseline_y,
-                                                        self.label)
-
-        # In case of empty label, we don't draw the dots
-        if self.label != '':
-            draw_utils.draw_dotted_line(ctx, fheight/12,
-                                        line_start + fheight/4, baseline_y,
-                                        line_end - line_start - fheight/2)
-        ctx.restore()
-
-
-class PoiIndexItem(IndexItem):
-
-    __slots__    = ['icon']
-    # icon = None
-
-    def __init__(self, label, coords, icon=None):
-        IndexItem.__init__(self, label, coords, None)
-        self.icon = icon
 
 
 
