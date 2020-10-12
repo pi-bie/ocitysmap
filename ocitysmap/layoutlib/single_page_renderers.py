@@ -79,6 +79,7 @@ class SinglePageRenderer(Renderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
+           TODO: above no longer fully correct
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
@@ -86,18 +87,22 @@ class SinglePageRenderer(Renderer):
         self.file_prefix = file_prefix
 
         # Prepare the index
-        if rc.poi_file:
-            self.street_index = PoiIndex(rc.poi_file)
-        else:
-            self.street_index = StreetIndex(db,
-                                            rc.polygon_wkt,
-                                            rc.i18n)
-
-        if not self.street_index.categories:
-            LOG.warning("Designated area leads to an empty index")
-            self.street_index = None
-
         self.index_position = index_position
+        if index_position is None: 
+            self.street_index = None
+        else:
+            if rc.poi_file:
+                self.street_index = PoiIndex(rc.poi_file)
+            else:
+                self.street_index = StreetIndex(db,
+                                                rc.polygon_wkt,
+                                                rc.i18n)
+
+            if not self.street_index.categories:
+                LOG.warning("Designated area leads to an empty index")
+                self.street_index = None
+                self.index_position = None
+
 
         # grid marker offset (originally used for solid grid frame,
         # now just for the letter/number overlay offset inside the map)
