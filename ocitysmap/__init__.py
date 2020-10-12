@@ -104,10 +104,12 @@ def get_mapnik_major_version():
     return int(mapnik.mapnik_version_string().split('.')[0])
 
 def guess_filetype(import_file):
+    need_close = False
     try:
         if type(import_file) == str:
             file_name = import_file
             import_file = open(import_file, 'rb')
+            need_close = true
         else:
             file_name = import_file.name
             import_file.open()
@@ -127,7 +129,10 @@ def guess_filetype(import_file):
     except Exception as e:
         raise RuntimeError("Error processing import file %s" % e)
 
-    import_file.close()
+    if need_close:
+        import_file.close()
+    else:
+        import_file.seek(0)
     return result
 
 class RenderingConfiguration:
