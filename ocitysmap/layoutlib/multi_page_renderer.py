@@ -189,11 +189,17 @@ class MultiPageRenderer(Renderer):
 
         # Prepare overlays for all additional import files
         self._overlays = copy(self.rc.overlays)
+        gpx_colors = ['red', 'blue', 'green', 'violet', 'orange']
+        gpx_color_index = 0
         track_linestrings = []
         if self.rc.import_files:
             for (file_type, import_file) in self.rc.import_files:
                 if file_type == 'gpx':
                     try:
+                        color = gpx_colors[gpx_color_index]
+                        gpx_color_index += 1
+                        if gpx_color_index == len(gpx_colors):
+                            gpx_color_index = 0
                         gpx_style = GpxStylesheet(import_file, self.tmpdir)
                     except Exception as e:
                         LOG.warning("GPX stylesheet error: %s" % e)

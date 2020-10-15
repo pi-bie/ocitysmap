@@ -150,11 +150,17 @@ class SinglePageRenderer(Renderer):
         self._overlay_effects  = {}
 
         # Prepare overlays for all additional import files
+        gpx_colors = ['red', 'blue', 'green', 'violet', 'orange']
+        gpx_color_index = 0
         if self.rc.import_files:
             for (file_type, import_file) in self.rc.import_files:
                 if file_type == 'gpx':
                     try:
-                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                        color = gpx_colors[gpx_color_index]
+                        gpx_color_index += 1
+                        if gpx_color_index == len(gpx_colors):
+                            gpx_color_index = 0
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir, color)
                     except Exception as e:
                         LOG.warning("GPX stylesheet error: %s" % e)
                     else:

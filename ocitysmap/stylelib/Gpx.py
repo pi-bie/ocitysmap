@@ -36,7 +36,7 @@ import logging
 LOG = logging.getLogger('ocitysmap')
 
 class GpxStylesheet(Stylesheet):
-    def __init__(self, gpx_file, tmpdir):
+    def __init__(self, gpx_file, tmpdir, track_color = '#7f7f7f'):
         super().__init__()
 
         self.linestrings = []
@@ -69,7 +69,8 @@ class GpxStylesheet(Stylesheet):
             tmpfile.write(
                 tmpstyle.substitute(
                     gpxfile = gpx_file,
-                    svgdir = template_dir
+                    svgdir = template_dir,
+                    color  = track_color
                 ))
 
         tmpfile.close()
