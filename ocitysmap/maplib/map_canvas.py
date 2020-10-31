@@ -64,6 +64,7 @@ class MapCanvas:
             provided rendering area. Needed by SinglePageRenderer.
         """
 
+        self._style_name = stylesheet.name
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
         self._dpi  = dpi
 
@@ -155,6 +156,9 @@ class MapCanvas:
 
     def get_rendered_map(self):
         return self._map
+
+    def get_style_name(self):
+        return self._style_name
 
     def get_actual_bounding_box(self):
         """Returns the actual geographic bounding box that will be rendered by

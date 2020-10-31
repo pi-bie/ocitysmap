@@ -514,7 +514,7 @@ class SinglePageRenderer(Renderer):
         for overlay_canvas in self._overlay_canvases:
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
-            LOG.debug('Overlay:') # TODO: overlay name
+            LOG.info('Overlay: %s' % overlay_canvas.get_style_name())
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
