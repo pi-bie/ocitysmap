@@ -97,6 +97,12 @@ class MapCanvas:
         mapnik.load_map(self._map, stylesheet.path)
         self._map.zoom_to_box(envelope)
 
+        # exclude layers based on configuration setting "exclude_layers"
+        for layer in self._map.layers:
+            if layer.name in stylesheet.exclude_layers:
+                LOG.debug("Excluding layer: %s" % layer.name)
+                layer.status = False
+
         # Added shapes to render
         self._shapes = []
 

@@ -506,12 +506,6 @@ class SinglePageRenderer(Renderer):
         LOG.info('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
         LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
 
-        # exclude layers based on configuration setting "exclude_layers"
-        for layer in rendered_map.layers:
-            if layer.name in self.rc.stylesheet.exclude_layers:
-                LOG.debug("Excluding layer: %s" % layer.name)
-                layer.status = False
-
         # now perform the actual drawing
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
