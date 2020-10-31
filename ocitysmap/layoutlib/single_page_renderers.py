@@ -328,7 +328,7 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Retrieve and paint the extra logo
-        # TODO: 
+        # TODO: make configurable 
         logo_width2 = 0
         if self.rc.poi_file:
             ctx.save()
