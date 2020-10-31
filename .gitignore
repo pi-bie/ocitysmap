@@ -18,6 +18,6 @@
 /stylesheet/maposmatic-printable/inc/fontset-settings.xml.inc
 /stylesheet/maposmatic-printable/inc/settings.xml.inc
 
-# TODO: why was this set to be ignored in the first place?
+# files generated from templates
 /support/shoreline-update.sh
 
