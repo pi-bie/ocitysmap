@@ -231,6 +231,11 @@ class PoiIndexRenderer:
         f = dpi / UTILS.PT_PER_INCH;
         x = 5*f
 
+        # clip the index row area
+        ctx.save()
+        ctx.rectangle( 0, 0, (area.w - 20)*f, dpi * 0.7)
+        ctx.clip()
+
         # find the marker icon
         marker_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
@@ -292,7 +297,6 @@ class PoiIndexRenderer:
                 LOG.warning("icon not found %s" % logo_path)
 
         # print marker text
-        # TODO: cut off if too long ...
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Droid Sans",
@@ -303,6 +307,7 @@ class PoiIndexRenderer:
         ctx.move_to(x, 10*f - y_bearing)
         ctx.show_text(label)
 
+        # print grid coordinate
         ctx.select_font_face("Aerial Mono",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 
@@ -310,11 +315,23 @@ class PoiIndexRenderer:
         gridlabel = gridParts.group(1) + '-' + gridParts.group(2)
 
         x_bearing, y_bearing, width, height, x_adv, y_adv = ctx.text_extents(gridlabel)
+
+        # white background (clear long label text)
+        # TODO: make this fade slowly instead of cutting hard?
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle( (area.w - 15)*f - x_adv - width/3, 8*f, width * 1.33, height + 4*f)
+        ctx.fill()
+
+        # black grid coordinate text
+        ctx.set_source_rgb(0, 0, 0)
         ctx.move_to((area.w - 15)*f - x_adv, 10*f + height)
         ctx.show_text(gridlabel)
 
         ctx.restore()
 
+        ctx.restore()
+
+        # return fixed row height
         return dpi * 0.7
 
     def render(self, ctx, area, dpi = UTILS.PT_PER_INCH):
@@ -324,6 +341,7 @@ class PoiIndexRenderer:
         ctx.translate(area.x*f, area.y*f)
         ctx.set_source_rgb(1, 1, 1)
         ctx.rectangle(0, 0, area.w*f, area.h*f)
+        ctx.clip()
         ctx.fill()
 
         n = 0
