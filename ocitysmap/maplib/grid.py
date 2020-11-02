@@ -80,8 +80,8 @@ class Grid:
         self.vert_count = self._height_m / size
 
         # we don't want to have too long grid identifiers, so we make sure
-        # to not have more than 26 (A-Z) horizontal grid squares
-        while self.horiz_count > 25 :
+        # to not have more than 9 (1-9) vertical grid squares
+        while self.vert_count >= 9 :
             if significand == 1:
                 significand = 2
             elif significand == 2:
