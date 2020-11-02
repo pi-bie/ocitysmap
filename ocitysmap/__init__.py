@@ -587,8 +587,13 @@ SELECT ST_AsText(ST_LongestLine(
             h_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_height_mm, dpi))
 
             if w_px > 25000 or h_px > 25000:
-                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
                 dpi = layoutlib.commons.PT_PER_INCH
+                w_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_width_pt, dpi))
+                h_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_height_pt, dpi))
+                if w_px > 25000 or h_px > 25000:
+                    LOG.warning("Paper size too large for PNG output, skipping")
+                    return
+                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
 
             # as the dpi value may have changed we need to re-create the renderer
             renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
@@ -599,8 +604,6 @@ SELECT ST_AsText(ST_LongestLine(
             # ImageSurface, the font metrics would NOT match those
             # pre-computed by renderer_cls.__init__() and used to
             # layout the whole page
-            w_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_width_pt, dpi))
-            h_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_height_pt, dpi))
             LOG.debug("Rendering PNG into %dpx x %dpx area at %ddpi ..."
                       % (w_px, h_px, dpi))
             surface = cairo.PDFSurface(None, w_px, h_px)
