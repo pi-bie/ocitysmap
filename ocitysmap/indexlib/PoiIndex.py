@@ -173,18 +173,26 @@ class PoiIndexRenderer:
         return area
 
     def _render_header(self, ctx, area, dpi, color, label, logo = None):
+        """
+        Render index category header bar
+        """
         f = dpi / UTILS.PT_PER_INCH;
 
         ctx.save()
+
+        # keep a little distance from the outer frame
         ctx.translate(10*f, 10*f)
 
+        # draw colored background bar
         c = Color(color);
         ctx.set_source_rgb(c.red, c.green, c.blue)
         ctx.rectangle( 0, 0, (area.w - 20)*f, dpi * 0.8)
         ctx.fill()
 
+        # keep a little distance from color bar outline to content
         x = 5*f
 
+        # show logo if one is defined and found
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
                 os.path.dirname(__file__), '..', '..', 'templates', 'poi_markers', 'Font-Awesome-SVG-PNG', 'white', 'svg', logo + '.svg'))
@@ -204,10 +212,10 @@ class PoiIndexRenderer:
             else:
                 LOG.warning("icon not found %s" % logo_path)
 
+        # print category name in white
         ctx.set_source_rgb(1, 1, 1)
         ctx.select_font_face("Droid Sans Bold",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-
         ctx.set_font_size(dpi*0.6)
         x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
         ctx.move_to(x, 10*f - y_bearing)
@@ -217,36 +225,40 @@ class PoiIndexRenderer:
         return dpi * 0.8
 
     def _render_item(self, ctx, area, dpi, color, number, label, gridlabel, logo = None):
+        """
+        Render a single item line
+        """
         f = dpi / UTILS.PT_PER_INCH;
-
         x = 5*f
 
+        # find the marker icon
         marker_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', '..', 'images', 'marker.svg'))
-
         fp = open(marker_path,'r')
         data = fp.read()
         fp.close()
 
+        # replace black with the actual marker color
         if color[0] != '#':
             c = Color(color);
             color = c.hex_l
-
         data = data.replace('#000000', color)
 
+        # create actual SVG marker
         rsvg = Rsvg.Handle()
         svg = rsvg.new_from_data(data.encode())
 
+        # scale the marker to correct size
         scale = 50.0 * f/ svg.props.height;
         x += 35*f
 
+        # draw the marker
         ctx.save()
-
         ctx.scale(scale, scale)
         svg.render_cairo(ctx)
-
         ctx.restore()
 
+        # put the marker number into the center of the marker circle
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Droid Sans Mono",
@@ -258,6 +270,7 @@ class PoiIndexRenderer:
         ctx.show_text(number)
         ctx.restore()
 
+        # add item logo if defined and found
         if logo != None:
             logo_path = os.path.abspath(os.path.join(
                 os.path.dirname(__file__), '..', '..', 'templates', 'poi_markers', 'Font-Awesome-SVG-PNG', 'black', 'svg', logo + '.svg'))
@@ -278,24 +291,26 @@ class PoiIndexRenderer:
             else:
                 LOG.warning("icon not found %s" % logo_path)
 
+        # print marker text
+        # TODO: cut off if too long ...
         ctx.save()
         ctx.set_source_rgb(0, 0, 0)
         ctx.select_font_face("Droid Sans",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
         ctx.set_font_size(dpi*0.6)
-        x_bearing, y_bearing, width, height = ctx.text_extents(label)[:4]
+        x_bearing, y_bearing, width, height, x_adv, y_adv = ctx.text_extents(label)
         ctx.move_to(x, 10*f - y_bearing)
         ctx.show_text(label)
 
-        ctx.select_font_face("Droid Sans Mono",
+        ctx.select_font_face("Aerial Mono",
                              cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
 
         gridParts = re.match('^([A-Z]+)([0-9]+)$', gridlabel)
         gridlabel = gridParts.group(1) + '-' + gridParts.group(2)
 
-        x_bearing, y_bearing, width, height = ctx.text_extents(gridlabel)[:4]
-        ctx.move_to((area.w - 15)*f - width, 10*f + height)
+        x_bearing, y_bearing, width, height, x_adv, y_adv = ctx.text_extents(gridlabel)
+        ctx.move_to((area.w - 15)*f - x_adv, 10*f + height)
         ctx.show_text(gridlabel)
 
         ctx.restore()
