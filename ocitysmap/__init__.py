@@ -88,6 +88,7 @@ import tempfile
 import shapely
 import shapely.wkt
 import shapely.geometry
+import gpxpy
 
 from . import coords
 from . import i18n
@@ -104,6 +105,7 @@ def get_mapnik_major_version():
 
 def guess_filetype(import_file):
     need_close = False
+    result = None
     try:
         if type(import_file) == str:
             file_name = import_file
@@ -115,7 +117,12 @@ def guess_filetype(import_file):
 
         first_line = import_file.readline(100).decode('utf-8-sig')
         if first_line.startswith('<?xml'):
-            result = "gpx"
+            try:
+                import_file.seek(0)
+                gpxpy.parse(import_file)
+                result = "gpx"
+            except:
+                pass
         elif first_line.startswith('{'):
             second_line = import_file.readline(100).decode('utf-8-sig')
             # TODO - support generic GeoJSON, too
@@ -123,7 +130,8 @@ def guess_filetype(import_file):
                 result = "poi"
             else:
                 result = "umap"
-        else:
+
+        if result is None:
             raise RuntimeError("Can't determine import file type for %s" % file_name)
     except Exception as e:
         raise RuntimeError("Error processing import file %s" % e)
