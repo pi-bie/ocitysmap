@@ -233,7 +233,7 @@ class PoiIndexRenderer:
 
         # clip the index row area
         ctx.save()
-        ctx.rectangle( 0, 0, (area.w - 20)*f, dpi * 0.7)
+        ctx.rectangle( 0, 0, area.w * f, dpi * 0.7)
         ctx.clip()
 
         # find the marker icon
@@ -319,7 +319,7 @@ class PoiIndexRenderer:
         # white background (clear long label text)
         # TODO: make this fade slowly instead of cutting hard?
         ctx.set_source_rgb(1, 1, 1)
-        ctx.rectangle( (area.w - 15)*f - x_adv - width/3, 8*f, width * 1.33, height + 4*f)
+        ctx.rectangle( (area.w - 15)*f - x_adv - width/4, 8*f, width * 2, height + 4*f)
         ctx.fill()
 
         # black grid coordinate text
