@@ -397,23 +397,22 @@ class StreetIndex:
         cursor = db.cursor()
         LOG.debug("Getting streets...")
 
-        # PostGIS >= 1.5.0 for this to work:
         query = """
-select name,
-       --- street_kind, -- only when group by is: group by name, street_kind
-       st_astext(st_transform(ST_LongestLine(street_path, street_path),
-                              4326)) as longest_linestring
-from
-  (select name,
-          -- highway as street_kind, -- only when group by name, street_kind
-          st_intersection(%(wkb_limits)s,
-                          st_linemerge(st_collect(%%(way)s))) as street_path
-   from planet_osm_line
-          where trim(name) != '' and highway is not null
-                and st_intersects(%%(way)s, %(wkb_limits)s)
-   group by name ---, street_kind -- (optional)
-   order by name) as foo;
-""" % dict(wkb_limits = ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
+SELECT name,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(street_path, street_path),
+                              4326)) AS longest_linestring
+  FROM ( SELECT name,
+                ST_INTERSECTION(%(wkb_limits)s,
+                                ST_LINEMERGE(ST_COLLECT(%%(way)s))
+                               ) AS street_path
+           FROM planet_osm_line
+          WHERE TRIM(name) != ''
+            AND highway IS NOT NULL
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+          GROUP BY name
+          ORDER BY name
+        ) AS foo;
+""" % dict(wkb_limits = ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s', 4326), 3857)"
                          % (polygon_wkt,)))
 
         # LOG.debug("Street query (nogrid): %s" % query)
@@ -463,25 +462,26 @@ from
                 current_category = result[-1]
 
             query = """
-select amenity_name,
-       st_astext(st_transform(ST_LongestLine(amenity_contour, amenity_contour),
-                              4326)) as longest_linestring
-from (
-       select name as amenity_name,
-              st_intersection(%(wkb_limits)s, %%(way)s) as amenity_contour
-       from planet_osm_point
-       where trim(name) != ''
-             and amenity = %(amenity)s and ST_intersects(%%(way)s, %(wkb_limits)s)
-      union
-       select name as amenity_name,
-              st_intersection(%(wkb_limits)s , %%(way)s) as amenity_contour
-       from planet_osm_polygon
-       where trim(name) != '' and amenity = %(amenity)s
-             and ST_intersects(%%(way)s, %(wkb_limits)s)
-     ) as foo
-order by amenity_name""" \
+SELECT amenity_name,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
+                              4326)) AS longest_linestring
+  FROM ( SELECT name AS amenity_name,
+                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
+           FROM planet_osm_point
+          WHERE TRIM(name) != ''
+            AND amenity = %(amenity)s
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+       UNION
+         SELECT name AS amenity_name,
+                ST_INTERSECTION(%(wkb_limits)s , %%(way)s) AS amenity_contour
+           FROM planet_osm_polygon
+          WHERE TRIM(name) != ''
+            AND amenity = %(amenity)s
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+     ) AS foo
+ ORDER by amenity_name""" \
                 % {'amenity': str(_sql_escape_unicode(db_amenity)),
-                   'wkb_limits': ("st_transform(ST_GeomFromText('%s' , 4326), 3857)"
+                   'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
                                   % (polygon_wkt,))}
 
             # LOG.debug("Amenity query for for %s/%s (nogrid): %s" \
@@ -540,20 +540,19 @@ order by amenity_name""" \
         result.append(current_category)
 
         query = """
-select village_name,
-       st_astext(st_transform(ST_LongestLine(village_contour, village_contour),
-                              4326)) as longest_linestring
-from (
-       select name as village_name,
-              st_intersection(%(wkb_limits)s, %%(way)s) as village_contour
-       from planet_osm_point
-       where trim(name) != ''
-             and (place = 'locality'
-                  or place = 'hamlet'
-                  or place = 'isolated_dwelling')
-             and ST_intersects(%%(way)s, %(wkb_limits)s)
-     ) as foo
-order by village_name""" \
+SELECT village_name,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(village_contour, village_contour),
+                              4326)) AS longest_linestring
+  FROM ( SELECT name AS village_name,
+                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS village_contour
+           FROM planet_osm_point
+          WHERE TRIM(name) != ''
+            AND (    place = 'locality'
+                  OR place = 'hamlet'
+                  OR place = 'isolated_dwelling')
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+     ) AS foo
+ ORDER BY village_name""" \
             % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
                               % (polygon_wkt,))}
 
