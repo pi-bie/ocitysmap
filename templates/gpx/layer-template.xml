@@ -1,0 +1,9 @@
+  <Layer name="${layername}" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+    <StyleName>${layername}_style</StyleName>
+    <Datasource>
+      <Parameter name="type">ogr</Parameter>
+      <Parameter name="file">${gpxfile}</Parameter>
+      <Parameter name="layer">${layername}</Parameter>
+    </Datasource>
+  </Layer>
+

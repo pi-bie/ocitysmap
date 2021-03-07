@@ -29,7 +29,6 @@ import tempfile
 from string import Template
 import gpxpy
 import gpxpy.gpx
-from shapely.geometry import LineString
 import codecs
 import logging
 
@@ -39,38 +38,55 @@ class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir, track_color = '#7f7f7f'):
         super().__init__()
 
-        self.linestrings = []
-
         gpx_fp = codecs.open(gpx_file, 'r', 'utf-8-sig')
         gpx = gpxpy.parse(gpx_fp)
         gpx_fp.close()
 
         if gpx.copyright_year or gpx.copyright_author or gpx.copyright_license:
             self.annotation = "GPX track © %s %s %s" % (gpx.copyright_year, gpx.copyright_author, gpx.copyright_license)
-        
-
-        for track in gpx.tracks:
-            for segment in track.segments:
-                l = LineString([(x.longitude, x.latitude)
-                                for x in segment.points])
-                self.linestrings.append(l)
 
         template_dir = os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__),
                 '../../templates/gpx'))
 
-        template_file = os.path.join(template_dir, 'template.xml')
+        style_template_file = os.path.join(template_dir, 'style-template.xml')
+        layer_template_file = os.path.join(template_dir, 'layer-template.xml')
+
         GPX_filename = tempfile.mktemp(suffix='.xml', dir=tmpdir)
         tmpfile = open(GPX_filename, 'w')
 
-        with open(template_file, 'r') as style_template:
+        layer_text = ""
+
+        with open(layer_template_file, 'r') as layer_template:
+            tmplayer = Template(layer_template.read())
+
+        if  len(gpx.tracks):
+            layer_text += tmplayer.substitute(
+                gpxfile = gpx_file,
+                layername = "tracks"
+            )
+
+        if  len(gpx.routes):
+            layer_text += tmplayer.substitute(
+                gpxfile = gpx_file,
+                layername = "routes"
+            )
+
+        if  len(gpx.waypoints):
+            layer_text += tmplayer.substitute(
+                gpxfile = gpx_file,
+                layername = "waypoints"
+            )
+
+        with open(style_template_file, 'r') as style_template:
             tmpstyle = Template(style_template.read())
             tmpfile.write(
                 tmpstyle.substitute(
                     gpxfile = gpx_file,
                     svgdir = template_dir,
-                    color  = track_color
+                    color  = track_color,
+                    layers = layer_text
                 ))
 
         tmpfile.close()

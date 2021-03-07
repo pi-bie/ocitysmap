@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
   <FileSource name="svg">${svgdir}</FileSource>
-  <Style name="route">
+  <Style name="tracks_style">
     <Rule>
       <LineSymbolizer stroke-width="6" stroke="#ffff00" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
     </Rule>
@@ -11,17 +11,17 @@
     </Rule>
   </Style>
   
-  <Layer name="route" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-    <StyleName>route</StyleName>
-    <Datasource>
-      <Parameter name="type">ogr</Parameter>
-      <Parameter name="file">${gpxfile}</Parameter>
-      <Parameter name="layer">tracks</Parameter>
-    </Datasource>
-  </Layer>
-
- 
-  <Style name="point">
+  <Style name="routes_style">
+    <Rule>
+      <LineSymbolizer stroke-width="6" stroke="#ffff00" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+    </Rule>
+    <Rule>
+      <LineSymbolizer stroke-width="2" stroke="${color}" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+      <MarkersSymbolizer base="svg" file="oneway.svg" fill="${color}" max-error="0.5" placement="line" spacing="32"/>
+    </Rule>
+  </Style>
+  
+  <Style name="waypoints_style">
     <Rule>
       <Filter>not ([name] = null or [name] = '')</Filter>
       <PointSymbolizer base="svg" file="point.svg" allow-overlap="true"/> 
@@ -29,13 +29,6 @@
     </Rule>
   </Style>
 
-  <Layer name="point" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
-    <StyleName>point</StyleName>
-    <Datasource>
-       <Parameter name="type">ogr</Parameter>
-       <Parameter name="file">${gpxfile}</Parameter>
-       <Parameter name="layer">waypoints</Parameter>
-    </Datasource>
-  </Layer>
+${layers}
 </Map>
 
