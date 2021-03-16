@@ -235,6 +235,14 @@ class OCitySMap:
         self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
 
+        # register additional font path directories if set
+        try:
+            font_path = self._parser.get('rendering', 'font_path')
+            for font_dir in font_path.split(os.pathsep):
+                mapnik.register_fonts(font_dir)
+        except configparser.NoOptionError:
+            pass
+
         r_paper = re.compile('^\s*(\d+)\s*x\s*(\d+)\s*$')
 
         if self._parser.has_section('paper_sizes'):
