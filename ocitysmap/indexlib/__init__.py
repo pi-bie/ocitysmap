@@ -34,10 +34,7 @@ if __name__ == '__main__':
 
     from ocitysmap import i18n, coords
     from ocitysmap.maplib.grid import Grid
-    from indexer  import StreetIndex
-    from renderer import StreetIndexRenderer
-    from commons  import StreetIndexCategory, StreetIndexItem
-
+    from StreetIndex import StreetIndex, StreetIndexRenderer, StreetIndexCategory, StreetIndexItem
 
     logging.basicConfig(level=logging.DEBUG)
     random.seed(42)

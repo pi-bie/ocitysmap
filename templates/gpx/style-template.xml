@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
+  <FileSource name="svg">${svgdir}</FileSource>
+  <Style name="tracks_style">
+    <Rule>
+      <LineSymbolizer stroke-width="6" stroke="#ffff00" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+    </Rule>
+    <Rule>
+      <LineSymbolizer stroke-width="2" stroke="${color}" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+      <MarkersSymbolizer base="svg" file="oneway.svg" fill="${color}" max-error="0.5" placement="line" spacing="32"/>
+    </Rule>
+  </Style>
+  
+  <Style name="routes_style">
+    <Rule>
+      <LineSymbolizer stroke-width="6" stroke="#ffff00" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+    </Rule>
+    <Rule>
+      <LineSymbolizer stroke-width="2" stroke="${color}" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.5" />
+      <MarkersSymbolizer base="svg" file="oneway.svg" fill="${color}" max-error="0.5" placement="line" spacing="32"/>
+    </Rule>
+  </Style>
+  
+  <Style name="waypoints_style">
+    <Rule>
+      <Filter>not ([name] = null or [name] = '')</Filter>
+      <PointSymbolizer base="svg" file="point.svg" allow-overlap="true"/> 
+      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1">[name]</TextSymbolizer>
+    </Rule>
+  </Style>
+
+${layers}
+</Map>
+

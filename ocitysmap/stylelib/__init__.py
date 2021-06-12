@@ -57,6 +57,7 @@ class Stylesheet:
         self.url         = '' # str
         self.group       = '' # str
         self.aliases     = [] # array of str
+        self.preview     = None
 
         self.exclude_layers = []
 
@@ -119,6 +120,8 @@ class Stylesheet:
         assign_if_present('bbox', parse_bbox)
 
         assign_list_if_present('exclude_layers')
+
+        assign_if_present('preview')
 
         return s
 

@@ -75,7 +75,7 @@ class Renderer:
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
     # see entities.xml.inc file from osm style sheet
-    DEFAULT_SCALE           = 70000
+    DEFAULT_SCALE           = 7000000
     DEFAULT_MULTIPAGE_SCALE = 12000
     MAX_MULTIPAGE_MAPPAGES  = 50
 
@@ -87,6 +87,7 @@ class Renderer:
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            street_index (StreetIndex): None or the street index object.
+           TODO: above no longer fully correct
         """
         # Note: street_index may be None
         self.db           = db

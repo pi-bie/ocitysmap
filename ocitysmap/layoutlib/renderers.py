@@ -5,6 +5,7 @@ from ocitysmap.layoutlib.single_page_renderer.side_index import SinglePageRender
 from ocitysmap.layoutlib.single_page_renderer.bottom_index import SinglePageRendererIndexBottom
 from ocitysmap.layoutlib.single_page_renderer.extra_page import SinglePageRendererIndexExtraPage
 from ocitysmap.layoutlib.multi_page_renderer import MultiPageRenderer
+from ocitysmap.layoutlib.tk25 import TK25Renderer
 
 # The renderers registry
 _RENDERERS = [
@@ -12,6 +13,7 @@ _RENDERERS = [
     SinglePageRendererIndexOnSide,
     SinglePageRendererIndexBottom,
     SinglePageRendererIndexExtraPage,
+    TK25Renderer,
     MultiPageRenderer,
     ]
 

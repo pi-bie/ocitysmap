@@ -64,6 +64,7 @@ class MapCanvas:
             provided rendering area. Needed by SinglePageRenderer.
         """
 
+        self._style_name = stylesheet.name
         self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
         self._dpi  = dpi
 
@@ -96,6 +97,12 @@ class MapCanvas:
         self._map = mapnik.Map(g_width, g_height, _MAPNIK_PROJECTION)
         mapnik.load_map(self._map, stylesheet.path)
         self._map.zoom_to_box(envelope)
+
+        # exclude layers based on configuration setting "exclude_layers"
+        for layer in self._map.layers:
+            if layer.name in stylesheet.exclude_layers:
+                LOG.debug("Excluding layer: %s" % layer.name)
+                layer.status = False
 
         # Added shapes to render
         self._shapes = []
@@ -149,6 +156,9 @@ class MapCanvas:
 
     def get_rendered_map(self):
         return self._map
+
+    def get_style_name(self):
+        return self._style_name
 
     def get_actual_bounding_box(self):
         """Returns the actual geographic bounding box that will be rendered by

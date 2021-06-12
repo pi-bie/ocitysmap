@@ -88,10 +88,10 @@ import tempfile
 import shapely
 import shapely.wkt
 import shapely.geometry
+import gpxpy
 
 from . import coords
 from . import i18n
-from .indexlib.indexer import StreetIndex
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 from .layoutlib import renderers
 from .layoutlib import commons
@@ -104,17 +104,25 @@ def get_mapnik_major_version():
     return int(mapnik.mapnik_version_string().split('.')[0])
 
 def guess_filetype(import_file):
+    need_close = False
+    result = None
     try:
         if type(import_file) == str:
             file_name = import_file
             import_file = open(import_file, 'rb')
+            need_close = true
         else:
             file_name = import_file.name
             import_file.open()
 
         first_line = import_file.readline(100).decode('utf-8-sig')
         if first_line.startswith('<?xml'):
-            result = "gpx"
+            try:
+                import_file.seek(0)
+                gpxpy.parse(import_file)
+                result = "gpx"
+            except:
+                pass
         elif first_line.startswith('{'):
             second_line = import_file.readline(100).decode('utf-8-sig')
             # TODO - support generic GeoJSON, too
@@ -122,12 +130,16 @@ def guess_filetype(import_file):
                 result = "poi"
             else:
                 result = "umap"
-        else:
+
+        if result is None:
             raise RuntimeError("Can't determine import file type for %s" % file_name)
     except Exception as e:
         raise RuntimeError("Error processing import file %s" % e)
 
-    import_file.close()
+    if need_close:
+        import_file.close()
+    else:
+        import_file.seek(0)
     return result
 
 class RenderingConfiguration:
@@ -222,6 +234,14 @@ class OCitySMap:
 
         self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
+
+        # register additional font path directories if set
+        try:
+            font_path = self._parser.get('rendering', 'font_path')
+            for font_dir in font_path.split(os.pathsep):
+                mapnik.register_fonts(font_dir)
+        except configparser.NoOptionError:
+            pass
 
         r_paper = re.compile('^\s*(\d+)\s*x\s*(\d+)\s*$')
 
@@ -443,6 +463,8 @@ SELECT ST_AsText(ST_LongestLine(
         for style in self.OVERLAY_REGISTRY:
             if style.name == name:
                 return style
+            if name in style.aliases:
+                return style
         raise LookupError( 'The requested overlay stylesheet %s was not found!' % name)
 
     def get_all_renderers(self):
@@ -507,6 +529,9 @@ SELECT ST_AsText(ST_LongestLine(
         LOG.info('Rendering with renderer %s in language: %s (rtl: %s).' %
                  (renderer_name, config.i18n.language_code(),
                   config.i18n.isrtl()))
+
+        if 'PGAPPNAME' not in os.environ:
+            os.environ['PGAPPNAME'] = "ocitysmap"
 
         os.environ['PGOPTIONS'] = "-c mapnik.language=" + config.language[:2] + " -c mapnik.locality=" + config.language[:5] + " -c mapnik.country=" + config.language[3:5]
         LOG.debug("PGOPTIONS '%s'" % os.environ.get('PGOPTIONS', 'not set'))
@@ -578,8 +603,13 @@ SELECT ST_AsText(ST_LongestLine(
             h_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_height_mm, dpi))
 
             if w_px > 25000 or h_px > 25000:
-                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
                 dpi = layoutlib.commons.PT_PER_INCH
+                w_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_width_pt, dpi))
+                h_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_height_pt, dpi))
+                if w_px > 25000 or h_px > 25000:
+                    LOG.warning("Paper size too large for PNG output, skipping")
+                    return
+                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
 
             # as the dpi value may have changed we need to re-create the renderer
             renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
@@ -590,8 +620,6 @@ SELECT ST_AsText(ST_LongestLine(
             # ImageSurface, the font metrics would NOT match those
             # pre-computed by renderer_cls.__init__() and used to
             # layout the whole page
-            w_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_width_pt, dpi))
-            h_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_height_pt, dpi))
             LOG.debug("Rendering PNG into %dpx x %dpx area at %ddpi ..."
                       % (w_px, h_px, dpi))
             surface = cairo.PDFSurface(None, w_px, h_px)

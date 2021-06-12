@@ -43,8 +43,8 @@ from copy import copy
 from ocitysmap.layoutlib import commons
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
-from ocitysmap.indexlib.renderer import StreetIndexRenderer, PoiIndexRenderer
-from indexlib.indexer import StreetIndex, PoiIndex
+from ocitysmap.indexlib.StreetIndex import StreetIndexRenderer, StreetIndex
+from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -79,6 +79,7 @@ class SinglePageRenderer(Renderer):
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
+           TODO: above no longer fully correct
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
@@ -86,18 +87,22 @@ class SinglePageRenderer(Renderer):
         self.file_prefix = file_prefix
 
         # Prepare the index
-        if rc.poi_file:
-            self.street_index = PoiIndex(rc.poi_file)
-        else:
-            self.street_index = StreetIndex(db,
-                                            rc.polygon_wkt,
-                                            rc.i18n)
-
-        if not self.street_index.categories:
-            LOG.warning("Designated area leads to an empty index")
-            self.street_index = None
-
         self.index_position = index_position
+        if index_position is None: 
+            self.street_index = None
+        else:
+            if rc.poi_file:
+                self.street_index = PoiIndex(rc.poi_file)
+            else:
+                self.street_index = StreetIndex(db,
+                                                rc.polygon_wkt,
+                                                rc.i18n)
+
+            if not self.street_index.categories:
+                LOG.warning("Designated area leads to an empty index")
+                self.street_index = None
+                self.index_position = None
+
 
         # grid marker offset (originally used for solid grid frame,
         # now just for the letter/number overlay offset inside the map)
@@ -145,11 +150,17 @@ class SinglePageRenderer(Renderer):
         self._overlay_effects  = {}
 
         # Prepare overlays for all additional import files
+        gpx_colors = ['red', 'blue', 'green', 'violet', 'orange']
+        gpx_color_index = 0
         if self.rc.import_files:
             for (file_type, import_file) in self.rc.import_files:
                 if file_type == 'gpx':
                     try:
-                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                        color = gpx_colors[gpx_color_index]
+                        gpx_color_index += 1
+                        if gpx_color_index == len(gpx_colors):
+                            gpx_color_index = 0
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir, color)
                     except Exception as e:
                         LOG.warning("GPX stylesheet error: %s" % e)
                     else:
@@ -317,7 +328,7 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Retrieve and paint the extra logo
-        # TODO: 
+        # TODO: make configurable 
         logo_width2 = 0
         if self.rc.poi_file:
             ctx.save()
@@ -495,12 +506,6 @@ class SinglePageRenderer(Renderer):
         LOG.info('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
         LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
 
-        # exclude layers based on configuration setting "exclude_layers"
-        for layer in rendered_map.layers:
-            if layer.name in self.rc.stylesheet.exclude_layers:
-                LOG.debug("Excluding layer: %s" % layer.name)
-                layer.status = False
-
         # now perform the actual drawing
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
@@ -509,7 +514,7 @@ class SinglePageRenderer(Renderer):
         for overlay_canvas in self._overlay_canvases:
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
-            LOG.debug('Overlay:') # TODO: overlay name
+            LOG.info('Overlay: %s' % overlay_canvas.get_style_name())
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
