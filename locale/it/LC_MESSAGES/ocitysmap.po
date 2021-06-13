@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-16 22:26+0200\n"
+"POT-Creation-Date: 2021-06-13 08:53+0000\n"
 "PO-Revision-Date: 2019-04-17 14:23+0000\n"
 "Last-Translator: Claudio Nanni <claudio.nanni@gmail.com>\n"
 "Language-Team: Italian <http://translate.get-map.org/projects/maposmatic/"
@@ -20,73 +20,78 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 3.5.1\n"
 
-#: ocitysmap/indexlib/indexer.py:261
+#: ocitysmap/indexlib/StreetIndex.py:296
 msgid "Places of worship"
 msgstr "Luoghi di culto"
 
-#: ocitysmap/indexlib/indexer.py:262
+#: ocitysmap/indexlib/StreetIndex.py:297
 msgid "Place of worship"
 msgstr "Luogo di culto"
 
-#: ocitysmap/indexlib/indexer.py:263 ocitysmap/indexlib/indexer.py:264
-#: ocitysmap/indexlib/indexer.py:265 ocitysmap/indexlib/indexer.py:266
-#: ocitysmap/indexlib/indexer.py:267
+#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
+#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
+#: ocitysmap/indexlib/StreetIndex.py:302
 msgid "Education"
 msgstr "Educazione"
 
-#: ocitysmap/indexlib/indexer.py:263
+#: ocitysmap/indexlib/StreetIndex.py:298
 msgid "Kindergarten"
 msgstr "Asilo"
 
-#: ocitysmap/indexlib/indexer.py:264
+#: ocitysmap/indexlib/StreetIndex.py:299
 msgid "School"
 msgstr "Scuola"
 
-#: ocitysmap/indexlib/indexer.py:265
+#: ocitysmap/indexlib/StreetIndex.py:300
 msgid "College"
 msgstr "Liceo"
 
-#: ocitysmap/indexlib/indexer.py:266
+#: ocitysmap/indexlib/StreetIndex.py:301
 msgid "University"
 msgstr "Università"
 
-#: ocitysmap/indexlib/indexer.py:267
+#: ocitysmap/indexlib/StreetIndex.py:302
 msgid "Library"
 msgstr "Biblioteca"
 
-#: ocitysmap/indexlib/indexer.py:268 ocitysmap/indexlib/indexer.py:269
-#: ocitysmap/indexlib/indexer.py:270 ocitysmap/indexlib/indexer.py:272
+#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
+#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
 msgid "Public buildings"
 msgstr "Uffici Pubblici"
 
-#: ocitysmap/indexlib/indexer.py:268
+#: ocitysmap/indexlib/StreetIndex.py:303
 msgid "Town hall"
 msgstr "Municipio"
 
-#: ocitysmap/indexlib/indexer.py:269
+#: ocitysmap/indexlib/StreetIndex.py:304
 msgid "Post office"
 msgstr "Poste"
 
-#: ocitysmap/indexlib/indexer.py:271
+#: ocitysmap/indexlib/StreetIndex.py:306
 msgid "Public building"
 msgstr "Ufficio Pubblico"
 
-#: ocitysmap/indexlib/indexer.py:272
+#: ocitysmap/indexlib/StreetIndex.py:307
 msgid "Police"
 msgstr "Polizia"
 
-#: ocitysmap/indexlib/indexer.py:503
+#: ocitysmap/indexlib/StreetIndex.py:538
 msgid "Villages"
 msgstr "Frazioni"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:584
-#: ocitysmap/layoutlib/single_page_renderers.py:368
+#: ocitysmap/indexlib/StreetIndex.py:1071
+#, python-format
+msgid "Index page %d"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:616
+#: ocitysmap/layoutlib/single_page_renderers.py:388
 #, python-format
 msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
 msgstr "Copyright © %(year)d Gli sviluppatori di MapOSMatic/OCitySMap."
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:586
-#: ocitysmap/layoutlib/single_page_renderers.py:370
+#: ocitysmap/layoutlib/multi_page_renderer.py:618
+#: ocitysmap/layoutlib/single_page_renderers.py:390
 #, python-format
 msgid ""
 "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
@@ -94,42 +99,62 @@ msgstr ""
 "Dati © %(year)d OpenStreetMap.org e contributori (see http://osm.org/"
 "copyright)"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:596
-#: ocitysmap/layoutlib/single_page_renderers.py:380
+#: ocitysmap/layoutlib/multi_page_renderer.py:628
+#: ocitysmap/layoutlib/single_page_renderers.py:400
 msgid "Map styles:"
 msgstr "Stili di mappa:"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:599
-#: ocitysmap/layoutlib/single_page_renderers.py:383
+#: ocitysmap/layoutlib/multi_page_renderer.py:631
+#: ocitysmap/layoutlib/single_page_renderers.py:413
 #, python-format
 msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
 msgstr "Mappa renderizzata il: %(date)s. Dati OSM aggiornati al: %(osmdate)s."
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:601
-#: ocitysmap/layoutlib/single_page_renderers.py:385
+#: ocitysmap/layoutlib/multi_page_renderer.py:633
+#: ocitysmap/layoutlib/single_page_renderers.py:415
 msgid "The map may be incomplete or inaccurate."
 msgstr "La mappa potrebbe essere incompleta o non accurata."
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:608
-#: ocitysmap/layoutlib/single_page_renderers.py:396
+#: ocitysmap/layoutlib/multi_page_renderer.py:640
+#: ocitysmap/layoutlib/single_page_renderers.py:426
 msgid "unknown"
 msgstr "sconosciuto"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:663
+#: ocitysmap/layoutlib/multi_page_renderer.py:681
+msgid "Front page"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:699
 msgid "This page is intentionally left blank."
 msgstr "Questa pagina è stata intenzionalmente lasciata in bianco."
 
-#: ocitysmap/layoutlib/single_page_renderers.py:430
-msgid ""
-"Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: Hartmut "
-"Holzgraefe (hartmut@php.net)"
+#: ocitysmap/layoutlib/multi_page_renderer.py:707
+msgid "Blank"
 msgstr ""
-"Sostituire con http://umgebungsplaene.osm-baustelle.de/ - Contatto: Hartmut "
-"Holzgraefe (hartmut@php.net)"
 
-#: ocitysmap/layoutlib/single_page_renderers.py:848
+#: ocitysmap/layoutlib/multi_page_renderer.py:749
+msgid "Overview"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#, python-format
+msgid "Map page %d"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:410
+msgid "Additional data sources:"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:796
 msgid "Test gettext"
 msgstr "Test gettext"
+
+#~ msgid ""
+#~ "Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: "
+#~ "Hartmut Holzgraefe (hartmut@php.net)"
+#~ msgstr ""
+#~ "Sostituire con http://umgebungsplaene.osm-baustelle.de/ - Contatto: "
+#~ "Hartmut Holzgraefe (hartmut@php.net)"
 
 #~ msgid ""
 #~ "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
