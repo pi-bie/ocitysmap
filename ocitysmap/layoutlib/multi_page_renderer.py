@@ -45,7 +45,7 @@ import ocitysmap
 import coords
 from . import commons
 from ocitysmap.layoutlib.abstract_renderer import Renderer
-from ocitysmap.indexlib.StreetIndex import StreetIndexCategory, StreetIndex, MultiPageStreetIndexRenderer
+from ocitysmap.indexlib.StreetIndex import StreetIndex, MultiPageStreetIndexRenderer
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
