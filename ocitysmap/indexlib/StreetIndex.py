@@ -176,7 +176,7 @@ class StreetIndexItem(IndexItem):
                                         line_end - line_start - fheight/2)
         ctx.restore()
 
-class StreetIndex:
+class GeneralIndex:
 
     def __init__(self, db, polygon_wkt, i18n, page_number=None):
         """
@@ -192,12 +192,6 @@ class StreetIndex:
         """
         self._i18n = i18n
         self._page_number = page_number
-
-        # Build the contents of the index
-        self._categories = \
-            (self._list_streets(db, polygon_wkt)
-             + self._list_amenities(db, polygon_wkt)
-             + self._list_villages(db, polygon_wkt))
 
     @property
     def categories(self):
@@ -277,6 +271,19 @@ class StreetIndex:
 
         fd.close()
 
+    def _my_cmp(self, x, y):
+        return locale.strcoll(x[0].lower(), y[0].lower())
+
+class StreetIndex(GeneralIndex):
+    def __init__(self, db, polygon_wkt, i18n, page_number=None):
+        GeneralIndex.__init__(self,db, polygon_wkt, i18n, page_number)
+        
+        # Build the contents of the index
+        self._categories = \
+            (self._list_streets(db, polygon_wkt)
+             + self._list_amenities(db, polygon_wkt)
+             + self._list_villages(db, polygon_wkt))
+
     def _get_selected_amenities(self):
         """
         Return the kinds of amenities to retrieve from DB as a list of
@@ -310,9 +317,6 @@ class StreetIndex:
             return []
 
         return selected_amenities
-
-    def _my_cmp(self, x, y):
-        return locale.strcoll(x[0].lower(), y[0].lower())
 
     def _convert_street_index(self, sl):
         """Given a list of street names, do some cleanup and pass it
@@ -593,6 +597,7 @@ SELECT village_name,
 
         return [category for category in result if category.items]
 
+    
 
 class StreetIndexRenderingStyle:
     """
