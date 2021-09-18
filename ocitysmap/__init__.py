@@ -497,6 +497,16 @@ SELECT ST_AsText(ST_LongestLine(
                 return [p[1], p[2]]
         raise LookupError( 'The requested paper size %s was not found!' % name)
 
+    def get_paper_size_name_by_size(self, width, height):
+        for p in self.get_all_paper_sizes(): # TODO: section
+            if (p[1] == width and p[2] == height) or (p[1] == height and p[2] == width):
+                if width > height:
+                    return "%s (landsacape)" % p[0]
+                else:
+                    return "%s (portrait)" % p[0]
+
+        return None
+
     def render(self, config, renderer_name, output_formats, file_prefix):
         """Renders a job with the given rendering configuration, using the
         provided renderer, to the given output formats.
