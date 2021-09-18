@@ -205,8 +205,11 @@ class MultiPageRenderer(Renderer):
                         LOG.warning("GPX stylesheet error: %s" % e)
                     else:
                         self._overlays.append(gpx_style)
-                        for l in gpx_style.linestrings:
-                            track_linestrings.append(l)
+                        try:
+                            for l in gpx_style.linestrings:
+                                track_linestrings.append(l)
+                        except:
+                            pass
                 elif file_type == 'umap':
                     try:
                         umap_style = UmapStylesheet(import_file, self.tmpdir)
