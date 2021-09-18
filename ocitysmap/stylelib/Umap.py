@@ -153,6 +153,13 @@ class UmapStylesheet(Stylesheet):
             for feature in layer['features']:
                 new_props = copy.deepcopy(layer_defaults)
                 if 'properties' in feature:
+                    if name in feature['properties']:
+                        for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
+                            if prop in feature['properties']:
+                                val = feature['properties'][prop]
+                                if prop in ['color', 'fillColor']:
+                                    val = color2hex(val)
+                                new_props[prop] = val
                     for name in ['_storage', '_storage_options', '_umap_options']:
                         if name in feature['properties']:
                             for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
