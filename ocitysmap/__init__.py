@@ -211,16 +211,15 @@ class OCitySMap:
         elif not isinstance(config_files, list):
             config_files = [config_files]
 
-        config_files = map(os.path.expanduser, config_files)
+        config_files = set(map(os.path.expanduser, config_files))
         LOG.debug('Reading OCitySMap configuration from %s...' %
                  ', '.join(config_files))
 
         self._parser = configparser.ConfigParser()
         self._parser.optionxform = str # make option names case sensitive
 
-        # if not self._parser.read(['/home/maposmatic/.ocitysmap.conf']):
-        #    raise IOError('None of the configuration files could be read!')
-        self._parser.read('/home/maposmatic/.ocitysmap.conf', encoding='utf-8')
+        if not self._parser.read(config_files, encoding='utf-8'):
+            raise IOError('None of the configuration files could be read!')
 
         self._locale_path = os.path.join(os.path.dirname(__file__), '..', 'locale')
         self.__dbs = {}
