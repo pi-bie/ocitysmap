@@ -87,9 +87,11 @@ class Stylesheet:
         """
         s = Stylesheet()
 
-        def assign_if_present(key, cast_fn=str):
+        def assign_if_present(key, cast_fn=str, default=None):
             if parser.has_option(section_name, key):
                 setattr(s, key, cast_fn(parser.get(section_name, key)))
+            elif default is not None:
+                setattr(s, key, cast_fn(default))
 
         def assign_list_if_present(key):
             if parser.has_option(section_name, key):
@@ -100,7 +102,7 @@ class Stylesheet:
         if not s.path.startswith('internal:') and not os.path.exists(s.path):
             raise ValueError(
                 'Could not find stylesheet file for stylesheet %s!' % s.name)
-        assign_if_present('description')
+        assign_if_present('description', default=s.name)
         assign_if_present('annotation')
         assign_if_present('datasource')
         assign_if_present('url')
