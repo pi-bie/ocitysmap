@@ -569,6 +569,10 @@ SELECT ST_AsText(ST_LongestLine(
 
         # Create a temporary directory for all our temporary helper files
         tmpdir = tempfile.mkdtemp(prefix='ocitysmap')
+
+        # count successfully created output files
+        output_count = 0
+        
         try:
             LOG.debug('Rendering in temporary directory %s' % tmpdir)
 
@@ -586,11 +590,17 @@ SELECT ST_AsText(ST_LongestLine(
                     LOG.exception("The actual font metrics probably don't "
                                   "match those pre-computed by the renderer's"
                                   "constructor. Backtrace follows...")
+                    raise
                 except OSError as e:
                     LOG.warning("OS Error while rendering %s: %s" % (output_format, e))
+                    raise
+
+                output_count = output_count + 1
         finally:
             self._cleanup_tempdir(tmpdir)
 
+        return output_count
+            
     def _render_one(self, config, tmpdir, renderer_cls,
                     output_format, output_filename, osm_date, file_prefix):
 
