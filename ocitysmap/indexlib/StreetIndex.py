@@ -80,11 +80,14 @@ class StreetIndexCategory(IndexCategory):
             baseline_x (int): base X axis position.
             baseline_y (int): base Y axis position.
         """
+        layout.set_auto_dir(False)
+        layout.set_alignment(Pango.Alignment.CENTER)
+        layout.set_text(self.name, -1)
+        width, height = [x/Pango.SCALE for x in layout.get_size()]
 
         ctx.save()
         ctx.set_source_rgb(0.9, 0.9, 0.9)
-        ctx.rectangle(baseline_x, baseline_y - fascent,
-                      layout.get_width() / Pango.SCALE, fheight)
+        ctx.rectangle(baseline_x, baseline_y - fascent, layout.get_width() / Pango.SCALE, height)
         ctx.fill()
 
         ctx.set_source_rgb(0.0, 0.0, 0.0)
@@ -92,6 +95,8 @@ class StreetIndexCategory(IndexCategory):
                                     baseline_x, baseline_y, self.name)
         ctx.restore()
 
+        return height
+    
 class StreetIndexItem(IndexItem):
     """
     An IndexItem represents one item in the index (a street or a POI). It
@@ -836,16 +841,17 @@ class StreetIndexRenderer:
                 offset_x      += delta_x
                 actual_n_cols += 1
 
-            category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
-                          UTILS.convert_pt_to_dots(header_fascent, dpi),
-                          UTILS.convert_pt_to_dots(header_fheight, dpi),
-                          UTILS.convert_pt_to_dots(rendering_area.x
-                                                   + offset_x, dpi),
-                          UTILS.convert_pt_to_dots(rendering_area.y
-                                                   + offset_y
-                                                   + header_fascent, dpi))
+            height = category.draw(self._i18n.isrtl(), ctx, pc, header_layout,
+                                   UTILS.convert_pt_to_dots(header_fascent, dpi),
+                                   UTILS.convert_pt_to_dots(header_fheight, dpi),
+                                   UTILS.convert_pt_to_dots(rendering_area.x
+                                                            + offset_x, dpi),
+                                   UTILS.convert_pt_to_dots(rendering_area.y
+                                                            + offset_y
+                                                            + header_fascent, dpi))
 
-            offset_y += header_fheight
+            LOG.warning("cat: %s h: %f" % (category.name, height))
+            offset_y += height
 
             for street in category.items:
                 if ( offset_y + label_fheight + margin/2.
@@ -1179,16 +1185,16 @@ class MultiPageStreetIndexRenderer:
                     offset_x = orig_offset_x
                     delta_x  = orig_delta_x
 
-            category.draw(self._i18n.isrtl(), self.ctx, pc, header_layout,
-                          UTILS.convert_pt_to_dots(header_fascent, dpi),
-                          UTILS.convert_pt_to_dots(header_fheight, dpi),
-                          UTILS.convert_pt_to_dots(self.rendering_area_x
-                                                   + offset_x, dpi),
-                          UTILS.convert_pt_to_dots(self.rendering_area_y
-                                                   + offset_y
-                                                   + header_fascent, dpi))
+            height = category.draw(self._i18n.isrtl(), self.ctx, pc, header_layout,
+                                   UTILS.convert_pt_to_dots(header_fascent, dpi),
+                                   UTILS.convert_pt_to_dots(header_fheight, dpi),
+                                   UTILS.convert_pt_to_dots(self.rendering_area_x
+                                                            + offset_x, dpi),
+                                   UTILS.convert_pt_to_dots(self.rendering_area_y
+                                                            + offset_y
+                                                            + header_fascent, dpi))
 
-            offset_y += header_fheight
+            offset_y += height
 
             for street in category.items:
                 label_height = street.label_drawing_height(label_layout)
