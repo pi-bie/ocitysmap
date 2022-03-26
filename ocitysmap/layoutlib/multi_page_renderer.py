@@ -40,6 +40,9 @@ import sys
 from string import Template
 from functools import cmp_to_key
 from copy import copy
+import qrcode
+import qrcode.image.svg
+from io import BytesIO
 
 import ocitysmap
 import coords
@@ -304,7 +307,13 @@ class MultiPageRenderer(Renderer):
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 plugin_name = path.lstrip('internal:')
-                self.overview_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                LOG.warning("plugin: %s - %s" % (path, plugin_name))
+                if plugin_name == 'qrcode':
+                    # QRcode should not be rendered on actual map pages here
+                    if not self.rc.qrcode_text:
+                        self.rc.qrcode_text = self.rc.origin_url
+                else:
+                    self.overview_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       overview_bb,
@@ -352,9 +361,11 @@ class MultiPageRenderer(Renderer):
             overlay_effects  = {}
             for overlay in self._overlays:
                 path = overlay.path.strip()
-                plugin_name = path.lstrip('internal:')
                 if path.startswith('internal:'):
-                    overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                    if plugin_name != 'qrcode':
+                        # ignore QRcode plugin
+                        plugin_name = path.lstrip('internal:')
+                        overlay_effects[plugin_name] = self.get_plugin(plugin_name)
                 else:
                     overlay_canvases.append(MapCanvas(overlay,
                                                bb, self._usable_area_width_pt,
@@ -530,9 +541,10 @@ class MultiPageRenderer(Renderer):
         self._frontpage_overlay_effects  = {}
         for overlay in self._overlays:
             path = overlay.path.strip()
-            plugin_name = path.lstrip('internal:')
             if path.startswith('internal:'):
-                self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                plugin_name = path.lstrip('internal:')
+                if plugin_name != "qrcode":
+                    self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       self.rc.bounding_box,
@@ -544,8 +556,7 @@ class MultiPageRenderer(Renderer):
                 self._frontpage_overlay_canvases.append(ov_canvas)
 
     def _render_front_page_header(self, ctx, w, h):
-        # Draw a grey blue block which will contain the name of the
-        # city being rendered.
+        # Draw a grey block which will contain the map title
         ctx.save()
         blue_w = w
         blue_h = 0.3 * h
@@ -613,6 +624,38 @@ class MultiPageRenderer(Renderer):
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.8)
             ctx.restore()
+
+        # add QRcode if qrcode text is provided
+        if self.rc.qrcode_text:
+                qr = qrcode.QRCode(
+                    version=1,
+                    error_correction=qrcode.constants.ERROR_CORRECT_L,
+                    box_size=10,
+                    border=4,
+                )
+
+                qr.add_data(self.rc.qrcode_text);
+                qr.make(fit=True)
+
+                img = qr.make_image(image_factory=qrcode.image.svg.SvgPathFillImage,
+                                    fill_color='lightblue')
+                svgstr = BytesIO()
+                img.save(svgstr);
+
+                svg_val = svgstr.getvalue()
+
+                rsvg = Rsvg.Handle()
+                svg = rsvg.new_from_data(svg_val)
+                svgstr.close()
+
+                ctx.save()
+                ctx.translate(w - 2*logo_width - 2*Renderer.PRINT_SAFE_MARGIN_PT,
+                              logo_height/2)
+                ctx.move_to(0, 0)
+                factor = logo_height / svg.props.height
+                ctx.scale(factor, factor)
+                svg.render_cairo(ctx)
+                ctx.restore()
 
         # Prepare the text for the left of the footer
         today = datetime.date.today()
