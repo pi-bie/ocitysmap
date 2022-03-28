@@ -850,8 +850,7 @@ class StreetIndexRenderer:
                                                             + offset_y
                                                             + header_fascent, dpi))
 
-            LOG.warning("cat: %s h: %f" % (category.name, height))
-            offset_y += height
+            offset_y += height * 72.0 / dpi
 
             for street in category.items:
                 if ( offset_y + label_fheight + margin/2.
