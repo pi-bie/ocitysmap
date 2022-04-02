@@ -92,7 +92,7 @@ class MultiPageRenderer(Renderer):
                              self._usable_area_width_pt,
                              self._usable_area_height_pt ) 
 
-        scale_denom = Renderer.DEFAULT_MULTIPAGE_SCALE
+        scale_denom = self.DEFAULT_MULTIPAGE_SCALE
 
         # offset to the first map page number
         # there are currently three header pages
@@ -152,8 +152,8 @@ class MultiPageRenderer(Renderer):
 
             total_pages = self.nb_pages_width * self.nb_pages_height
 
-            if Renderer.MAX_MULTIPAGE_MAPPAGES and \
-               total_pages < Renderer.MAX_MULTIPAGE_MAPPAGES:
+            if self.MAX_MULTIPAGE_MAPPAGES and \
+               total_pages < self.MAX_MULTIPAGE_MAPPAGES:
                 break
 
             new_scale_denom = scale_denom * 1.41
@@ -1081,9 +1081,11 @@ class MultiPageRenderer(Renderer):
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
                                    renderer_context,
-                                   scale=Renderer.DEFAULT_MULTIPAGE_SCALE,
+                                   scale=None,
                                    index_position=None, hsplit=1, vsplit=1):
         valid_sizes = []
+        if scale is None:
+            scale = scale=MultiPageRenderer.DEFAULT_MULTIPAGE_SCALE
         LOG.warning("getting multipage paper size options")
         is_default = True
         for sz in renderer_context.get_all_paper_sizes('multipage'):
