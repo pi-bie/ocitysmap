@@ -96,7 +96,69 @@ class TK25Renderer(Renderer):
                                osm_date=None):
         return
 
+    @staticmethod
+    def _mm_rect(ctx,x,y,w,h,dpi):
+        ctx.rectangle(commons.convert_mm_to_dots(x, dpi),
+                      commons.convert_mm_to_dots(y, dpi),
+                      commons.convert_mm_to_dots(w, dpi),
+                      commons.convert_mm_to_dots(h, dpi))
+
+    @staticmethod
+    def _mm_mvto(ctx,x,y,dpi):
+        ctx.move_to(commons.convert_mm_to_dots(x, dpi),
+                    commons.convert_mm_to_dots(y, dpi))
+        
     def render(self, cairo_surface, dpi, osm_date):
+        ctx = cairo.Context(cairo_surface)
+
+        # Set a white background
+        ctx.save()
+        ctx.set_source_rgb(1, 1, 1)
+        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                      commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+        ctx.fill()
+        ctx.restore()
+
+        # Frame around the actual map area
+        ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(1);
+        self._mm_rect(ctx, 40, 40, 40 +  480, 40 + 450, dpi)
+        ctx.stroke()
+        ctx.restore()
+
+        # Wider outer frame 
+        ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(5);
+        self._mm_rect(ctx, 30, 30, 60 +  480, 60 + 450, dpi)
+        ctx.stroke()
+        ctx.set_line_width(1);
+        self._mm_rect(ctx, 28, 28, 64 +  480, 64 + 450, dpi)
+        self._mm_rect(ctx, 32, 32, 56 +  480, 56 + 450, dpi)
+        ctx.stroke()
+        ctx.restore()
+
+        # coordinates
+        ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.select_font_face("Droid Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
+
+        self._mm_mvto(ctx, 36, 42, dpi)
+        ctx.set_font_size(16);
+        ctx.show_text("52°");
+        ctx.set_font_size(10);
+        ctx.show_text("10'");
+        
+        self._mm_mvto(ctx, 38.5, 38.5, dpi)
+        ctx.set_font_size(16);
+        ctx.show_text("8°");
+        ctx.set_font_size(10);
+        ctx.show_text("30'");
+
+        ctx.restore()
+        
+        cairo_surface.flush()
         return
 
     @staticmethod
@@ -134,7 +196,27 @@ class TK25Renderer(Renderer):
         if sheetno in tk25_names:
             return tk25_names[sheetno]
         return none
-    
+
+    @staticmethod
+    def get_compatible_paper_sizes(bounding_box,
+                                   renderer_context,
+                                   scale=Renderer.DEFAULT_SCALE):
+
+        return [
+            {
+                "name": "Best fit",
+                "width": 841,
+                "height": 594,
+                "portrait_ok": False,
+                "landscake_ok": True,
+                "default": True,
+                "landscape_preferred": True,
+            }
+        ]
+
+        
+
+     
         
 tk25_names = {
     193: "Deutsch Crottingen [Kretingalė]",
