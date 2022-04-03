@@ -304,19 +304,18 @@ class StreetIndex(GeneralIndex):
 
         # Make sure gettext is available...
         try:
-            selected_amenities = [
-                (_(u"Places of worship"), "place_of_worship",
-                 _(u"Place of worship")),
-                (_(u"Education"), "kindergarten", _(u"Kindergarten")),
-                (_(u"Education"), "school", _(u"School")),
-                (_(u"Education"), "college", _(u"College")),
-                (_(u"Education"), "university", _(u"University")),
-                (_(u"Education"), "library", _(u"Library")),
-                (_(u"Public buildings"), "townhall", _(u"Town hall")),
-                (_(u"Public buildings"), "post_office", _(u"Post office")),
-                (_(u"Public buildings"), "public_building",
-                 _(u"Public building")),
-                (_(u"Public buildings"), "police", _(u"Police"))]
+            selected_amenities = {
+                "place_of_worship":  (_(u"Places of worship"), _(u"Place of worship")),
+                "kindergarten":      (_(u"Education"), _(u"Kindergarten")),
+                "school":            (_(u"Education"), _(u"School")),
+                "college":           (_(u"Education"), _(u"College")),
+                "university":        (_(u"Education"), _(u"University")),
+                "library":           (_(u"Education"), _(u"Library")),
+                "townhall":          (_(u"Public buildings"), _(u"Town hall")),
+                "post_office":       (_(u"Public buildings"), _(u"Post office")),
+                "public_building":   (_(u"Public buildings"), _(u"Public building")),
+                "police":            (_(u"Public buildings"), _(u"Police")),
+            }
         except NameError:
             LOG.exception("i18n has to be initialized beforehand")
             return []
@@ -457,8 +456,13 @@ SELECT name,
 
         cursor = db.cursor()
 
+        sep = "','"
         result = []
-        for catname, db_amenity, label in self._get_selected_amenities():
+
+        amenities = self._get_selected_amenities()
+        amenities_in = "'" + sep.join(amenities) + "'"
+        
+        for db_amenity, ( catname, label ) in amenities.items():
             LOG.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
 
             # Get the current IndexCategory object, or create one if
@@ -471,24 +475,24 @@ SELECT name,
                 current_category = result[-1]
 
             query = """
-SELECT amenity_name,
+SELECT amenity_type, amenity_name,
        ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
                               4326)) AS longest_linestring
-  FROM ( SELECT name AS amenity_name,
+  FROM ( SELECT amenity AS amenity_type, name AS amenity_name,
                 ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
            FROM planet_osm_point
           WHERE TRIM(name) != ''
             AND amenity = %(amenity)s
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
        UNION
-         SELECT name AS amenity_name,
+         SELECT amenity AS amenity_type, name AS amenity_name,
                 ST_INTERSECTION(%(wkb_limits)s , %%(way)s) AS amenity_contour
            FROM planet_osm_polygon
           WHERE TRIM(name) != ''
-            AND amenity = %(amenity)s
+            AND amenity IN ( %(amenity)s )
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
      ) AS foo
- ORDER by amenity_name""" \
+ ORDER by amenity_type, amenity_name""" \
                 % {'amenity': str(_sql_escape_unicode(db_amenity)),
                    'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
                                   % (polygon_wkt,))}
@@ -505,7 +509,7 @@ SELECT amenity_name,
                 db.rollback()
                 cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
-            for amenity_name, linestring in cursor.fetchall():
+            for amenity_type, amenity_name, linestring in cursor.fetchall():
                 # Parse the WKT from the largest linestring in shape
                 try:
                     s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
