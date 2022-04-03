@@ -56,6 +56,11 @@ LOG = logging.getLogger('ocitysmap')
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
+# FIXME: make truely configurable
+MAX_INDEX_CATEGORY_ITEMS = 30
+MAX_INDEX_STREETS = 1000
+MAX_INDEX_VILLAGES = 100
+
 class StreetIndexCategory(IndexCategory):
     """
     The IndexCategory represents a set of index items that belong to the same
@@ -438,6 +443,9 @@ SELECT name,
 
         LOG.debug("Got %d streets." % len(sl))
 
+        if len(sl) > MAX_INDEX_STREETS:
+            return []
+
         return self._convert_street_index(sl)
 
 
@@ -518,7 +526,7 @@ SELECT amenity_type, amenity_name,
                                                           endpoint2,
                                                           self._page_number))
 
-        return [category for catname, category in sorted(result.items()) if category.items]
+        return [category for catname, category in sorted(result.items()) if (category.items and len(category.items) <= MAX_INDEX_CATEGORY_ITEMS)]
 
     def _list_villages(self, db, polygon_wkt):
         """Get the list of villages inside the given polygon. Don't
@@ -591,7 +599,7 @@ SELECT village_name,
         LOG.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
 
-        return [category for category in result if category.items]
+        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLLAGES)]
 
     
 
