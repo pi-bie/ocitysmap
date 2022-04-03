@@ -31,6 +31,19 @@ from gi.repository import Pango, PangoCairo
 
 import layoutlib.commons as commons
 
+def create_layout_with_font(ctx, pc, font_desc):
+    layout = PangoCairo.create_layout(ctx)
+    layout.set_font_description(font_desc)
+    font = layout.get_context().load_font(font_desc)
+    font_metric = font.get_metrics()
+
+    fascent = float(font_metric.get_ascent()) / Pango.SCALE
+    fheight = float((font_metric.get_ascent() + font_metric.get_descent())
+                    / Pango.SCALE)
+    em = float(font_metric.get_approximate_char_width()) / Pango.SCALE
+
+    return layout, fascent, fheight, em
+
 def draw_text(ctx, pc, layout, fascent, fheight,
               baseline_x, baseline_y, text, pango_alignment):
     """Draws the given text into the provided Cairo

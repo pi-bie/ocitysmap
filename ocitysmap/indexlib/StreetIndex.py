@@ -795,9 +795,9 @@ class StreetIndexRenderer:
             rendering_area.rendering_style.label_font_spec)
 
         header_layout, header_fascent, header_fheight, header_em = \
-                self._create_layout_with_font(ctx, pc, header_fd)
+                draw_utils.create_layout_with_font(ctx, pc, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-                self._create_layout_with_font(ctx, pc, label_fd)
+                draw_utils.create_layout_with_font(ctx, pc, label_fd)
 
         #print "RENDER", header_layout, header_fascent, header_fheight, header_em
         #print "RENDER", label_layout, label_fascent, label_fheight, label_em
@@ -879,20 +879,6 @@ class StreetIndexRenderer:
         assert actual_n_cols <= rendering_area.n_cols
 
 
-    def _create_layout_with_font(self, ctx, pc, font_desc):
-        layout = PangoCairo.create_layout(ctx)
-        layout.set_font_description(font_desc)
-        font = layout.get_context().load_font(font_desc)
-        font_metric = font.get_metrics()
-
-        fascent = float(font_metric.get_ascent()) / Pango.SCALE
-        fheight = float((font_metric.get_ascent() + font_metric.get_descent())
-                        / Pango.SCALE)
-        em = float(font_metric.get_approximate_char_width()) / Pango.SCALE
-
-        return layout, fascent, fheight, em
-
-
     def _compute_lines_occupation(self, ctx, pc, font_desc, n_em_padding,
                                   text_lines):
         """Compute the visual dimension parameters of the initial long column
@@ -913,7 +899,7 @@ class StreetIndexRenderer:
             fheight: scaled font height.
         """
 
-        layout, fascent, fheight, em = self._create_layout_with_font(ctx, pc,
+        layout, fascent, fheight, em = draw_utils.create_layout_with_font(ctx, pc,
                                                                      font_desc)
         #print "PREPARE", layout, fascent, fheight, em
 
@@ -1053,19 +1039,6 @@ class MultiPageStreetIndexRenderer:
         self.page_offset      = page_offset
         self.index_page_num   = 0
 
-    def _create_layout_with_font(self, ctx, pc, font_desc):
-        layout = PangoCairo.create_layout(ctx)
-        layout.set_font_description(font_desc)
-        font = layout.get_context().load_font(font_desc)
-        font_metric = font.get_metrics()
-
-        fascent = float(font_metric.get_ascent()) / Pango.SCALE
-        fheight = float((font_metric.get_ascent() + font_metric.get_descent())
-                        / Pango.SCALE)
-        em = float(font_metric.get_approximate_char_width()) / Pango.SCALE
-
-        return layout, fascent, fheight, em
-
     def _draw_page_number(self):
         self.ctx.save()
         self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
@@ -1098,11 +1071,11 @@ class MultiPageStreetIndexRenderer:
         label_column_fd  = Pango.FontDescription("DejaVu 6")
 
         header_layout, header_fascent, header_fheight, header_em = \
-            self._create_layout_with_font(self.ctx, pc, header_fd)
+            draw_utils.create_layout_with_font(self.ctx, pc, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-            self._create_layout_with_font(self.ctx, pc, label_column_fd)
+            draw_utils.create_layout_with_font(self.ctx, pc, label_column_fd)
         column_layout, _, _, _ = \
-            self._create_layout_with_font(self.ctx, pc, label_column_fd)
+            draw_utils.create_layout_with_font(self.ctx, pc, label_column_fd)
 
         # By OCitysmap's convention, the default resolution is 72 dpi,
         # which maps to the default pangocairo resolution (96 dpi
