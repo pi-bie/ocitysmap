@@ -548,9 +548,8 @@ SELECT village_name,
                 ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS village_contour
            FROM planet_osm_point
           WHERE TRIM(name) != ''
-            AND (    place = 'locality'
-                  OR place = 'hamlet'
-                  OR place = 'isolated_dwelling')
+            AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
+                          'village', 'hamlet', 'isolated_dwelling')
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
      ) AS foo
  ORDER BY village_name""" \
