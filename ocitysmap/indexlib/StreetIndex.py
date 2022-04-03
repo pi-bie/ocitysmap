@@ -305,16 +305,16 @@ class StreetIndex(GeneralIndex):
         # Make sure gettext is available...
         try:
             selected_amenities = {
-                "place_of_worship":  (_(u"Places of worship"), _(u"Place of worship")),
-                "kindergarten":      (_(u"Education"), _(u"Kindergarten")),
-                "school":            (_(u"Education"), _(u"School")),
-                "college":           (_(u"Education"), _(u"College")),
-                "university":        (_(u"Education"), _(u"University")),
-                "library":           (_(u"Education"), _(u"Library")),
-                "townhall":          (_(u"Public buildings"), _(u"Town hall")),
-                "post_office":       (_(u"Public buildings"), _(u"Post office")),
-                "public_building":   (_(u"Public buildings"), _(u"Public building")),
-                "police":            (_(u"Public buildings"), _(u"Police")),
+                "place_of_worship":  _(u"Places of worship"),
+                "kindergarten":      _(u"Education"),
+                "school":            _(u"Education"),
+                "college":           _(u"Education"),
+                "university":        _(u"Education"),
+                "library":           _(u"Education"),
+                "townhall":          _(u"Public buildings"),
+                "post_office":       _(u"Public buildings"),
+                "public_building":   _(u"Public buildings"),
+                "police":            _(u"Public buildings"),
             }
         except NameError:
             LOG.exception("i18n has to be initialized beforehand")
@@ -457,24 +457,12 @@ SELECT name,
         cursor = db.cursor()
 
         sep = "','"
-        result = []
+        result = {}
 
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        for db_amenity, ( catname, label ) in amenities.items():
-            LOG.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
-
-            # Get the current IndexCategory object, or create one if
-            # different than previous
-            if (not result or result[-1].name != catname):
-                current_category = StreetIndexCategory(catname,
-                                                       is_street=False)
-                result.append(current_category)
-            else:
-                current_category = result[-1]
-
-            query = """
+        query = """
 SELECT amenity_type, amenity_name,
        ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
                               4326)) AS longest_linestring
@@ -482,7 +470,7 @@ SELECT amenity_type, amenity_name,
                 ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
            FROM planet_osm_point
           WHERE TRIM(name) != ''
-            AND amenity = %(amenity)s
+            AND amenity IN ( %(amenity)s )
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
        UNION
          SELECT amenity AS amenity_type, name AS amenity_name,
@@ -493,44 +481,44 @@ SELECT amenity_type, amenity_name,
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
      ) AS foo
  ORDER by amenity_type, amenity_name""" \
-                % {'amenity': str(_sql_escape_unicode(db_amenity)),
-                   'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                                  % (polygon_wkt,))}
+     % {'amenity': amenities_in,
+        'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
+                       % (polygon_wkt,))}
 
-            # LOG.debug("Amenity query for for %s/%s (nogrid): %s" \
-            #            % (catname, db_amenity, query))
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+
+        for amenity_type, amenity_name, linestring in cursor.fetchall():
+            # Parse the WKT from the largest linestring in shape
             try:
-                cursor.execute(query % {'way':'way'})
-            except psycopg2.InternalError:
-                # This exception generaly occurs when inappropriate ways have
-                # to be cleaned. Using a buffer of 0 generaly helps to clean
-                # them. This operation is not applied by default for
-                # performance.
-                db.rollback()
-                cursor.execute(query % {'way':'st_buffer(way, 0)'})
+                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                               linestring[11:-1].split(','))
+            except (ValueError, TypeError):
+                LOG.exception("Error parsing %s for %s/%s/%s"
+                              % (repr(linestring), catname, db_amenity,
+                                 repr(amenity_name)))
+                continue
+            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
 
-            for amenity_type, amenity_name, linestring in cursor.fetchall():
-                # Parse the WKT from the largest linestring in shape
-                try:
-                    s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                                   linestring[11:-1].split(','))
-                except (ValueError, TypeError):
-                    LOG.exception("Error parsing %s for %s/%s/%s"
-                                % (repr(linestring), catname, db_amenity,
-                                   repr(amenity_name)))
-                    continue
-                    ## raise
-                endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
-                endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-                current_category.items.append(StreetIndexItem(amenity_name,
-                                                              endpoint1,
-                                                              endpoint2,
-                                                              self._page_number))
-                
-            LOG.debug("Got %d amenities for %s/%s."
-                    % (len(current_category.items), catname, db_amenity))
+            catname = amenities[amenity_type]
 
-        return [category for category in result if category.items]
+            if not catname in result:
+                result[catname] = StreetIndexCategory(catname, is_street=False)
+
+            result[catname].items.append(StreetIndexItem(amenity_name,
+                                                          endpoint1,
+                                                          endpoint2,
+                                                          self._page_number))
+
+        return [category for catname, category in sorted(result.items()) if category.items]
 
     def _list_villages(self, db, polygon_wkt):
         """Get the list of villages inside the given polygon. Don't
