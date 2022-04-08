@@ -599,7 +599,7 @@ SELECT village_name,
         LOG.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
 
-        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLLAGES)]
+        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLAGES)]
 
     
 
