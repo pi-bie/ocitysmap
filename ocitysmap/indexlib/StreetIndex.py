@@ -394,6 +394,51 @@ class StreetIndex(GeneralIndex):
 
         return result
 
+    @staticmethod
+    def _build_query(polygon_wkt, tables, columns, where):
+        subquery_template = """
+SELECT %(columns)s,
+       ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS contour
+           FROM planet_osm_%(table)s
+          WHERE %(where)s
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+"""
+
+        subquery_parts = []
+
+        for table in tables:
+                subquery_parts.append( subquery_template % {
+                    'table': table,
+                    'columns': columns,
+                    'where': where,
+                    'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
+                                   % (polygon_wkt,))
+                })
+
+        subquery = ' UNION ' . join(subquery_parts)
+
+        query = """
+SELECT %(columns)s,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(contour,contour),
+                              4326)) AS longest_linestring
+  FROM ( %(subquery)s
+     ) AS foo
+ ORDER by %(columns)s""" % {'columns': columns, 'subquery': subquery}
+
+        return query
+
+    @staticmethod
+    def _run_query(cursor, query):
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+
     def _list_streets(self, db, polygon_wkt):
         """Get the list of streets inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
@@ -430,15 +475,8 @@ SELECT name,
 
         # LOG.debug("Street query (nogrid): %s" % query)
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        self._run_query(cursor, query)
+
         sl = cursor.fetchall()
 
         LOG.debug("Got %d streets." % len(sl))
@@ -493,15 +531,9 @@ SELECT amenity_type, amenity_name,
         'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
                        % (polygon_wkt,))}
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        query = self._build_query(polygon_wkt,["point","polygon"],"amenity, name", "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
+
+        self._run_query(cursor, query)
 
         for amenity_type, amenity_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
@@ -568,15 +600,7 @@ SELECT village_name,
         # LOG.debug("Villages query for %s (nogrid): %s" \
         #             % ('Villages', query))
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        self._run_query(cursor, query)
 
         for village_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
@@ -599,7 +623,7 @@ SELECT village_name,
         LOG.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
 
-        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLLAGES)]
+        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLAGES)]
 
     
 
