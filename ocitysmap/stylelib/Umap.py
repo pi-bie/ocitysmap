@@ -146,6 +146,8 @@ class UmapStylesheet(Stylesheet):
                     for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                         if prop in layer[name]:
                             val = layer[name][prop]
+                            if val is True:
+                                val = 'yes'
                             if prop in ['color', 'fillColor']:
                                 val = color2hex(val)
                             layer_defaults[prop] = val
@@ -157,6 +159,8 @@ class UmapStylesheet(Stylesheet):
                         for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
                             if prop in feature['properties']:
                                 val = feature['properties'][prop]
+                                if val is True:
+                                    val = 'yes'
                                 if prop in ['color', 'fillColor']:
                                     val = color2hex(val)
                                 new_props[prop] = val
@@ -165,6 +169,8 @@ class UmapStylesheet(Stylesheet):
                             for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
                                 if prop in feature['properties'][name]:
                                     val = feature['properties'][name][prop]
+                                    if val is True:
+                                        val = 'yes'
                                     if prop in ['color', 'fillColor']:
                                         val = color2hex(val)
                                     new_props[prop] = val
@@ -226,4 +232,5 @@ class UmapStylesheet(Stylesheet):
             'features' : new_features
         }
 
+        LOG.debug("rewritten JSON:\n %s" % json.dumps(new_umap, indent=2))
         return json.dumps(new_umap, indent=2)

@@ -10,6 +10,10 @@
       <Filter>[mapnik::geometry_type]=polygon and [stroke]='yes'</Filter>
       <LineSymbolizer stroke="[color]" stroke-opacity="[opacity]" stroke-width="[weight]" stroke-linecap="round" stroke-linejoin="round"/>
     </Rule>
+    <Rule>
+      <Filter>[mapnik::geometry_type]=polygon and (not ([name] = null or [name] = ''))</Filter>
+      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
+    </Rule>
   </Style>
   
   <Style name="line">

@@ -172,7 +172,7 @@ def render(renderer, ctx):
             (x1, y1) = renderer._latlon2xy(lat1, lon1)
             ctx.save()
             ctx.set_source_rgba(0, 0, 0.5, 0.5)
-            draw_simpletext_center(ctx, beautify_km(v), x1 + 12, 20)
+            draw_simpletext_center(ctx, beautify_km(v), x1 + 12, 62.5)
             ctx.restore()
 
         # draw the horizontal grid lines
