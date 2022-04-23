@@ -508,30 +508,10 @@ SELECT name,
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        query = """
-SELECT amenity_type, amenity_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT amenity AS amenity_type, name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND amenity IN ( %(amenity)s )
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-       UNION
-         SELECT amenity AS amenity_type, name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s , %%(way)s) AS amenity_contour
-           FROM planet_osm_polygon
-          WHERE TRIM(name) != ''
-            AND amenity IN ( %(amenity)s )
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER by amenity_type, amenity_name""" \
-     % {'amenity': amenities_in,
-        'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                       % (polygon_wkt,))}
-
-        query = self._build_query(polygon_wkt,["point","polygon"],"amenity, name", "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
+        query = self._build_query(polygon_wkt,
+                                  ["point","polygon"],
+                                  "amenity, name",
+                                  "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
 
         self._run_query(cursor, query)
 
@@ -580,25 +560,22 @@ SELECT amenity_type, amenity_name,
                                                is_street=False)
         result.append(current_category)
 
-        query = """
-SELECT village_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(village_contour, village_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT name AS village_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS village_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
-                          'village', 'hamlet', 'isolated_dwelling')
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER BY village_name""" \
-            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
-                              % (polygon_wkt,))}
+        places = ['borough',
+                  'suburb',
+                  'quarter',
+                  'neighbourhood',
+                  'village',
+                  'hamlet',
+                  'isolated_dwelling']
+        sep = "','"
+        places_in = "'" + sep.join(places) + "'"
 
-
-        # LOG.debug("Villages query for %s (nogrid): %s" \
-        #             % ('Villages', query))
+        query = self._build_query(polygon_wkt,
+                                  ["point"],
+                                  "name",
+                                  """TRIM(name) != ''
+AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
+              'village', 'hamlet', 'isolated_dwelling')""")
 
         self._run_query(cursor, query)
 
