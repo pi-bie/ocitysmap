@@ -395,13 +395,14 @@ class StreetIndex(GeneralIndex):
         return result
 
     @staticmethod
-    def _build_query(polygon_wkt, tables, columns, where):
+    def _build_query(polygon_wkt, tables, columns, where, group=False):
         subquery_template = """
 SELECT %(columns)s,
-       ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS contour
+       ST_INTERSECTION(%(wkb_limits)s, %(aggregate)s%%(way)s%(aggreg_end)s) AS contour
            FROM planet_osm_%(table)s
           WHERE %(where)s
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+          %(order_group)s
 """
 
         subquery_parts = []
@@ -412,8 +413,12 @@ SELECT %(columns)s,
                     'columns': columns,
                     'where': where,
                     'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                                   % (polygon_wkt,))
-                })
+                                   % (polygon_wkt,)),
+                    'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
+                    'aggreg_end': "))" if group else "",
+                    'order_group': "GROUP BY %(columns)s ORDER BY %(columns)s" % {'columns': columns} if group else "",
+                }
+                )
 
         subquery = ' UNION ' . join(subquery_parts)
 
@@ -475,6 +480,7 @@ SELECT name,
 
         # LOG.debug("Street query (nogrid): %s" % query)
 
+        query = self._build_query(polygon_wkt, ["line"], "name", "TRIM(name) != '' AND highway IS NOT NULL", True)
         self._run_query(cursor, query)
 
         sl = cursor.fetchall()
