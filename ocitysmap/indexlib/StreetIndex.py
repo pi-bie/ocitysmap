@@ -394,6 +394,56 @@ class StreetIndex(GeneralIndex):
 
         return result
 
+    @staticmethod
+    def _build_query(polygon_wkt, tables, columns, where, group=False):
+        subquery_template = """
+SELECT %(columns)s,
+       ST_INTERSECTION(%(wkb_limits)s, %(aggregate)s%%(way)s%(aggreg_end)s) AS contour
+           FROM planet_osm_%(table)s
+          WHERE %(where)s
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+          %(order_group)s
+"""
+
+        subquery_parts = []
+
+        for table in tables:
+                subquery_parts.append( subquery_template % {
+                    'table': table,
+                    'columns': columns,
+                    'where': where,
+                    'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
+                                   % (polygon_wkt,)),
+                    'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
+                    'aggreg_end': "))" if group else "",
+                    'order_group': "GROUP BY %(columns)s ORDER BY %(columns)s" % {'columns': columns} if group else "",
+                }
+                )
+
+        subquery = ' UNION ' . join(subquery_parts)
+
+        query = """
+SELECT %(columns)s,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(contour,contour),
+                              4326)) AS longest_linestring
+  FROM ( %(subquery)s
+     ) AS foo
+ ORDER by %(columns)s""" % {'columns': columns, 'subquery': subquery}
+
+        return query
+
+    @staticmethod
+    def _run_query(cursor, query):
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+
     def _list_streets(self, db, polygon_wkt):
         """Get the list of streets inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
@@ -430,15 +480,9 @@ SELECT name,
 
         # LOG.debug("Street query (nogrid): %s" % query)
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        query = self._build_query(polygon_wkt, ["line"], "name", "TRIM(name) != '' AND highway IS NOT NULL", True)
+        self._run_query(cursor, query)
+
         sl = cursor.fetchall()
 
         LOG.debug("Got %d streets." % len(sl))
@@ -470,38 +514,12 @@ SELECT name,
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        query = """
-SELECT amenity_type, amenity_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT amenity AS amenity_type, name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND amenity IN ( %(amenity)s )
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-       UNION
-         SELECT amenity AS amenity_type, name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s , %%(way)s) AS amenity_contour
-           FROM planet_osm_polygon
-          WHERE TRIM(name) != ''
-            AND amenity IN ( %(amenity)s )
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER by amenity_type, amenity_name""" \
-     % {'amenity': amenities_in,
-        'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                       % (polygon_wkt,))}
+        query = self._build_query(polygon_wkt,
+                                  ["point","polygon"],
+                                  "amenity, name",
+                                  "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        self._run_query(cursor, query)
 
         for amenity_type, amenity_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
@@ -548,35 +566,24 @@ SELECT amenity_type, amenity_name,
                                                is_street=False)
         result.append(current_category)
 
-        query = """
-SELECT village_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(village_contour, village_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT name AS village_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS village_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
-                          'village', 'hamlet', 'isolated_dwelling')
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER BY village_name""" \
-            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
-                              % (polygon_wkt,))}
+        places = ['borough',
+                  'suburb',
+                  'quarter',
+                  'neighbourhood',
+                  'village',
+                  'hamlet',
+                  'isolated_dwelling']
+        sep = "','"
+        places_in = "'" + sep.join(places) + "'"
 
+        query = self._build_query(polygon_wkt,
+                                  ["point"],
+                                  "name",
+                                  """TRIM(name) != ''
+AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
+              'village', 'hamlet', 'isolated_dwelling')""")
 
-        # LOG.debug("Villages query for %s (nogrid): %s" \
-        #             % ('Villages', query))
-
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        self._run_query(cursor, query)
 
         for village_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
