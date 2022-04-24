@@ -129,12 +129,15 @@ class SinglePageRenderer(Renderer):
                                        self._copyright_margin_pt)
 
         # Prepare the Index (may raise a IndexDoesNotFitError)
-        if ( index_position and self.street_index
-             and self.street_index.categories ):
-            self._index_renderer, self._index_area \
-                = self._create_index_rendering(index_position)
-        else:
-            self._index_renderer, self._index_area = None, None
+        try:
+            if ( index_position and self.street_index
+                 and self.street_index.categories ):
+                self._index_renderer, self._index_area \
+                    = self._create_index_rendering(index_position)
+            else:
+                self._index_renderer, self._index_area = None, None
+        except IndexDoesNotFitError as e:
+                self._index_renderer, self._index_area = None, None
 
         self._map_coords = self._get_map_coords(index_position if self._index_area else None)
 
