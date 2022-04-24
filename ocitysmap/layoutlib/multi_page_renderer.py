@@ -218,7 +218,8 @@ class MultiPageRenderer(Renderer):
                         try:
                             for l in gpx_style.linestrings:
                                 track_linestrings.append(l)
-                        except:
+                        except Exception as e:
+                            LOG.warning("GPX linestring extraction error: %s" % e)
                             pass
                 elif file_type == 'umap':
                     try:
