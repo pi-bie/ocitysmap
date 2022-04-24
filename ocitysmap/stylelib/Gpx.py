@@ -31,12 +31,15 @@ import gpxpy
 import gpxpy.gpx
 import codecs
 import logging
+from shapely.geometry import LineString
 
 LOG = logging.getLogger('ocitysmap')
 
 class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir, track_color = '#7f7f7f'):
         super().__init__()
+
+        self.linestrings = []
 
         gpx_fp = codecs.open(gpx_file, 'r', 'utf-8-sig')
         gpx = gpxpy.parse(gpx_fp)
@@ -67,6 +70,8 @@ class GpxStylesheet(Stylesheet):
                 for segment in track.segments:
                     if len(segment.points) > 0:
                         nonempty_tracks = nonempty_tracks + 1
+                        l = LineString([(x.longitude, x.latitude) for x in segment.points])
+                        self.linestrings.append(l)
             if nonempty_tracks > 0:
                 layer_text += tmplayer.substitute(
                     gpxfile = gpx_file,
@@ -78,6 +83,8 @@ class GpxStylesheet(Stylesheet):
             for route in gpx.routes:
                 if len(route.points) > 0:
                     nonempty_routes = nonempty_routes + 1
+                    l = LineString([(x.longitude, x.latitude) for x in route.points])
+                    self.linestrings.append(l)
             if nonempty_routes > 0:
                 layer_text += tmplayer.substitute(
                     gpxfile = gpx_file,
