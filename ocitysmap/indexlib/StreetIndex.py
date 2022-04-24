@@ -416,7 +416,7 @@ SELECT %(columns)s,
                                    % (polygon_wkt,)),
                     'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
                     'aggreg_end': "))" if group else "",
-                    'order_group': "GROUP BY %(columns)s ORDER BY %(columns)s" % {'columns': columns} if group else "",
+                    'order_group': "GROUP BY %(columns)s" % {'columns': columns} if group else "",
                 }
                 )
 
@@ -428,8 +428,7 @@ SELECT %(columns)s,
                               4326)) AS longest_linestring
   FROM ( %(subquery)s
      ) AS foo
- ORDER by %(columns)s""" % {'columns': columns, 'subquery': subquery}
-
+ """ % {'columns': columns, 'subquery': subquery}
         return query
 
     @staticmethod
