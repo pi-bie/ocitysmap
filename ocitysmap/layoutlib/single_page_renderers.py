@@ -45,7 +45,7 @@ import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.StreetIndex import StreetIndexRenderer, StreetIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
-from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+from ocitysmap.indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.stylelib import GpxStylesheet, UmapStylesheet
