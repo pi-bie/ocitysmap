@@ -565,6 +565,12 @@ SELECT ST_AsText(ST_LongestLine(
         assert config.bounding_box is not None
         assert config.polygon_wkt is not None
 
+        # Make sure bounding box has non-zero width / height
+        assert config.bounding_box.get_left() !=  config.bounding_box.get_right(), \
+                "Bounding box has zero width"
+        assert config.bounding_box.get_top()  !=  config.bounding_box.get_bottom(), \
+                "Bounding box has zero height"
+
         osm_date = self.get_osm_database_last_update()
 
         # Create a temporary directory for all our temporary helper files
