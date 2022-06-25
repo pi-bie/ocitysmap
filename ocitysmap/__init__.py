@@ -571,6 +571,12 @@ SELECT ST_AsText(ST_LongestLine(
         assert config.bounding_box.get_top()  !=  config.bounding_box.get_bottom(), \
                 "Bounding box has zero height"
 
+        # Make sure paper has non-zero widht / height
+        assert config.paper_width_mm > 0, \
+                "Paper needs non-zero width"
+        assert config.paper_height_mm > 0, \
+                "Paper needs non-zero height"
+
         osm_date = self.get_osm_database_last_update()
 
         # Create a temporary directory for all our temporary helper files
