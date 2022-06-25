@@ -56,6 +56,11 @@ LOG = logging.getLogger('ocitysmap')
 # We use the same 10mm as GRAYED_MARGIN_MM in the map multi-page renderer
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
+# FIXME: make truely configurable
+MAX_INDEX_CATEGORY_ITEMS = 30
+MAX_INDEX_STREETS = 1000
+MAX_INDEX_VILLAGES = 100
+
 class StreetIndexCategory(IndexCategory):
     """
     The IndexCategory represents a set of index items that belong to the same
@@ -304,19 +309,18 @@ class StreetIndex(GeneralIndex):
 
         # Make sure gettext is available...
         try:
-            selected_amenities = [
-                (_(u"Places of worship"), "place_of_worship",
-                 _(u"Place of worship")),
-                (_(u"Education"), "kindergarten", _(u"Kindergarten")),
-                (_(u"Education"), "school", _(u"School")),
-                (_(u"Education"), "college", _(u"College")),
-                (_(u"Education"), "university", _(u"University")),
-                (_(u"Education"), "library", _(u"Library")),
-                (_(u"Public buildings"), "townhall", _(u"Town hall")),
-                (_(u"Public buildings"), "post_office", _(u"Post office")),
-                (_(u"Public buildings"), "public_building",
-                 _(u"Public building")),
-                (_(u"Public buildings"), "police", _(u"Police"))]
+            selected_amenities = {
+                "place_of_worship":  _(u"Places of worship"),
+                "kindergarten":      _(u"Education"),
+                "school":            _(u"Education"),
+                "college":           _(u"Education"),
+                "university":        _(u"Education"),
+                "library":           _(u"Education"),
+                "townhall":          _(u"Public buildings"),
+                "post_office":       _(u"Public buildings"),
+                "public_building":   _(u"Public buildings"),
+                "police":            _(u"Public buildings"),
+            }
         except NameError:
             LOG.exception("i18n has to be initialized beforehand")
             return []
@@ -390,6 +394,55 @@ class StreetIndex(GeneralIndex):
 
         return result
 
+    @staticmethod
+    def _build_query(polygon_wkt, tables, columns, where, group=False):
+        subquery_template = """
+SELECT %(columns)s,
+       ST_INTERSECTION(%(wkb_limits)s, %(aggregate)s%%(way)s%(aggreg_end)s) AS contour
+           FROM planet_osm_%(table)s
+          WHERE %(where)s
+            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
+          %(order_group)s
+"""
+
+        subquery_parts = []
+
+        for table in tables:
+                subquery_parts.append( subquery_template % {
+                    'table': table,
+                    'columns': columns,
+                    'where': where,
+                    'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
+                                   % (polygon_wkt,)),
+                    'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
+                    'aggreg_end': "))" if group else "",
+                    'order_group': "GROUP BY %(columns)s" % {'columns': columns} if group else "",
+                }
+                )
+
+        subquery = ' UNION ' . join(subquery_parts)
+
+        query = """
+SELECT %(columns)s,
+       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(contour,contour),
+                              4326)) AS longest_linestring
+  FROM ( %(subquery)s
+     ) AS foo
+ """ % {'columns': columns, 'subquery': subquery}
+        return query
+
+    @staticmethod
+    def _run_query(cursor, query):
+        try:
+            cursor.execute(query % {'way':'way'})
+        except psycopg2.InternalError:
+            # This exception generaly occurs when inappropriate ways have
+            # to be cleaned. Using a buffer of 0 generaly helps to clean
+            # them. This operation is not applied by default for
+            # performance.
+            db.rollback()
+            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+
     def _list_streets(self, db, polygon_wkt):
         """Get the list of streets inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
@@ -426,18 +479,15 @@ SELECT name,
 
         # LOG.debug("Street query (nogrid): %s" % query)
 
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        query = self._build_query(polygon_wkt, ["line"], "name", "TRIM(name) != '' AND highway IS NOT NULL", True)
+        self._run_query(cursor, query)
+
         sl = cursor.fetchall()
 
         LOG.debug("Got %d streets." % len(sl))
+
+        if len(sl) > MAX_INDEX_STREETS:
+            return []
 
         return self._convert_street_index(sl)
 
@@ -457,76 +507,43 @@ SELECT name,
 
         cursor = db.cursor()
 
-        result = []
-        for catname, db_amenity, label in self._get_selected_amenities():
-            LOG.debug("Getting amenities for %s/%s..." % (catname, db_amenity))
+        sep = "','"
+        result = {}
 
-            # Get the current IndexCategory object, or create one if
-            # different than previous
-            if (not result or result[-1].name != catname):
-                current_category = StreetIndexCategory(catname,
-                                                       is_street=False)
-                result.append(current_category)
-            else:
-                current_category = result[-1]
+        amenities = self._get_selected_amenities()
+        amenities_in = "'" + sep.join(amenities) + "'"
+        
+        query = self._build_query(polygon_wkt,
+                                  ["point","polygon"],
+                                  "amenity, name",
+                                  "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
 
-            query = """
-SELECT amenity_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(amenity_contour, amenity_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS amenity_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND amenity = %(amenity)s
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-       UNION
-         SELECT name AS amenity_name,
-                ST_INTERSECTION(%(wkb_limits)s , %%(way)s) AS amenity_contour
-           FROM planet_osm_polygon
-          WHERE TRIM(name) != ''
-            AND amenity = %(amenity)s
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER by amenity_name""" \
-                % {'amenity': str(_sql_escape_unicode(db_amenity)),
-                   'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                                  % (polygon_wkt,))}
+        self._run_query(cursor, query)
 
-            # LOG.debug("Amenity query for for %s/%s (nogrid): %s" \
-            #            % (catname, db_amenity, query))
+        for amenity_type, amenity_name, linestring in cursor.fetchall():
+            # Parse the WKT from the largest linestring in shape
             try:
-                cursor.execute(query % {'way':'way'})
-            except psycopg2.InternalError:
-                # This exception generaly occurs when inappropriate ways have
-                # to be cleaned. Using a buffer of 0 generaly helps to clean
-                # them. This operation is not applied by default for
-                # performance.
-                db.rollback()
-                cursor.execute(query % {'way':'st_buffer(way, 0)'})
+                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                               linestring[11:-1].split(','))
+            except (ValueError, TypeError):
+                LOG.exception("Error parsing %s for %s/%s/%s"
+                              % (repr(linestring), catname, db_amenity,
+                                 repr(amenity_name)))
+                continue
+            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
 
-            for amenity_name, linestring in cursor.fetchall():
-                # Parse the WKT from the largest linestring in shape
-                try:
-                    s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                                   linestring[11:-1].split(','))
-                except (ValueError, TypeError):
-                    LOG.exception("Error parsing %s for %s/%s/%s"
-                                % (repr(linestring), catname, db_amenity,
-                                   repr(amenity_name)))
-                    continue
-                    ## raise
-                endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
-                endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-                current_category.items.append(StreetIndexItem(amenity_name,
-                                                              endpoint1,
-                                                              endpoint2,
-                                                              self._page_number))
-                
-            LOG.debug("Got %d amenities for %s/%s."
-                    % (len(current_category.items), catname, db_amenity))
+            catname = amenities[amenity_type]
 
-        return [category for category in result if category.items]
+            if not catname in result:
+                result[catname] = StreetIndexCategory(catname, is_street=False)
+
+            result[catname].items.append(StreetIndexItem(amenity_name,
+                                                          endpoint1,
+                                                          endpoint2,
+                                                          self._page_number))
+
+        return [category for catname, category in sorted(result.items()) if (category.items and len(category.items) <= MAX_INDEX_CATEGORY_ITEMS)]
 
     def _list_villages(self, db, polygon_wkt):
         """Get the list of villages inside the given polygon. Don't
@@ -548,36 +565,24 @@ SELECT amenity_name,
                                                is_street=False)
         result.append(current_category)
 
-        query = """
-SELECT village_name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(village_contour, village_contour),
-                              4326)) AS longest_linestring
-  FROM ( SELECT name AS village_name,
-                ST_INTERSECTION(%(wkb_limits)s, %%(way)s) AS village_contour
-           FROM planet_osm_point
-          WHERE TRIM(name) != ''
-            AND (    place = 'locality'
-                  OR place = 'hamlet'
-                  OR place = 'isolated_dwelling')
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-     ) AS foo
- ORDER BY village_name""" \
-            % {'wkb_limits': ("st_transform(ST_GeomFromText('%s', 4326), 3857)"
-                              % (polygon_wkt,))}
+        places = ['borough',
+                  'suburb',
+                  'quarter',
+                  'neighbourhood',
+                  'village',
+                  'hamlet',
+                  'isolated_dwelling']
+        sep = "','"
+        places_in = "'" + sep.join(places) + "'"
 
+        query = self._build_query(polygon_wkt,
+                                  ["point"],
+                                  "name",
+                                  """TRIM(name) != ''
+AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
+              'village', 'hamlet', 'isolated_dwelling')""")
 
-        # LOG.debug("Villages query for %s (nogrid): %s" \
-        #             % ('Villages', query))
-
-        try:
-            cursor.execute(query % {'way':'way'})
-        except psycopg2.InternalError:
-            # This exception generaly occurs when inappropriate ways have
-            # to be cleaned. Using a buffer of 0 generaly helps to clean
-            # them. This operation is not applied by default for
-            # performance.
-            db.rollback()
-            cursor.execute(query % {'way':'st_buffer(way, 0)'})
+        self._run_query(cursor, query)
 
         for village_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
@@ -600,7 +605,7 @@ SELECT village_name,
         LOG.debug("Got %d villages for %s."
                 % (len(current_category.items), 'Villages'))
 
-        return [category for category in result if category.items]
+        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLAGES)]
 
     
 
@@ -876,7 +881,11 @@ class StreetIndexRenderer:
         # Simple verification...
         if actual_n_cols < rendering_area.n_cols:
             LOG.warning("Rounding/security margin lost some space (%d actual cols vs. allocated %d" % (actual_n_cols, rendering_area.n_cols))
-        assert actual_n_cols <= rendering_area.n_cols
+        if actual_n_cols > rendering_area.n_cols:
+            LOG.warning("Rounding/security margin used more space (%d actual cols vs. allocated %d" % (actual_n_cols, rendering_area.n_cols))
+        # TODO removed the assertion here, so rendering can overflow the index area right now
+        # far from perfect visually, but at least better than bailing out completely without
+        # any rendered result ... see also Issue #52
 
 
     def _compute_lines_occupation(self, ctx, pc, font_desc, n_em_padding,

@@ -40,6 +40,7 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.StreetIndex import StreetIndexRenderer, StreetIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+import ocitysmap.layoutlib.commons as UTILS
 import draw_utils
 from ocitysmap.maplib.map_canvas import MapCanvas
 
@@ -107,9 +108,30 @@ class TK25Renderer(Renderer):
     def _mm_mvto(ctx,x,y,dpi):
         ctx.move_to(commons.convert_mm_to_dots(x, dpi),
                     commons.convert_mm_to_dots(y, dpi))
-        
+    @staticmethod
+    def _fs(ctx, pt, dpi):
+        ctx.set_font_size(pt*dpi/72)
+
+    @staticmethod
+    def deg2hm(a):
+        (f, d) = math.mpdf(a)
+        m = (int)(f*60)
+        return d, m
+
     def render(self, cairo_surface, dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
+        pc = PangoCairo.create_context(ctx)
+
+        normal_fd = Pango.FontDescription("DejaVu 7")
+        normal_layout, normal_fascent, normal_fheight, normal_em = \
+            draw_utils.create_layout_with_font(ctx, pc, normal_fd)
+
+        small_fd  = Pango.FontDescription("DejaVu 4")
+        small_layout, small_fascent, small_fheight, small_em = \
+            draw_utils.create_layout_with_font(ctx, pc, small_fd)
+
+        PangoCairo.context_set_resolution(normal_layout.get_context(),
+                                          96.*dpi/UTILS.PT_PER_INCH)
 
         # Set a white background
         ctx.save()
@@ -144,20 +166,22 @@ class TK25Renderer(Renderer):
         ctx.set_source_rgb(0,0,0)
         ctx.select_font_face("Droid Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
 
-        self._mm_mvto(ctx, 36, 42, dpi)
-        ctx.set_font_size(16);
+        self._mm_mvto(ctx, 33, 42, dpi)
+        self._fs(ctx, 7, dpi);
         ctx.show_text("52°");
-        ctx.set_font_size(10);
+        self._fs(ctx, 4, dpi);
         ctx.show_text("10'");
         
-        self._mm_mvto(ctx, 38.5, 38.5, dpi)
-        ctx.set_font_size(16);
-        ctx.show_text("8°");
-        ctx.set_font_size(10);
-        ctx.show_text("30'");
-
-        ctx.restore()
+        self._mm_mvto(ctx, 40, 39, dpi)
+        draw_utils.draw_text_left(ctx, pc, normal_layout, normal_fascent, normal_fheight,
+                                  commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(39, dpi),
+                                  "18°")
+        draw_utils.draw_text_right(ctx, pc, normal_layout, normal_fascent, normal_fheight,
+                                  commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(41, dpi),
+                                  "30'")
         
+        ctx.restore()
+
         cairo_surface.flush()
         return
 

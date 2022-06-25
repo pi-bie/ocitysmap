@@ -78,7 +78,7 @@ msgstr "Polizei"
 
 #: ocitysmap/indexlib/StreetIndex.py:538
 msgid "Villages"
-msgstr "Dörfer"
+msgstr "Ortsteile"
 
 #: ocitysmap/indexlib/StreetIndex.py:1071
 #, python-format
