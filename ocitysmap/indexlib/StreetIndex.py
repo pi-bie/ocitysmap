@@ -34,7 +34,6 @@ from . import commons
 import ocitysmap
 import ocitysmap.layoutlib.commons as UTILS
 
-from .commons import IndexDoesNotFitError 
 from .indexer import _sql_escape_unicode
 from .GeneralIndex import GeneralIndex, GeneralIndexCategory, GeneralIndexItem
 

@@ -22,8 +22,6 @@ from . import commons
 import ocitysmap
 import ocitysmap.layoutlib.commons as UTILS
 
-from .commons import IndexDoesNotFitError 
-from .StreetIndex import StreetIndexCategory, StreetIndexItem
 from .GeneralIndex import GeneralIndex, GeneralIndexCategory, GeneralIndexItem
 
 import logging
@@ -87,9 +85,9 @@ class HealthIndex(GeneralIndex):
             catname = amenity_type
 
             if not catname in result:
-                result[catname] = GeneralIndexCategory(catname, is_street=False)
+                result[catname] = HealthIndexCategory(catname, is_street=False)
 
-            result[catname].items.append(StreetIndexItem(amenity_name,
+            result[catname].items.append(HealthIndexItem(amenity_name,
                                                           endpoint1,
                                                           endpoint2,
                                                           self._page_number))
