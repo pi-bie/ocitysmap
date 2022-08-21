@@ -37,7 +37,8 @@ from copy import copy
 from ocitysmap.layoutlib import commons
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
-from ocitysmap.indexlib.StreetIndex import StreetIndexRenderer, StreetIndex
+from ocitysmap.indexlib.GeneralIndex import GeneralIndexRenderer
+from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import ocitysmap.layoutlib.commons as UTILS

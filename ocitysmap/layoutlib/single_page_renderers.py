@@ -43,7 +43,9 @@ from copy import copy
 from ocitysmap.layoutlib import commons
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
-from ocitysmap.indexlib.StreetIndex import StreetIndexRenderer, StreetIndex
+from ocitysmap.indexlib.GeneralIndex import GeneralIndexRenderer
+from ocitysmap.indexlib.StreetIndex import StreetIndex
+from ocitysmap.indexlib.HealthIndex import HealthIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from ocitysmap.indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
@@ -248,7 +250,7 @@ class SinglePageRenderer(Renderer):
             index_renderer = PoiIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
         else:
-            index_renderer = StreetIndexRenderer(self.rc.i18n,
+            index_renderer = GeneralIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
 
         # We use a fake vector device to determine the actual

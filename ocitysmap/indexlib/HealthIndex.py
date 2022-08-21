@@ -17,21 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import psycopg2
-import cairo
-import gi
-gi.require_version('Rsvg', '2.0')
-gi.require_version('Pango', '1.0')
-gi.require_version('PangoCairo', '1.0')
-from gi.repository import Rsvg, Pango, PangoCairo
-import ocitysmap.layoutlib.commons as UTILS
-from ocitysmap.layoutlib.abstract_renderer import Renderer
-import draw_utils
 
 from . import commons
 import ocitysmap
 import ocitysmap.layoutlib.commons as UTILS
 
-from .commons import IndexCategory, IndexItem, IndexDoesNotFitError 
+from .commons import IndexDoesNotFitError 
 from .StreetIndex import StreetIndexCategory, StreetIndexItem
 from .GeneralIndex import GeneralIndex, GeneralIndexCategory, GeneralIndexItem
 
@@ -74,8 +65,9 @@ class HealthIndex(GeneralIndex):
 
         query = self._build_query(polygon_wkt,
                                   ["point","polygon"],
-                                  "healthcare, name",
-                                  "amenity = 'health_post' AND healthcare IS NOT NULL")
+                                  "healthcare, coalesce(name, '***???***') AS name",
+#                                  "amenity = 'health_post' AND healthcare IS NOT NULL")
+                                   "healthcare IS NOT NULL AND healthcare != ''")
 
         self._run_query(cursor, query)
 

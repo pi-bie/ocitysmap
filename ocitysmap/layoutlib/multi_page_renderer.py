@@ -48,7 +48,8 @@ import ocitysmap
 import coords
 from . import commons
 from ocitysmap.layoutlib.abstract_renderer import Renderer
-from ocitysmap.indexlib.StreetIndex import StreetIndex, StreetIndexCategory, MultiPageStreetIndexRenderer
+from ocitysmap.indexlib.GeneralIndex import GeneralIndex, GeneralIndexCategory, MultiPageIndexRenderer
+from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
@@ -404,6 +405,7 @@ class MultiPageRenderer(Renderer):
 
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
+            # TODO: other index types
             index = StreetIndex(self.db,
                                 inside_contour_wkt,
                                 self.rc.i18n, page_number=(i + self._first_map_page_number))
@@ -486,7 +488,7 @@ class MultiPageRenderer(Renderer):
             # Rebuild a IndexCategory object with the list of merged
             # and sorted IndexItem
             categories_merged.append(
-                StreetIndexCategory(category_name, grouped_items_sorted, is_street))
+                GeneralIndexCategory(category_name, grouped_items_sorted, is_street))
 
         return categories_merged
 
@@ -1055,16 +1057,16 @@ class MultiPageRenderer(Renderer):
             except:
                 pass
             cairo_surface.show_page()
-        ctx.restore()
+        ctx.restore
 
-        mpsir = MultiPageStreetIndexRenderer(self.rc.i18n,
-                                             ctx, cairo_surface,
-                                             self.index_categories,
-                                             (Renderer.PRINT_SAFE_MARGIN_PT,
-                                              Renderer.PRINT_SAFE_MARGIN_PT,
-                                              self._usable_area_width_pt,
-                                              self._usable_area_height_pt),
-                                              map_number+5)
+        mpsir = MultiPageIndexRenderer(self.rc.i18n,
+                                       ctx, cairo_surface,
+                                       self.index_categories,
+                                       (Renderer.PRINT_SAFE_MARGIN_PT,
+                                        Renderer.PRINT_SAFE_MARGIN_PT,
+                                        self._usable_area_width_pt,
+                                        self._usable_area_height_pt),
+                                       map_number+5)
 
         mpsir.render()
 

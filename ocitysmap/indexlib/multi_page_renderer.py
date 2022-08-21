@@ -78,7 +78,7 @@ if __name__ == '__main__':
                                                     string.ascii_uppercase),
                                             random.randint(1,19),
                                             ))]*random.randint(1, 20):
-            item              = commons.StreetIndexItem(label, None, None)
+            item              = commons.GeneralIndexItem(label, None, None)
             item.location_str = location_str
             item.page_number  = random.randint(1, 100)
             items.append(item)
@@ -89,14 +89,14 @@ if __name__ == '__main__':
     rendering_area = \
         (15, 15, width - 2 * 15, height - 2 * 15)
 
-    mpsir = MultiPageStreetIndexRenderer(i18nMock(False), ctxtmp, surface,
-                                         streets, rendering_area, 1)
+    mpsir = MultiPageIndexRenderer(i18nMock(False), ctxtmp, surface,
+                                   streets, rendering_area, 1)
     mpsir.render()
     surface.show_page()
 
-    mpsir2 = MultiPageStreetIndexRenderer(i18nMock(True), ctxtmp, surface,
-                                          streets, rendering_area,
-                                          mpsir.page_number + 1)
+    mpsir2 = MultiPagendexRenderer(i18nMock(True), ctxtmp, surface,
+                                   streets, rendering_area,
+                                   mpsir.page_number + 1)
     mpsir2.render()
 
     surface.finish()

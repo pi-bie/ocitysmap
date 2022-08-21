@@ -125,7 +125,7 @@ if __name__ == '__main__':
             items.append(item)
         streets.append(commons.IndexCategory(i, items))
 
-    index = StreetIndexRenderer(i18nMock(False), streets)
+    index = GeneralIndexRenderer(i18nMock(False), streets)
 
     def _render(freedom_dimension, alignment):
         x,y,w,h = 50, 50, width-100, height-100
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     _render('width', 'right')
     surface.show_page()
 
-    index = StreetIndexRenderer(i18nMock(True), streets)
+    index = GeneralIndexRenderer(i18nMock(True), streets)
     _render('height', 'top')
     surface.show_page()
     _render('height', 'bottom')
