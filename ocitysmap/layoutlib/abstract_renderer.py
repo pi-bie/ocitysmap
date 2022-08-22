@@ -82,10 +82,10 @@ class Renderer:
         Create the renderer.
 
         Args:
+           db (psycopg2 DB): The GIS database
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
-           street_index (StreetIndex): None or the street index object.
-           TODO: above no longer fully correct
+           dpi (integer): output resolution for bitmap formats
         """
         # Note: street_index may be None
         self.db           = db

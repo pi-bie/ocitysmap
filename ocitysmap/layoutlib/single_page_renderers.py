@@ -77,11 +77,13 @@ class SinglePageRenderer(Renderer):
         Create the renderer.
 
         Args:
+           db (psycopg2 DB): The GIS database
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
+           file_prefix: prefix for all output file formats to be generated
+           dpi (integer): output resolution for bitmap formats
            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
-           TODO: above no longer fully correct
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)

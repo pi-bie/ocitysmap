@@ -72,6 +72,7 @@ class MultiPageRenderer(Renderer):
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
     # see entities.xml.inc file from osm style sheet
+    # TODO: make configurable
     DEFAULT_MULTIPAGE_SCALE = 12000
     MAX_MULTIPAGE_MAPPAGES  = 50
 
