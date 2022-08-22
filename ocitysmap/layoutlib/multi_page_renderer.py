@@ -407,12 +407,17 @@ class MultiPageRenderer(Renderer):
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             # TODO: other index types
-            index = StreetIndex(self.db,
-                                inside_contour_wkt,
-                                self.rc.i18n, page_number=(i + self._first_map_page_number))
+            try:
+                indexer_class = globals()[self.rc.indexer]
+            except:
+                LOG.warning("Indexer class '%s' not found" % self.rc.indexer)
+            else:
+                index = indexer_class(self.db,
+                                      inside_contour_wkt,
+                                      self.rc.i18n, page_number=(i + self._first_map_page_number))
 
-            index.apply_grid(map_grid)
-            indexes.append(index)
+                index.apply_grid(map_grid)
+                indexes.append(index)
 
         # Merge all indexes
         self.index_categories = self._merge_page_indexes(indexes)

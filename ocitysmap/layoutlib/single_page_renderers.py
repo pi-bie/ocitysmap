@@ -98,9 +98,16 @@ class SinglePageRenderer(Renderer):
             if rc.poi_file:
                 self.street_index = PoiIndex(rc.poi_file)
             else:
-                self.street_index = StreetIndex(db,
-                                                rc.polygon_wkt,
-                                                rc.i18n)
+                try:
+                    indexer_class = globals()[rc.indexer]
+                except:
+                    LOG.warning("Indexer class '%s' not found" % rc.indexer)
+                    self.street_index = None
+                    self.index_position = None
+                else:
+                    self.street_index = indexer_class(db,
+                                                      rc.polygon_wkt,
+                                                      rc.i18n)
 
             if not self.street_index.categories:
                 LOG.warning("Designated area leads to an empty index")

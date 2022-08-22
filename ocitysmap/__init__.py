@@ -160,6 +160,8 @@ class RenderingConfiguration:
         self.stylesheet      = None # Obj Stylesheet
         self.overlays        = [] # Array of Obj Stylesheet
 
+        self.indexer         = "StreetIndex"
+
         self.paper_width_mm  = None
         self.paper_height_mm = None
 
