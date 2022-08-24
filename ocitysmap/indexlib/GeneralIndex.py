@@ -93,7 +93,7 @@ SELECT %(columns)s,
                                    % (polygon_wkt,)),
                     'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
                     'aggreg_end': "))" if group else "",
-                    'order_group': "GROUP BY %(columns)s" % {'columns': columns} if group else "",
+                    'order_group': "GROUP BY 1,2" if group else "",
                 }
                 )
 
