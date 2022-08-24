@@ -24,6 +24,7 @@ import csv
 import datetime
 import math
 import psycopg2
+from sys import maxsize
 
 import cairo
 import gi
@@ -34,7 +35,7 @@ from gi.repository import Rsvg, Pango, PangoCairo
 import draw_utils
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 
-from .commons import IndexCategory, IndexItem, IndexDoesNotFitError 
+from .commons import IndexCategory, IndexItem, IndexDoesNotFitError
 import ocitysmap.layoutlib.commons as UTILS
 from ocitysmap.coords import Point
 from .renderer import IndexRenderingArea
@@ -52,12 +53,17 @@ class GeneralIndex:
         Prepare the index of the items inside the given WKT. This
         constructor will perform all the SQL queries.
 
-        Args:
-           db (psycopg2 DB): The GIS database
-           polygon_wkt (str): The WKT of the surrounding polygon of interest
-           i18n (i18n.i18n): Internationalization configuration
+        Parameters
+        ----------
+        db : psycopg2 DB) handle
+            The GIS database
+        polygon_wkt : str
+            The WKT of the surrounding polygon of interest
+        i18n : i18n.i18n
+            Internationalization configuration
+        page_number : int, optional
+            Page number to show when creating multi page index pages
 
-        Note: All the arguments have to be provided !
         """
         self._i18n = i18n
         self._page_number = page_number
@@ -68,10 +74,60 @@ class GeneralIndex:
         return self._categories
 
     def add_category(self, name, items=None, is_street=False):
+        """
+        Add a new named category to the index.
+
+        Parameters
+        ----------
+        name : str
+            Display name of the category
+        items : list of IndexItem, optional
+            List of index entries if already known at this point
+        is_street : bool, optional
+            Whether this is a street index category (True) or a basic POI
+            category (False, default)
+        """
         self._categories.append(GeneralIndexCategory(name, items, is_street))
 
     @staticmethod
     def _build_query(polygon_wkt, tables, columns, where, group=False):
+        """
+        Helper function builing a SQL query string to extract index information
+        from the osm2pgsql database.
+
+        Parameters
+        ----------
+	polygon_wkt: str
+            Bounding polygon of the area to index, in WKT format
+	tables: list of str
+	    osm2pgsql model tables to retrive data from, one or more of
+	    "point", "line", "polygon", "roads"
+	columns: list of str
+            One or more SQL expressions generating result columns
+	where: str
+	    WHERE condition to filter for valid index entries
+	group: bool, optional
+	    Whether to merge multiple items of same category and entry text
+
+        Returns
+        -------
+        str
+            SQL Query string ready to be executed
+        """
+
+
+        # first we create numbered aliases for all result column expressions
+        # that we can easily refer to in GROUP BY, ORDER BY, and the outer query
+        column_expressions = []
+        column_aliases = []
+        for column in columns:
+            alias = "col_%d" % (len(column_aliases) + 1)
+            column_expressions.append("%s AS %s" % (column, alias))
+            column_aliases.append(alias)
+
+
+        # next we generate one subquery per table to query, using a
+        # template string and iterating over the table names
         subquery_template = """
 SELECT %(columns)s,
        ST_INTERSECTION(%(wkb_limits)s, %(aggregate)s%%(way)s%(aggreg_end)s) AS contour
@@ -82,13 +138,6 @@ SELECT %(columns)s,
 """
 
         subquery_parts = []
-
-        column_expressions = []
-        column_aliases = []
-        for column in columns:
-            alias = "col_%d" % (len(column_aliases) + 1)
-            column_expressions.append("%s AS %s" % (column, alias))
-            column_aliases.append(alias)
 
         for table in tables:
                 subquery_parts.append( subquery_template % {
@@ -103,6 +152,8 @@ SELECT %(columns)s,
                 }
                 )
 
+        # finally we take all the subquery parts, join them with UNION,
+        # and wrap them by the outer query returning the actual result
         subquery = ' UNION ' . join(subquery_parts)
 
         query = """
@@ -111,24 +162,72 @@ SELECT %(columns)s,
                               4326)) AS longest_linestring
   FROM ( %(subquery)s
      ) AS foo
+ ORDER BY %(columns)s
  """ % {'columns': (",".join(column_aliases)), 'subquery': subquery}
 
         return query
 
     @staticmethod
     def _run_query(cursor, query):
+        """
+        Simple helper to execute a SQL query on the osm2pgsql tables
+
+        First tries fast, but fragile way, falls back to stable but slower
+        alternative in case of problems
+
+        Parameters
+        ----------
+        cursor: psycopg2 database cursor
+            Cursor to process the query with
+        query: str
+            The actual query string to execute, with '%(way)s'
+            placeholder fo the actual Geometry column
+
+        Returns
+        -------
+        void
+        """
         try:
             cursor.execute(query % {'way':'way'})
         except psycopg2.InternalError:
             # This exception generaly occurs when inappropriate ways have
             # to be cleaned. Using a buffer of 0 generaly helps to clean
             # them. This operation is not applied by default for
-            # performance.
+            # performance reasons.
             db.rollback()
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
-    def get_index_entries(self, db, polygon_wkt, tables, columns, where, group=False, category_mapping=None, max_category_items=30):
-        LOG.warning(category_mapping)
+    def get_index_entries(self, db, polygon_wkt, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize):
+        """
+        Generates an index entry from query snippets. The generated query is supposed
+        to return three columns: category name, index entry text, and the entries geometry.
+
+        Parameters
+        ----------
+        db : psycopg2 database connection
+	    The database to retrieve the information from
+	polygon_wkt: str
+            Bounding polygon of the area to index, in WKT format
+	tables: list of str
+	    osm2pgsql model tables to retrive data from, one or more of
+	    "point", "line", "polygon", "roads"
+	columns: list of str
+            Two SQL expressions returning the category name (1st) and
+	    actual index entry text (2nd)
+	where: str
+	    WHERE condition to filter for valid index entries
+	group: bool, optional
+	    Whether to merge multiple items of same category and entry text
+        category_mapping: dict, optional
+            Map SQL category results to more readable values
+        max_category_items: int, optional
+            Maximum number of entries before a categorie is dismissed
+
+        Returns
+        -------
+        dict
+            A dictionary of IndexCategory objects with category name as key
+        """
         cursor = db.cursor()
         result = {}
 
@@ -169,12 +268,15 @@ SELECT %(columns)s,
         Update the location_str field of the streets and amenities by
         mapping them onto the given grid.
 
-        Args:
-           grid (ocitysmap.Grid): the Grid object from which we
-           compute the location strings
+        Parameters
+        ----------
+            grid : ocitysmap.Grid
+               The Grid object from which we compute the location strings
 
-        Returns:
-           Nothing, but self._categories has been modified!
+        Returns
+        -------
+            void
+                Nothing, but self._categories has been modified as side effect
         """
         for category in self._categories:
             for item in category.items:
@@ -185,8 +287,10 @@ SELECT %(columns)s,
         """
         Group locations whith the same name and the same position on the grid.
 
-        Returns:
-           Nothing, but self._categories has been modified!
+        Returns
+        -------
+            void
+                Nothing, but self._categories has been modified as side effect
         """
         categories = []
         for category in self._categories:
@@ -201,6 +305,20 @@ SELECT %(columns)s,
             category.items = grouped_items
 
     def write_to_csv(self, title, output_filename):
+        """
+        Write out index data in CSV format
+
+        Parameters
+        ----------
+        title: str
+            Title to print to first line
+        output_filename: str
+            Path of the file to write to
+
+        Returns
+        -------
+            void
+        """
         # TODO: implement writing the index to CSV
         try:
             fd = open(output_filename, 'w', encoding='utf-8')
@@ -234,9 +352,6 @@ SELECT %(columns)s,
                 csv_writerow(['', item.label, item.location_str or '???'])
 
         fd.close()
-
-    def _my_cmp(self, x, y):
-        return locale.strcoll(x[0].lower(), y[0].lower())
 
 class GeneralIndexCategory(IndexCategory):
     def __init__(self, name, items=None, is_street=False):
@@ -272,7 +387,7 @@ class GeneralIndexCategory(IndexCategory):
         ctx.restore()
 
         return height
-    
+
 class GeneralIndexItem(IndexItem):
     """
     An IndexItem represents one item in the index (a street or a POI). It
@@ -357,7 +472,7 @@ class GeneralIndexItem(IndexItem):
         ctx.restore()
 
 
-        
+
 class GeneralIndexRenderingStyle:
     """
     The GeneralIndexRenderingStyle class defines how the header and
@@ -373,9 +488,12 @@ class GeneralIndexRenderingStyle:
         http://www.pygtk.org/docs/pygtk/class-pangofontdescription.html
         for more details.
 
-        Args:
-           header_font_spec (str): Pango Font Specification for the headers.
-           label_font_spec (str): Pango Font Specification for the labels.
+        Parameters
+        ----------
+            header_font_spec : str
+                Pango Font Specification for the headers.
+            label_font_spec : str
+                Pango Font Specification for the labels.
         """
         self.header_font_spec = header_font_spec
         self.label_font_spec  = label_font_spec
@@ -424,18 +542,28 @@ class GeneralIndexRenderer:
         index must not be larger than the provided width and height
         (in pixels). Nothing will be drawn on surface.
 
-        Args:
-            surface (cairo.Surface): the cairo surface to render into.
-            x (int): horizontal origin position, in pixels.
-            y (int): vertical origin position, in pixels.
-            w (int): maximum usable width for the index, in dots (Cairo unit).
-            h (int): maximum usable height for the index, in dots (Cairo unit).
-            freedom_direction (string): freedom direction, can be 'width' or
+        Parameters
+        ----------
+            surface : cairo.Surface
+                The cairo surface to render into.
+            x : int
+                Horizontal origin position, in pixels.
+            y : int
+                Vertical origin position, in pixels.
+            w : int
+                Maximum usable width for the index, in dots (Cairo unit).
+            h : int
+                Maximum usable height for the index, in dots (Cairo unit).
+            freedom_direction : str
+                 Freedom direction, can be 'width' or
                 'height'. See _compute_columns_split for more details.
-            alignment (string): 'top' or 'bottom' for a freedom_direction
-                of 'height', 'left' or 'right' for 'width'. Tells which side to
-                stick the index to.
+            alignment : str
+                'top' or 'bottom' for a freedom_direction of
+                'height', 'left' or 'right' for 'width'.
+                Tells which side to stick the index to.
 
+        Returns
+        -------
         Returns the actual graphical IndexRenderingArea defining
         how and where the index should be rendered. Raise
         IndexDoesNotFitError when the provided area's surface is not
