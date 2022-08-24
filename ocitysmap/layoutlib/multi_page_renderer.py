@@ -409,6 +409,7 @@ class MultiPageRenderer(Renderer):
             # TODO: other index types
             try:
                 indexer_class = globals()[self.rc.indexer]
+                # TODO: check that it actually implements a working indexer class
             except:
                 LOG.warning("Indexer class '%s' not found" % self.rc.indexer)
             else:

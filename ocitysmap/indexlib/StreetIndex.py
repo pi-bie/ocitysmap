@@ -46,9 +46,7 @@ LOG = logging.getLogger('ocitysmap')
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
 # FIXME: make truely configurable
-MAX_INDEX_CATEGORY_ITEMS = 30
 MAX_INDEX_STREETS = 1000
-MAX_INDEX_VILLAGES = 100
 
 class StreetIndexCategory(GeneralIndexCategory):
     """
@@ -193,26 +191,6 @@ class StreetIndex(GeneralIndex):
         cursor = db.cursor()
         LOG.debug("Getting streets...")
 
-        query = """
-SELECT name,
-       ST_ASTEXT(ST_TRANSFORM(ST_LONGESTLINE(street_path, street_path),
-                              4326)) AS longest_linestring
-  FROM ( SELECT name,
-                ST_INTERSECTION(%(wkb_limits)s,
-                                ST_LINEMERGE(ST_COLLECT(%%(way)s))
-                               ) AS street_path
-           FROM planet_osm_line
-          WHERE TRIM(name) != ''
-            AND highway IS NOT NULL
-            AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
-          GROUP BY name
-          ORDER BY name
-        ) AS foo;
-""" % dict(wkb_limits = ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s', 4326), 3857)"
-                         % (polygon_wkt,)))
-
-        # LOG.debug("Street query (nogrid): %s" % query)
-
         query = self._build_query(polygon_wkt, ["line"], "name", "TRIM(name) != '' AND highway IS NOT NULL", True)
         self._run_query(cursor, query)
 
@@ -239,45 +217,15 @@ SELECT name,
         having no specific grid square location
         """
 
-        cursor = db.cursor()
-
         sep = "','"
-        result = {}
-
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        query = self._build_query(polygon_wkt,
-                                  ["point","polygon"],
-                                  "amenity, name",
-                                  "TRIM(name) != '' AND amenity in (%s)" % amenities_in)
-
-        self._run_query(cursor, query)
-
-        for amenity_type, amenity_name, linestring in cursor.fetchall():
-            # Parse the WKT from the largest linestring in shape
-            try:
-                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                               linestring[11:-1].split(','))
-            except (ValueError, TypeError):
-                LOG.exception("Error parsing %s for %s/%s/%s"
-                              % (repr(linestring), catname, db_amenity,
-                                 repr(amenity_name)))
-                continue
-            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
-            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-
-            catname = amenities[amenity_type]
-
-            if not catname in result:
-                result[catname] = StreetIndexCategory(catname, is_street=False)
-
-            result[catname].items.append(StreetIndexItem(amenity_name,
-                                                          endpoint1,
-                                                          endpoint2,
-                                                          self._page_number))
-
-        return [category for catname, category in sorted(result.items()) if (category.items and len(category.items) <= MAX_INDEX_CATEGORY_ITEMS)]
+        return  self.get_index_entries(db, polygon_wkt,
+                                      ["point","polygon"],
+                                      "amenity, name",
+                                      ("TRIM(name) != '' AND amenity in (%s)" % amenities_in),
+                                      category_mapping = amenities)
 
     def _list_villages(self, db, polygon_wkt):
         """Get the list of villages inside the given polygon. Don't
@@ -309,37 +257,12 @@ SELECT name,
         sep = "','"
         places_in = "'" + sep.join(places) + "'"
 
-        query = self._build_query(polygon_wkt,
-                                  ["point"],
-                                  "name",
-                                  """TRIM(name) != ''
-AND place IN ('borough', 'suburb', 'quarter', 'neighbourhood',
-              'village', 'hamlet', 'isolated_dwelling')""")
+        return self.get_index_entries(db, polygon_wkt,
+                                      ["point"],
+                                      "'Village', name",
+                                      ("TRIM(name) != '' AND place IN (%s)" % places_in),
+                                      max_category_items=100)
 
-        self._run_query(cursor, query)
-
-        for village_name, linestring in cursor.fetchall():
-            # Parse the WKT from the largest linestring in shape
-            try:
-                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                               linestring[11:-1].split(','))
-            except (ValueError, TypeError):
-                LOG.exception("Error parsing %s for %s/%s"
-                            % (repr(linestring), 'Villages',
-                               repr(village_name)))
-                continue
-                ## raise
-            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
-            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-            current_category.items.append(StreetIndexItem(village_name,
-                                                          endpoint1,
-                                                          endpoint2,
-                                                          self._page_number))
-
-        LOG.debug("Got %d villages for %s."
-                % (len(current_category.items), 'Villages'))
-
-        return [category for category in result if (category.items and len(category.items) <= MAX_INDEX_VILLAGES)]
 
     
 

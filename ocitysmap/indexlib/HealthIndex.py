@@ -56,41 +56,10 @@ class HealthIndex(GeneralIndex):
         self._categories = (self._list_amenities(db, polygon_wkt))
 
     def _list_amenities(self, db, polygon_wkt):
-        cursor = db.cursor()
-
-        sep = "','"
-        result = {}
-
-        query = self._build_query(polygon_wkt,
-                                  ["point","polygon"],
-                                  "healthcare, coalesce(name, '***???***') AS name",
-#                                  "amenity = 'health_post' AND healthcare IS NOT NULL")
-                                   "healthcare IS NOT NULL AND healthcare != ''")
-
-        self._run_query(cursor, query)
-
-        for amenity_type, amenity_name, linestring in cursor.fetchall():
-            # Parse the WKT from the largest linestring in shape
-            try:
-                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
-                                               linestring[11:-1].split(','))
-            except (ValueError, TypeError):
-                LOG.exception("Error parsing %s for %s/%s/%s"
-                              % (repr(linestring), catname, db_amenity,
-                                 repr(amenity_name)))
-                continue
-            endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
-            endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-
-            catname = amenity_type
-
-            if not catname in result:
-                result[catname] = HealthIndexCategory(catname, is_street=False)
-
-            result[catname].items.append(HealthIndexItem(amenity_name,
-                                                          endpoint1,
-                                                          endpoint2,
-                                                          self._page_number))
-
-        return [category for catname, category in sorted(result.items()) if (category.items and len(category.items) <= MAX_INDEX_CATEGORY_ITEMS)]
+        return self.get_index_entries(db, polygon_wkt,
+                                      ["point","polygon"],
+                                      "healthcare, coalesce(name, '***???***') AS name",
+                                      # "amenity = 'health_post' AND healthcare IS NOT NULL")
+                                      "healthcare IS NOT NULL AND healthcare != ''",
+        )
 

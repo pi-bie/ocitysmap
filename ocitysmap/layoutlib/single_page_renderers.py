@@ -100,6 +100,7 @@ class SinglePageRenderer(Renderer):
             else:
                 try:
                     indexer_class = globals()[rc.indexer]
+                    # TODO: check that it actually implements a working indexer class
                 except:
                     LOG.warning("Indexer class '%s' not found" % rc.indexer)
                     self.street_index = None

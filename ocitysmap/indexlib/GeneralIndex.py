@@ -23,6 +23,7 @@ from functools import reduce
 import csv
 import datetime
 import math
+import psycopg2
 
 import cairo
 import gi
@@ -35,6 +36,7 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 
 from .commons import IndexCategory, IndexItem, IndexDoesNotFitError 
 import ocitysmap.layoutlib.commons as UTILS
+from ocitysmap.coords import Point
 from .renderer import IndexRenderingArea
 
 import logging
@@ -42,6 +44,7 @@ LOG = logging.getLogger('ocitysmap')
 
 # TODO: define in single place, not in multiple files
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
+MAX_INDEX_CATEGORY_ITEMS = 30
 
 class GeneralIndex:
 
@@ -116,6 +119,43 @@ SELECT %(columns)s,
             # performance.
             db.rollback()
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
+
+    def get_index_entries(self, db, polygon_wkt, tables, columns, where, group=False, category_mapping=None, max_category_items=30):
+        LOG.warning(category_mapping)
+        cursor = db.cursor()
+        result = {}
+
+        query = self._build_query(polygon_wkt, tables, columns, where, group)
+
+        self._run_query(cursor, query)
+
+        for amenity_type, amenity_name, linestring in cursor.fetchall():
+            # Parse the WKT from the largest linestring in shape
+            try:
+                s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
+                                               linestring[11:-1].split(','))
+            except (ValueError, TypeError):
+                LOG.exception("Error parsing %s for %s/%s/%s"
+                              % (repr(linestring), catname, db_amenity,
+                                 repr(amenity_name)))
+                continue
+            endpoint1 = Point(s_endpoint1[1], s_endpoint1[0])
+            endpoint2 = Point(s_endpoint2[1], s_endpoint2[0])
+
+            if category_mapping is not None and amenity_type in category_mapping:
+                catname = category_mapping[amenity_type]
+            else:
+                catname = amenity_type
+
+            if not catname in result:
+                result[catname] = GeneralIndexCategory(catname, is_street=False)
+
+            result[catname].items.append(GeneralIndexItem(amenity_name,
+                                                          endpoint1,
+                                                          endpoint2,
+                                                          self._page_number))
+
+        return [category for catname, category in sorted(result.items()) if (category.items and len(category.items) <= max_category_items)]
 
     def apply_grid(self, grid):
         """
