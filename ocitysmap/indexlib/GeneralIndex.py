@@ -44,7 +44,6 @@ LOG = logging.getLogger('ocitysmap')
 
 # TODO: define in single place, not in multiple files
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
-MAX_INDEX_CATEGORY_ITEMS = 30
 
 class GeneralIndex:
 
@@ -84,16 +83,23 @@ SELECT %(columns)s,
 
         subquery_parts = []
 
+        column_expressions = []
+        column_aliases = []
+        for column in columns:
+            alias = "col_%d" % (len(column_aliases) + 1)
+            column_expressions.append("%s AS %s" % (column, alias))
+            column_aliases.append(alias)
+
         for table in tables:
                 subquery_parts.append( subquery_template % {
                     'table': table,
-                    'columns': columns,
+                    'columns': ",".join(column_expressions),
                     'where': where,
                     'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
                                    % (polygon_wkt,)),
                     'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
                     'aggreg_end': "))" if group else "",
-                    'order_group': "GROUP BY 1,2" if group else "",
+                    'order_group': ("GROUP BY %s" % (",".join(column_aliases))) if group else "",
                 }
                 )
 
@@ -105,7 +111,8 @@ SELECT %(columns)s,
                               4326)) AS longest_linestring
   FROM ( %(subquery)s
      ) AS foo
- """ % {'columns': columns, 'subquery': subquery}
+ """ % {'columns': (",".join(column_aliases)), 'subquery': subquery}
+
         return query
 
     @staticmethod

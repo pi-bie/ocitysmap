@@ -191,7 +191,7 @@ class StreetIndex(GeneralIndex):
         cursor = db.cursor()
         LOG.debug("Getting streets...")
 
-        query = self._build_query(polygon_wkt, ["line"], "name", "TRIM(name) != '' AND highway IS NOT NULL", True)
+        query = self._build_query(polygon_wkt, ["line"], ["name"], "TRIM(name) != '' AND highway IS NOT NULL", True)
         self._run_query(cursor, query)
 
         sl = cursor.fetchall()
@@ -221,9 +221,9 @@ class StreetIndex(GeneralIndex):
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        return  self.get_index_entries(db, polygon_wkt,
+        return self.get_index_entries(db, polygon_wkt,
                                       ["point","polygon"],
-                                      "amenity, name",
+                                      ["amenity", "name"],
                                       ("TRIM(name) != '' AND amenity in (%s)" % amenities_in),
                                       category_mapping = amenities)
 
@@ -259,7 +259,7 @@ class StreetIndex(GeneralIndex):
 
         return self.get_index_entries(db, polygon_wkt,
                                       ["point"],
-                                      "'Village', name",
+                                      ["'Village'", "name"],
                                       ("TRIM(name) != '' AND place IN (%s)" % places_in),
                                       max_category_items=100)
 

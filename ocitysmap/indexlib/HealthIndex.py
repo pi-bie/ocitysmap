@@ -58,7 +58,7 @@ class HealthIndex(GeneralIndex):
     def _list_amenities(self, db, polygon_wkt):
         return self.get_index_entries(db, polygon_wkt,
                                       ["point","polygon"],
-                                      "healthcare, coalesce(name, '***???***') AS name",
+                                      ["healthcare", "coalesce(name, '***???***') AS name"],
                                       # "amenity = 'health_post' AND healthcare IS NOT NULL")
                                       "healthcare IS NOT NULL AND healthcare != ''",
         )
