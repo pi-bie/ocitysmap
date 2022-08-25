@@ -163,12 +163,26 @@ def draw_halotext_center(ctx, text, x, y):
     """
     Draw the given text centered at x,y, with a halo below
 
-    Args:
-       ctx (cairo.Context): The cairo context to use to draw.
-       text (str): the text to draw.
-       x,y (numbers): Location of the center (cairo units).
+    Parameters
+    ----------
+       ctx : cairo.Context)
+         The cairo context to use to draw.
+       text : str
+         The text to draw.
+       x : float
+           Horizontal center position in cairo units
+       y : float
+           Vertical position of the center in cairo units
+
+    Returns
+    -------
+    void
     """
+
+    # get full text dimensions
     xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+
+    # first draw the semi-transparent halo
     ctx.save()
     ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
     ctx.set_line_width(10);
@@ -178,6 +192,7 @@ def draw_halotext_center(ctx, text, x, y):
     ctx.stroke()
     ctx.restore()
 
+    # then put the actual text on top
     ctx.save()
     ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
     ctx.show_text(text)
@@ -185,11 +200,36 @@ def draw_halotext_center(ctx, text, x, y):
     ctx.restore()
 
 def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
+    """ Draw a dotted line
+
+    Useful for e.g. index entries to have a visual connection between actual
+    index text and the map square reference at the other side of the column.
+
+    Parameters
+    ----------
+    ctx : cairo.Context
+        Cairo context to draw into
+    line_width : float
+        Width to use for the actual line dots
+    baseline_x : float
+        Horizontal start position
+    baseline_y : float
+        Vertical start position
+    length : float
+        Horizontal line length to draw
+
+    Returns
+    -------
+    void
+    """
+
+    ctx.save()
     ctx.set_line_width(line_width)
-    ctx.set_dash([line_width, line_width*2])
+    ctx.set_dash([line_width, line_width*2]) # gaps twice as wide as the actual dots
     ctx.move_to(baseline_x, baseline_y)
     ctx.rel_line_to(length, 0)
     ctx.stroke()
+    ctx.restore()
 
 def adjust_font_size(layout, fd, constraint_x, constraint_y):
     """
@@ -294,18 +334,73 @@ def render_page_number(ctx, page_number,
 
 
 def begin_internal_link(ctx, target):
+    """Start an internal link
+
+    Used for links to anchors within a multi page PDF,
+    e.g for index entries linking to the actual map position,
+    or for the "continues on page #" markers.
+
+    Note: requires PyCairo 1.18.0 or higher to work, if that's
+    not present we fall back to doing nothing.
+
+    See also: `end_link()`, `anchor()`
+
+    Parameters
+    ----------
+    target : sring
+        Name of the internal anchor to link to.
+
+    Returns
+    -------
+    void
+    """
     try: # tag_begin() only available starting with PyCairo 1.18.0
         ctx.tag_begin(cairo.TAG_LINK, "dest='%s'" % target)
     except Exception:
         pass
 
 def end_link(ctx):
+    """ End internal link
+
+    Note: requires PyCairo 1.18.0 or higher to work, if that's
+    not present we fall back to doing nothing.
+
+    See also `start_internal_link()`.
+
+    Parameters
+    ----------
+    none
+
+    Returns
+    -------
+    void
+    """
     try: # tag_end() only available starting with PyCairo 1.18.0
         ctx.tag_end(cairo.TAG_LINK)
     except Exception:
         pass
 
 def anchor(ctx, name):
+    """ Add an internal anchor that internal links can refer to
+
+    Used for anchors within a multi page PDF, e.g as target for
+    index entries linking to the actual map position,
+    or for the "continues on page #" markers.
+
+    Note: requires PyCairo 1.18.0 or higher to work, if that's
+    not present we fall back to doing nothing.
+
+    See also: `start_internal_link()`
+
+    Parameters
+    ----------
+    name : sring
+        Name of the internal anchor to add.
+
+    Returns
+    -------
+    void
+    """
     try: # tag_begin() only available starting with PyCairo 1.18.0
         ctx.tag_begin(cairo.TAG_DEST, "name='%s'" % name)
         ctx.tag_end(cairo.TAG_DEST)
