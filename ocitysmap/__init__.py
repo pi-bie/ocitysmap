@@ -290,6 +290,23 @@ class OCitySMap:
 
     @property
     def _db(self, name='default'):
+        """ Connect to configured database
+
+        Actual config entry name is `[datasource]` for the default db,
+        and `[datasource_...name...]` for everything else
+
+        Parameters
+        ----------
+        name : str, optional
+             Name of datasource to use.
+
+        Returns
+        -------
+        psycopg2.connection
+            Database connection for the given name.
+        """
+
+        # check db chache for already opened connection for this name
         if name in self.__dbs:
             return self.__dbs[name]
 
@@ -303,6 +320,7 @@ class OCitySMap:
         # sure we define a default value.
         if not 'port' in datasource:
             datasource['port'] = 5432
+
         LOG.debug('Connecting to database %s on %s:%s as %s...' %
                  (datasource['dbname'], datasource['host'], datasource['port'],
                   datasource['user']))
@@ -317,29 +335,18 @@ class OCitySMap:
         # (which loads the unicode extensions for psycopg2)
         db.set_client_encoding('utf8')
 
-        # Make sure the DB is correctly installed
-        self._verify_db(db)
-
+        # set request timeout from configuration, or static default if not configured
         try:
             timeout = int(self._parser.get('datasource', 'request_timeout'))
         except (configparser.NoOptionError, ValueError):
             timeout = OCitySMap.DEFAULT_REQUEST_TIMEOUT_MIN
         self._set_request_timeout(db, timeout)
 
+        # cache result
         self.__dbs[name] = db
-        return db
 
-    def _verify_db(self, db):
-        """Make sure the PostGIS DB is compatible with us."""
-        cursor = db.cursor()
-        cursor.execute("""
-SELECT ST_AsText(ST_LongestLine(
-                    'POINT(100 100)'::geometry,
-		    'LINESTRING(20 80, 98 190, 110 180, 50 75 )'::geometry)
-	        ) As lline;
-""")
-        assert cursor.fetchall()[0][0] == "LINESTRING(100 100,98 190)", \
-            LOG.fatal("PostGIS >= 1.5 required for correct operation !")
+        # return result
+        return db
 
     def _set_request_timeout(self, db, timeout_minutes=15):
         """Sets the PostgreSQL request timeout to avoid long-running queries on
