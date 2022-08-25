@@ -100,9 +100,6 @@ from .stylelib import Stylesheet
 LOG = logging.getLogger('ocitysmap')
 
 
-def get_mapnik_major_version():
-    return int(mapnik.mapnik_version_string().split('.')[0])
-
 def guess_filetype(import_file):
     need_close = False
     result = None
