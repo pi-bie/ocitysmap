@@ -61,15 +61,6 @@ class Point:
     def __str__(self):
         return 'Point(lat=%f, long_=%f)' % (self._lat, self._long)
 
-    def spheric_spherical_vector(self, other):
-        """Approx (self - other) vector converted to lat/long meters
-        wrt the given other point"""
-        delta_lat  = abs(self._lat - other._lat)
-        delta_long = abs(self._long - other._long)
-        radius_lat = EARTH_RADIUS * math.cos(math.radians(self._lat))
-        return (EARTH_RADIUS * math.radians(delta_lat),
-                radius_lat * math.radians(delta_long))
-
 
 class BoundingBox:
     """
@@ -126,12 +117,43 @@ class BoundingBox:
         return (self._lat2, self._long2)
 
     def create_expanded(self, dlat, dlong):
-        """Return a new bbox of the same size + dlat/dlong added
-           on the top-left sides"""
+        """ Extend bounding box
+
+        Return a new bbox extended by the given values
+        on all sides. Not that values are added to all
+        sides, so the total width actually expands by
+        2*dlat vertically and 2*dlong horizontally.
+
+        Parameters
+        ----------
+        dlat : float
+            Number of degrees to add vertically
+        dlon : float
+            Number of degrees to add horizontally
+
+        Returns
+        -------
+        BoundingBox
+            New extended bounding box
+        """
         return BoundingBox(self._lat1 + dlat, self._long1 - dlong,
                            self._lat2 - dlat, self._long2 + dlong)
 
     def merge(self, bbox):
+        """Merge with other bounding box
+
+        Create a new bounding box that contains both this and
+        the other bounding box completely.
+
+        Parameters
+        ----------
+        bbox : BoundingBox
+            The other bouding box to merge this one with.
+
+        Returns
+        -------
+        void
+        """
         self._lat1 = max(self._lat1, bbox._lat1)
         self._lat2 = min(self._lat2, bbox._lat2)
         self._long1 = min(self._long1, bbox._long1)
@@ -158,6 +180,14 @@ class BoundingBox:
 
     def spheric_sizes(self):
         """Metric distances at the bounding box top latitude.
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        list of float
+
         Returns the tuple (metric_size_lat, metric_size_long)
         """
         delta_lat = abs(self._lat1 - self._lat2)
@@ -167,8 +197,22 @@ class BoundingBox:
                 radius_lat * math.radians(delta_long))
 
     def get_pixel_size_for_zoom_factor(self, zoom):
-        """Return the size in pixels (tuple height,width) needed to
-        render the bounding box at the given zoom factor."""
+        """Bbox size in pixels for given zoom factor
+
+        Return the size in pixels (tuple height,width) needed to
+        render the bounding box at the given zoom factor.
+
+        Parameters
+        ----------
+        zoom : int
+            Numeric map tile zoom factor
+
+        Returns
+        -------
+        int, int
+            Required pixel height and width
+
+        """
         delta_long = abs(self._long1 - self._long2)
         # 2^zoom tiles (1 tile = 256 pix) for the whole earth
         pix_x = delta_long * (2 ** (zoom + 8)) / 360
@@ -185,6 +229,20 @@ class BoundingBox:
         return (int(math.ceil(pix_y)), int(math.ceil(pix_x)))
 
     def to_mercator(self):
+        """ Bbox coordinates in spherical mercator
+
+        Converts the bounding box coordinates from WGS84 lat/lon (EPSG:4326)
+        to spherical mercator (EPSG:3857, formerly also EPGS:900913)
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of float
+            Mercator coordinates for bottom left, bottom right, top left, top right
+        """
         envelope = mapnik.Box2d(self.get_top_left()[1],
                                 self.get_top_left()[0],
                                 self.get_bottom_right()[1],
@@ -197,8 +255,21 @@ class BoundingBox:
         return (bottom_right, bottom_left, top_left, top_right)
 
     def as_json_bounds(self):
-        """Returns this bounding box as an array of arrays that can be
-        serialized as JSON."""
+        """Bbox bounds in JSON format
+
+        Returns this bounding box as an array of arrays that can be
+        serialized as JSON.
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of list of float
+            First list entry is list of lat and lon of upper left bbox corner,
+            second entry contains lat/lon of lower right bbox corner.
+        """
         return [[self._lat1, self._long1],
                 [self._lat2, self._long2]]
 
@@ -206,3 +277,6 @@ if __name__ == "__main__":
     wkt = 'POINT(2.0333 48.7062132250362)'
     pt = Point.parse_wkt(wkt)
     print(wkt, pt, pt.as_wkt())
+
+    bbox = BoundingBox(52,8,53,9)
+    print(bbox.to_mercator())

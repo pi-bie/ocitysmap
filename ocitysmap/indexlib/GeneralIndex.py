@@ -361,31 +361,51 @@ class GeneralIndexCategory(IndexCategory):
              baseline_x, baseline_y):
         """Draw this category header.
 
-        Args:
-            rtl (boolean): whether to draw right-to-left or not.
-            ctx (cairo.Context): the Cairo context to draw to.
-            pc (pangocairo.CairoContext): the PangoCairo context.
-            layout (pango.layout): the Pango layout to draw text into.
-            fascent (int): font ascent.
-            fheight (int): font height.
-            baseline_x (int): base X axis position.
-            baseline_y (int): base Y axis position.
+        Parameters
+        ----------
+            rtl : boolean
+                Whether to draw right-to-left or not.
+            ctx : cairo.Context
+                The Cairo context to draw to.
+            pc : pangocairo.CairoContext
+                The PangoCairo context to use.
+            layout : pango.layout
+                The Pango layout to draw text into.
+            fascent : int
+                Font ascent.
+            fheight : int
+                Font height.
+            baseline_x : int
+                Base X axis position.
+            baseline_y : int 
+                Base Y axis position.
+
+        Returns
+        -------
+        int
+            Actual rendering height used
         """
+
+        # calculate header dimensions based on layout
         layout.set_auto_dir(False)
         layout.set_alignment(Pango.Alignment.CENTER)
         layout.set_text(self.name, -1)
-        width, height = [x/Pango.SCALE for x in layout.get_size()]
+        width, height = [x / Pango.SCALE for x in layout.get_size()]
+        wrap_width = layout.get_width() / Pango.SCALE
 
+        # draw the category header background bar
         ctx.save()
         ctx.set_source_rgb(0.9, 0.9, 0.9)
-        ctx.rectangle(baseline_x, baseline_y - fascent, layout.get_width() / Pango.SCALE, height)
+        ctx.rectangle(baseline_x, baseline_y - fascent, wrap_width, height)
         ctx.fill()
 
+        # draw the actual category title text
         ctx.set_source_rgb(0.0, 0.0, 0.0)
         draw_utils.draw_text_center(ctx, pc, layout, fascent, fheight,
                                     baseline_x, baseline_y, self.name)
         ctx.restore()
 
+        # return total document height used
         return height
 
 class GeneralIndexItem(IndexItem):
@@ -395,14 +415,51 @@ class GeneralIndexItem(IndexItem):
     humanized squares description.
     """
     def label_drawing_width(self, layout):
+        """
+        Category item text width
+
+        Parameters
+        ----------
+           layout: pango.layout
+               Layout to use to render index items
+
+        Returns
+        -------
+        float
+            Index entry type text width
+        """
         layout.set_text(self.label, -1)
         return float(layout.get_size()[0]) / Pango.SCALE
 
     def label_drawing_height(self, layout):
+        """
+        Category item height width
+
+        Parameters
+        ----------
+           layout: pango.layout
+               Layout to use to render index items
+
+        Returns
+        -------
+        float
+            Index entry type text height
+        """
         layout.set_text(self.label, -1)
         return float(layout.get_size()[1]) / Pango.SCALE
 
     def location_drawing_width(self, layout):
+        """
+        Parameters
+        ----------
+           layout: pango.layout
+               Layout to use to render index items
+
+        Returns
+        -------
+        float
+            Index entry type text width
+        """
         layout.set_text(self.location_str, -1)
         return float(layout.get_size()[0]) / Pango.SCALE
 
