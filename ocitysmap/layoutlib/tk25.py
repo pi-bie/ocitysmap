@@ -125,11 +125,11 @@ class TK25Renderer(Renderer):
 
         normal_fd = Pango.FontDescription("DejaVu 7")
         normal_layout, normal_fascent, normal_fheight, normal_em = \
-            draw_utils.create_layout_with_font(ctx, pc, normal_fd)
+            draw_utils.create_layout_with_font(ctx, normal_fd)
 
         small_fd  = Pango.FontDescription("DejaVu 4")
         small_layout, small_fascent, small_fheight, small_em = \
-            draw_utils.create_layout_with_font(ctx, pc, small_fd)
+            draw_utils.create_layout_with_font(ctx, small_fd)
 
         PangoCairo.context_set_resolution(normal_layout.get_context(),
                                           96.*dpi/UTILS.PT_PER_INCH)

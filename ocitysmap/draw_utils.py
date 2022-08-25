@@ -32,6 +32,28 @@ from gi.repository import Pango, PangoCairo
 import layoutlib.commons as commons
 
 def create_layout_with_font(ctx, pc, font_desc):
+    """ Create a Pango layout from given font destription
+
+    Parameters
+    ----------
+    ctx : cairo.Context
+        The Cairo context to use
+    font_desc :  Pango.FontDescription or str
+        Font description string or already prepared Pango FontDescription
+
+    Returns
+    -------
+    list of (PangoCairo.Layout, float, float, em)
+        A list containing:
+        * the actual Pango Layout created
+        * the font ascent (TODO: what unit?)
+        * the font height (TODO: what unit?)
+        * the font character width ('em') (TODO: what unit?)
+    """
+
+
+    if isinstance(font_desc, str):
+        font_desc = Pango.FontDescription(font_desc)
     layout = PangoCairo.create_layout(ctx)
     layout.set_font_description(font_desc)
     font = layout.get_context().load_font(font_desc)
@@ -147,10 +169,20 @@ def draw_simpletext_center(ctx, text, x, y):
     """
     Draw the given text centered at x,y.
 
-    Args:
-       ctx (cairo.Context): The cairo context to use to draw.
-       text (str): the text to draw.
-       x,y (numbers): Location of the center (cairo units).
+    Parameters
+    ----------
+       ctx : cairo.Context)
+         The cairo context to use to draw.
+       text : str
+         The text to draw.
+       x : float
+           Horizontal center position in cairo units
+       y : float
+           Vertical position of the center in cairo units
+
+    Returns
+    -------
+    void
     """
     ctx.save()
     xb, yb, tw, th, xa, ya = ctx.text_extents(text)
@@ -161,7 +193,7 @@ def draw_simpletext_center(ctx, text, x, y):
 
 def draw_halotext_center(ctx, text, x, y):
     """
-    Draw the given text centered at x,y, with a halo below
+    Draw the given text centered at x,y, with a semi-transparent halo below
 
     Parameters
     ----------
@@ -232,21 +264,41 @@ def draw_dotted_line(ctx, line_width, baseline_x, baseline_y, length):
     ctx.restore()
 
 def adjust_font_size(layout, fd, constraint_x, constraint_y):
-    """
-    Grow the given font description (20% by 20%) until it fits in
-    designated area and then draw it.
+    """ Adjust font size to available space
 
-    Args:
-       layout (pango.Layout): The text block parameters.
-       fd (pango.FontDescriptor): The font object.
-       constraint_x/constraint_y (numbers): The area we want to
-           write into (cairo units).
+    Grow the given font description (20% by 20%) until it fits in
+    designated area. The font descriptors size setting is changed
+    directly as an intended side effect.
+
+    Parameters
+    ----------
+    layout : Pango.Layout
+        The layout to use for this
+    fd : Pango.FontDescriptor
+        The font to use for this
+    constraint_x : float
+        Available width to fit the text into
+    constraint_y : float
+        Available height to fit the text into
+
+    Returns
+    -------
+    void
     """
+    # TODO: are we sure changing the passed font descriptor by reference
+    # is safe to do here? Or should we rather create a copy and return that
+    # to avoid side effects?
+
+    # try increasing the size by 20% until we exceed the given constraints
     while (layout.get_size()[0] / Pango.SCALE < constraint_x and
            layout.get_size()[1] / Pango.SCALE < constraint_y):
         fd.set_size(int(fd.get_size()*1.2))
         layout.set_font_description(fd)
+
+    # take back the last 20% increment we did to get back within the constraints
     fd.set_size(int(fd.get_size()/1.2))
+
+    # make the new font settings effective for the given layout
     layout.set_font_description(fd)
 
 def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
@@ -304,8 +356,26 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
 def render_page_number(ctx, page_number,
                        usable_area_width_pt, usable_area_height_pt, margin_pt,
                        transparent_background = True):
-    """
-    Render page number
+    """ Render page number
+
+    Parameters
+    ----------
+    ctx : Cairo.context
+        The Cairo context to draw into
+    page_number : int
+        The page number to render
+    usable_area_width_pt : float
+        The usable horizontal page size
+    usable_area_height_pt : float
+        The usable vertical page size
+    margin_pt : float
+        Page margin before usable area begins (same horizontally and vertically)
+    transparent_background : bool
+       Should the number be printed on opaque white background, or should
+       map content below it shine through?
+
+    Returns
+    -------
     """
     ctx.save()
     x_offset = 0
@@ -316,10 +386,13 @@ def render_page_number(ctx, page_number,
              - commons.convert_pt_to_dots(margin_pt)
     ctx.translate(x_offset, y_offset)
 
+    # TODO: these are actually both tranparent, just using different shades of white/gray?
     if transparent_background:
         ctx.set_source_rgba(1, 1, 1, 0.6)
     else:
         ctx.set_source_rgba(0.8, 0.8, 0.8, 0.6)
+
+
     ctx.rectangle(0, 0, commons.convert_pt_to_dots(margin_pt),
                   commons.convert_pt_to_dots(margin_pt))
     ctx.fill()
