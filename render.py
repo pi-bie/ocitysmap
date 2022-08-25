@@ -172,7 +172,7 @@ def main():
     # Parse overlay stylesheet (defaults to none)
     overlays = []
     if options.overlays is not None:
-        for overlay_name in options.overlays.split(","): 
+        for overlay_name in options.overlays.split(","):
             try:
                 overlays.append(mapper.get_overlay_by_name(overlay_name))
             except LookupError as ex:
@@ -273,13 +273,18 @@ def main():
     rc.language     = options.language
     rc.stylesheet   = stylesheet
     rc.overlays     = overlays
-    if (options.poi_file):
-        rc.poi_file     = os.path.realpath(options.poi_file)
-    if (options.gpx_file):
-        rc.gpx_file     = os.path.realpath(options.gpx_file)
-    if (options.umap_file):
-        rc.umap_file    = os.path.realpath(options.umap_file)
+
     rc.import_files = []
+
+    # handle legacy file options
+    # TODO: add file format detection here, too, instead of relying on user input?
+    if (options.poi_file):
+        rc.import_files.append(('poi', options.poi_file))
+    if (options.gpx_file):
+        rc.import_files.append(('gpx', options.gpx_file))
+    if (options.umap_file):
+        rc.import_files.append(('umap', options.umap_file))
+
     if options.import_file:
         for import_file in options.import_file:
             import_file = os.path.realpath(import_file)

@@ -349,8 +349,20 @@ class OCitySMap:
         return db
 
     def _set_request_timeout(self, db, timeout_minutes=15):
-        """Sets the PostgreSQL request timeout to avoid long-running queries on
-        the database."""
+        """ Set db statement timeout
+
+        Sets the PostgreSQL request timeout to avoid long-running queries on
+        the database.
+
+        Parameters
+        ----------
+        timeout_minutes : int, optional
+            Statement execution timeout in minutes (default: 15)
+
+        Returns
+        -------
+        void
+        """
         cursor = db.cursor()
         cursor.execute('set session statement_timeout=%d;' %
                        (timeout_minutes * 60 * 1000))
@@ -668,14 +680,6 @@ class OCitySMap:
         config.i18n = i18n.install_translation(config.language,
                                                self._locale_path)
 
-        # legacy import file processing
-        if config.gpx_file and ('gpx', config.gpx_file) not in config.import_files:
-            config.import_files.append(('gpx', config.gpx_file))
-        if config.umap_file and ('umap', config.umap_file) not in config.import_files:
-            config.import_files.append(('umap', config.umap_file))
-        if config.poi_file and ('poi', config.poi_file) not in config.import_files:
-            config.import_files.append(('poi', config.poi_file))
-
         LOG.info('Rendering with renderer %s in language: %s (rtl: %s).' %
                  (renderer_name, config.i18n.language_code(),
                   config.i18n.isrtl()))
@@ -756,7 +760,24 @@ class OCitySMap:
 
     def _render_one(self, config, tmpdir, renderer_cls,
                     output_format, output_filename, osm_date, file_prefix):
+        """ Render one output format
 
+        Parameters
+        ----------
+        config :
+            The renderer / request settings.
+        tmpdir : str
+            Path to temporary directory to use for this job
+        renderer_cls :
+        output_format : str
+            One of `pdf`, `ps`, `ps.gz`, `svg`, `svgz`, `csv`
+        osm_date :
+        file_prefix : str
+
+        Returns
+        -------
+        void
+        """
         LOG.debug('Rendering to %s format...' % output_format.upper())
 
         dpi = layoutlib.commons.PT_PER_INCH
