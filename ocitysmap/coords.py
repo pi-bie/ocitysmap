@@ -40,24 +40,6 @@ _MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
 
 EARTH_RADIUS = 6370986 # meters
 
-# XML tag handler for parsing GPX files
-class GpxElementHandler(xml.sax.ContentHandler):
-  min_lat = 90
-  max_lat = -90
-  min_lon = 180
-  max_lon = -180
-
-  def startElement(self, name, attrs):
-    if "lat" in attrs:
-      lat = float(attrs.getValue("lat"));
-      lon = float(attrs.getValue("lon"));
-
-      self.min_lat = min(self.min_lat, lat)
-      self.min_lon = min(self.min_lon, lon)
-      self.max_lat = max(self.max_lat, lat)
-      self.max_lon = max(self.max_lon, lon)
-
-
 class Point:
     def __init__(self, lat, long_):
         self._lat, self._long = float(lat), float(long_)
@@ -124,24 +106,6 @@ class BoundingBox:
         (lat1, long1) = points[0].split(',')
         (lat2, long2) = points[1].split(',')
         return BoundingBox(lat1, long1, lat2, long2)
-
-    @staticmethod
-    def parse_gpx(gpx_file):
-        """ Returs a BoundingBox object extraced from GPX file contents"""
-        # create GPX XML parser
-        parser = xml.sax.make_parser()
-        handler = GpxElementHandler()
-        parser.setContentHandler(handler)
-
-        # parse given GPX file
-        parser.parse(open(gpx_file, "r"))
-
-        # we don't want gpx track to touch the page border, so we add ~5% on each side
-        dlat = (handler.max_lat - handler.min_lat) * 0.05
-        dlon = (handler.max_lon - handler.min_lon) * 0.05
-
-        # create bounding box object from detected GPX bounds plus 5% extra margin
-        return BoundingBox(handler.min_lat - dlat, handler.min_lon - dlon, handler.max_lat + dlat, handler.max_lon + dlon)
 
     def get_left(self):
         return self._long1
