@@ -124,6 +124,7 @@ class IndexItem:
             ep2_label = grid.get_location_str( * self.endpoint2.get_latlong())
         else:
             ep2_label = None
+
         if ep1_label is None:
             ep1_label = ep2_label
         if ep2_label is None:

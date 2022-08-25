@@ -101,6 +101,18 @@ LOG = logging.getLogger('ocitysmap')
 
 
 def guess_filetype(import_file):
+    """ Try to find out file type via content inspection
+
+    Parameters
+    ----------
+    import_file : str or UploadedFile
+        Either a file path string, or a Django UploadedFile object
+
+    Returns
+    -------
+    str or None
+        File type name, currently one of "gpx", "umap", "poi"
+    """
     need_close = False
     result = None
     try:
@@ -108,7 +120,7 @@ def guess_filetype(import_file):
             file_name = import_file
             import_file = open(import_file, 'rb')
             need_close = true
-        else:
+        else: # UploadedFile
             file_name = import_file.name
             import_file.open()
 
@@ -136,7 +148,7 @@ def guess_filetype(import_file):
     if need_close:
         import_file.close()
     else:
-        import_file.seek(0)
+        import_file.seek(0) # rewind to start
     return result
 
 class RenderingConfiguration:
@@ -184,7 +196,7 @@ class OCitySMap:
     this module's documentation for more details on its API.
     """
 
-    DEFAULT_REQUEST_TIMEOUT_MIN = 15 # TODO make this a config file setting 
+    DEFAULT_REQUEST_TIMEOUT_MIN = 15 # TODO make this a config file setting
 
     DEFAULT_RENDERING_PNG_DPI = 300 # TODO make this a config file setting
 
@@ -340,19 +352,38 @@ SELECT ST_AsText(ST_LongestLine(
                   cursor.fetchall()[0][0])
 
     def _cleanup_tempdir(self, tmpdir):
+        """ Remove a temporary directory including all contents
+
+        Parameters
+        ----------
+        tmpdir : str
+            Path to the temporary directory
+
+        Returns
+        -------
+        void
+        """
         LOG.debug('Cleaning up %s...' % tmpdir)
         shutil.rmtree(tmpdir)
 
     def _get_geographic_info(self, osmid, table):
-        """Return the area for the given osm id in the given table, or raise
+        """ Get geograpich info for an OSM object
+
+        Return the area for the given osm id in the given table, or raise
         LookupError when not found
 
-        Args:
-            osmid (integer): OSM ID
-            table (str): either 'polygon' or 'line'
+        Parameters
+        ----------
+        osmid : int
+            Openstreetmap in osm2pgsql table (may be negative)
+        table : str
+            Table to search in, either 'polygon' or 'line'
+            (TODO: what about 'roads'?)
 
-        Return:
-            Geos geometry object
+        Returns
+        -------
+        shapely.geometry
+            The geometry corresponding to the OSM id
         """
 
         # Ensure all OSM IDs are integers, bust cast them back to strings
@@ -379,14 +410,23 @@ SELECT ST_AsText(ST_LongestLine(
         return shapely.wkt.loads(wkt)
 
     def get_geographic_info(self, osmid):
-        """Return a tuple (WKT_envelope, WKT_buildarea) or raise
+        """ Get geometry information for OSM object by Id
+
+        Return a tuple (WKT_envelope, WKT_buildarea) or raise
         LookupError when not found
 
-        Args:
-            osmid (integer): OSM ID
+        Parameters
+        ----------
+        osmid : int
+            OpenStreetMap object Id to search for in `polygon'
+            and `line` table (may be negative)
 
-        Return:
-            tuple (WKT bbox, WKT area)
+        Returns
+        -------
+        list of str
+            WKT representations of
+            * object geometry envelope
+            * actual object geometry itself
         """
         found = False
 
@@ -407,11 +447,23 @@ SELECT ST_AsText(ST_LongestLine(
         # Merge results:
         if not found:
             raise LookupError("No such OSM id: %d" % osmid)
-
         result = polygon_geom.union(line_geom)
+
         return (result.envelope.wkt, result.wkt)
 
     def get_osm_database_last_update(self):
+        """ Get last update timestamp from osm2pgsql database
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        datetime.datetime
+            Time the last successful update of the osm2pgsql database has happened
+        """
+        # TODO this also exists on context_processors.py on maposmatic side
         cursor = self._db.cursor()
         query = "select last_update from maposmatic_admin;"
         try:
@@ -421,22 +473,65 @@ SELECT ST_AsText(ST_LongestLine(
             return None
         # Extract datetime object. It is located as the first element
         # of a tuple, itself the first element of an array.
-        return cursor.fetchall()[0][0]
+        result = cursor.fetchall()[0][0]
+        cursor.close()
+
+        return result
 
     def get_all_style_configurations(self):
-        """Returns the list of all available stylesheet configurations (list of
-        Stylesheet objects)."""
+        """ Get all configured stylesheets
+
+        Returns the list of all available stylesheet configurations (list of
+        Stylesheet objects).
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of Stylesheet
+            All configured stylesheets that have successfully been loaded
+        """
         return self.STYLESHEET_REGISTRY
 
     def get_all_style_names(self):
-        """Returns the list of all available stylesheet names"""
+        """Returns the list of all available stylesheet names
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of str
+            Names of all configured stylesheets that have been loaded successfully
+
+        """
         style_names = []
         for s in self.STYLESHEET_REGISTRY:
             style_names.append(s.name)
         return style_names;
 
     def get_stylesheet_by_name(self, name):
-        """Returns a stylesheet by its key name."""
+        """Returns a stylesheet by its key name.
+
+        Parameters
+        ----------
+        name : str
+            Name of stylesheet to retrieve
+
+        Returns
+        -------
+        Stylesheet
+            Full stylesheet data for the given stylesheet name
+
+
+        Throws
+        ------
+        LookupError
+            When no stylesheet is found by the given name
+        """
         for style in self.STYLESHEET_REGISTRY:
             if style.name == name:
                 return style
@@ -445,19 +540,59 @@ SELECT ST_AsText(ST_LongestLine(
         raise LookupError( 'The requested stylesheet %s was not found!' % name)
 
     def get_all_overlay_configurations(self):
-        """Returns the list of all available overlay stylesheet configurations 
-           (list of overlay Stylesheet objects)."""
+        """ Get all configured overlay styles
+
+        Returns the list of all available overlay configurations (list of
+        Stylesheet objects).
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of Stylesheet
+            All configured overlays that have successfully been loaded
+        """
         return self.OVERLAY_REGISTRY
 
     def get_all_overlay_names(self):
-        """Returns the list of all available overlay names"""
+        """Returns the list of all available overlay names
+
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        list of str
+            Names of all configured overlays that have been loaded successfully
+
+        """
         overlay_names = []
         for o in self.OVERLAY_REGISTRY:
             overlay_names.append(o.name)
         return overlay_names;
 
     def get_overlay_by_name(self, name):
-        """Returns a overlay stylesheet by its key name."""
+        """Returns an overlay by its key name.
+
+        Parameters
+        ----------
+        name : str
+            Name of overlay style to retrieve
+
+        Returns
+        -------
+        Stylesheet
+            Full stylesheet data for the given overlay name
+
+
+        Throws
+        ------
+        LookupError
+            When no overlay style is found by the given name
+        """
         for style in self.OVERLAY_REGISTRY:
             if style.name == name:
                 return style
@@ -583,7 +718,7 @@ SELECT ST_AsText(ST_LongestLine(
 
         # count successfully created output files
         output_count = 0
-        
+
         try:
             LOG.debug('Rendering in temporary directory %s' % tmpdir)
 
@@ -611,7 +746,7 @@ SELECT ST_AsText(ST_LongestLine(
             self._cleanup_tempdir(tmpdir)
 
         return output_count
-            
+
     def _render_one(self, config, tmpdir, renderer_cls,
                     output_format, output_filename, osm_date, file_prefix):
 
@@ -643,7 +778,7 @@ SELECT ST_AsText(ST_LongestLine(
 
             # as the dpi value may have changed we need to re-create the renderer
             renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
-                
+
             # As strange as it may seem, we HAVE to use a vector
             # device here and not a raster device such as
             # ImageSurface. Because, for some reason, with
