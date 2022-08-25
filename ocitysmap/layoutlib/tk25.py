@@ -174,10 +174,10 @@ class TK25Renderer(Renderer):
         ctx.show_text("10'");
         
         self._mm_mvto(ctx, 40, 39, dpi)
-        draw_utils.draw_text_left(ctx, pc, normal_layout, normal_fascent, normal_fheight,
+        draw_utils.draw_text_left(ctx, normal_layout, normal_fascent,
                                   commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(39, dpi),
                                   "18°")
-        draw_utils.draw_text_right(ctx, pc, normal_layout, normal_fascent, normal_fheight,
+        draw_utils.draw_text_right(ctx, normal_layout, normal_fascent,
                                   commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(41, dpi),
                                   "30'")
         

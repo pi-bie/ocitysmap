@@ -377,7 +377,7 @@ class GeneralIndexCategory(IndexCategory):
                 Font height.
             baseline_x : int
                 Base X axis position.
-            baseline_y : int 
+            baseline_y : int
                 Base Y axis position.
 
         Returns
@@ -401,7 +401,7 @@ class GeneralIndexCategory(IndexCategory):
 
         # draw the actual category title text
         ctx.set_source_rgb(0.0, 0.0, 0.0)
-        draw_utils.draw_text_center(ctx, pc, layout, fascent, fheight,
+        draw_utils.draw_text_center(ctx, layout, fascent,
                                     baseline_x, baseline_y, self.name)
         ctx.restore()
 
@@ -501,25 +501,26 @@ class GeneralIndexItem(IndexItem):
 
         ctx.save()
         if not rtl:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, label_layout,
-                                                         fascent, fheight,
-                                                         baseline_x, baseline_y,
-                                                         self.label)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, column_layout,
-                                                        fascent, fheight,
-                                                        baseline_x, baseline_y,
-                                                        location_str)
+            # _, _,
+            _, line_start = draw_utils.draw_text_left(ctx, label_layout,
+                                            fascent,
+                                            baseline_x, baseline_y,
+                                            self.label)
+            line_end, _ = draw_utils.draw_text_right(ctx, column_layout,
+                                                     fascent,
+                                                     baseline_x, baseline_y,
+                                                     location_str)
         else:
-            _, _, line_start = draw_utils.draw_text_left(ctx, pc, column_layout,
-                                                         fascent, fheight,
-                                                         baseline_x, baseline_y,
-                                                         location_str)
-            line_end, _, _ = draw_utils.draw_text_right(ctx, pc, label_layout,
-                                                        fascent, fheight,
-                                                        (baseline_x
-                                                         + location_width),
-                                                        baseline_y,
-                                                        self.label)
+            _, line_start = draw_utils.draw_text_left(ctx, column_layout,
+                                                      fascent,
+                                                      baseline_x, baseline_y,
+                                                      location_str)
+            line_end, _ = draw_utils.draw_text_right(ctx, label_layout,
+                                                     fascent,
+                                                     (baseline_x
+                                                      + location_width),
+                                                     baseline_y,
+                                                     self.label)
 
         # In case of empty label, we don't draw the dots
         if self.label != '':
@@ -732,9 +733,9 @@ class GeneralIndexRenderer:
             rendering_area.rendering_style.label_font_spec)
 
         header_layout, header_fascent, header_fheight, header_em = \
-                draw_utils.create_layout_with_font(ctx, pc, header_fd)
+                draw_utils.create_layout_with_font(ctx, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-                draw_utils.create_layout_with_font(ctx, pc, label_fd)
+                draw_utils.create_layout_with_font(ctx, label_fd)
 
         #print "RENDER", header_layout, header_fascent, header_fheight, header_em
         #print "RENDER", label_layout, label_fascent, label_fheight, label_em
@@ -840,7 +841,7 @@ class GeneralIndexRenderer:
             fheight: scaled font height.
         """
 
-        layout, fascent, fheight, em = draw_utils.create_layout_with_font(ctx, pc,
+        layout, fascent, fheight, em = draw_utils.create_layout_with_font(ctx,
                                                                      font_desc)
         #print "PREPARE", layout, fascent, fheight, em
 
@@ -1006,7 +1007,6 @@ class MultiPageIndexRenderer:
         self.ctx.save()
 
         LOG.warning("render multipage index")
-        LOG.warning(self.index_categories)
 
         # Create a PangoCairo context for drawing to Cairo
         pc = PangoCairo.create_context(self.ctx)
@@ -1015,11 +1015,11 @@ class MultiPageIndexRenderer:
         label_column_fd  = Pango.FontDescription("DejaVu 6")
 
         header_layout, header_fascent, header_fheight, header_em = \
-            draw_utils.create_layout_with_font(self.ctx, pc, header_fd)
+            draw_utils.create_layout_with_font(self.ctx, header_fd)
         label_layout, label_fascent, label_fheight, label_em = \
-            draw_utils.create_layout_with_font(self.ctx, pc, label_column_fd)
+            draw_utils.create_layout_with_font(self.ctx, label_column_fd)
         column_layout, _, _, _ = \
-            draw_utils.create_layout_with_font(self.ctx, pc, label_column_fd)
+            draw_utils.create_layout_with_font(self.ctx, label_column_fd)
 
         # By OCitysmap's convention, the default resolution is 72 dpi,
         # which maps to the default pangocairo resolution (96 dpi

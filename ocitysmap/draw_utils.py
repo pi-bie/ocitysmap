@@ -31,7 +31,7 @@ from gi.repository import Pango, PangoCairo
 
 import layoutlib.commons as commons
 
-def create_layout_with_font(ctx, pc, font_desc):
+def create_layout_with_font(ctx, font_desc):
     """ Create a Pango layout from given font destription
 
     Parameters
@@ -66,108 +66,149 @@ def create_layout_with_font(ctx, pc, font_desc):
 
     return layout, fascent, fheight, em
 
-def draw_text(ctx, pc, layout, fascent, fheight,
+def draw_text(ctx, layout, fascent,
               baseline_x, baseline_y, text, pango_alignment):
-    """Draws the given text into the provided Cairo
+    """ General text drawing function
+
+    Draws the given text into the provided Cairo
     context through the Pango layout (get_width() expected to be
     correct in order to position the text correctly) with the
     specified pango.ALIGN_x alignment.
 
-    Args:
-        ctx (cairo.Context): cairo context to use
-        pc (pangocairo.CairoContext): pango context
-        layout (pango.Layout): pango layout to draw into (get_with() important)
-        fascent, fheight (int): current font ascent/height metrics
-        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
-        pango_alignment (enum): pango.ALIGN_ constant value
+    Parameters
+    ----------
+        ctx : cairo.Context
+            The context to draw into
+        layout : pango.Layout
+            Pango layout to draw into (get_with() important)
+        fascent : float
+            Current font ascent (TODO: get from layout?)
+        baseline_x : float
+            Horizontal position of baseline start point (TODO: Unit?)
+        baseline_y : float
+            Vertical position of baseline start point (TODO: Unit?)
+        pango_alignment : enum
+            A pango.ALIGN_* constant value specifying the alignment to use
 
-    Results:
-        A 3-uple text_width, text_height (cairo units)
+    Results
+    -------
+    list of float
+        Actual width and height of the rendered text
     """
-    layout.set_auto_dir(False) # Make sure ALIGN_RIGHT is independent on RTL...
+    layout.set_auto_dir(False) # TODO: Make sure ALIGN_RIGHT is independent on RTL...
     layout.set_alignment(pango_alignment)
     layout.set_text(text, -1)
     width, height = [x/Pango.SCALE for x in layout.get_size()]
 
+    ctx.save()
     ctx.move_to(baseline_x, baseline_y - fascent)
     PangoCairo.update_layout(ctx, layout)
     PangoCairo.show_layout(ctx, layout)
-    return width, height
+    ctx.restore()
 
-def draw_text_left(ctx, pc, layout, fascent, fheight,
+    return (width, height)
+
+def draw_text_left(ctx, layout, fascent,
                     baseline_x, baseline_y, text):
-    """Draws the given text left aligned into the provided Cairo
+    """ Draw center alinged text
+
+    Draws the given text left aligned into the provided Cairo
     context through the Pango layout (get_width() expected to be
     correct in order to position the text correctly).
 
-    Args:
-        ctx (cairo.Context): cairo context to use
-        pc (pangocairo.CairoContext): pango context
-        layout (pango.Layout): pango layout to draw into (get_with() important)
-        fascent, fheight (int): current font ascent/height metrics
-        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
-        pango_alignment (enum): pango.ALIGN_ constant value
+    Parameters
+    ----------
+        ctx : cairo.Context
+            The context to draw into
+        layout : pango.Layout
+            Pango layout to draw into (get_with() important)
+        fascent : float
+            Current font ascent (TODO: get from layout?)
+        baseline_x : float
+            Horizontal position of baseline start point (TODO: Unit?)
+        baseline_y : float
+            Vertical position of baseline start point (TODO: Unit?)
 
-    Results:
-        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
+    Results
+    -------
+    list of float
+        Horizontal start and end position of drawn text (TODO: Unit?)
     """
-    w,h = draw_text(ctx, pc, layout, fascent, fheight,
+    text_width,text_height = draw_text(ctx, layout, fascent,
                     baseline_x, baseline_y, text, Pango.Alignment.LEFT)
-    return baseline_x, baseline_y, baseline_x + w
 
-def draw_text_center(ctx, pc, layout, fascent, fheight,
+    return (baseline_x, baseline_x + text_width)
+
+def draw_text_center(ctx, layout, fascent,
                      baseline_x, baseline_y, text):
-    """Draws the given text centered inside the provided Cairo
+    """ Draw left alinged text
+
+    Draws the given text left aligned into the provided Cairo
     context through the Pango layout (get_width() expected to be
     correct in order to position the text correctly).
 
-    Args:
-        ctx (cairo.Context): cairo context to use
-        pc (pangocairo.CairoContext): pango context
-        layout (pango.Layout): pango layout to draw into (get_with() important)
-        fascent, fheight (int): current font ascent/height metrics
-        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
-        pango_alignment (enum): pango.ALIGN_ constant value
+    Parameters
+    ----------
+        ctx : cairo.Context
+            The context to draw into
+        layout : pango.Layout
+            Pango layout to draw into (get_with() important)
+        fascent : float
+            Current font ascent (TODO: get from layout?)
+        baseline_x : float
+            Horizontal position of baseline start point (TODO: Unit?)
+        baseline_y : float
+            Vertical position of baseline start point (TODO: Unit?)
 
-    Results:
-        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
+    Results
+    -------
+    list of float
+        Horizontal start and end position of drawn text (TODO: Unit?)
     """
-    txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
+    text_width,text_height = draw_text(ctx, layout, fascent,
                                       baseline_x, baseline_y, text,
                                       Pango.Alignment.CENTER)
     layout_width = layout.get_width() / Pango.SCALE
-    return ( baseline_x + (layout_width - txt_width) / 2.,
-             baseline_y,
-             baseline_x + (layout_width + txt_width) / 2. )
+    return (baseline_x + (layout_width - text_width) / 2.0,
+            baseline_x + (layout_width + text_width) / 2.0)
 
-def draw_text_right(ctx, pc, layout, fascent, fheight,
+
+def draw_text_right(ctx, layout, fascent,
                     baseline_x, baseline_y, text):
-    """Draws the given text right aligned into the provided Cairo
+    """ Draw left alinged text
+
+    Draws the given text left aligned into the provided Cairo
     context through the Pango layout (get_width() expected to be
     correct in order to position the text correctly).
 
-    Args:
-        ctx (cairo.Context): cairo context to use
-        pc (pangocairo.CairoContext): pango context
-        layout (pango.Layout): pango layout to draw into (get_with() important)
-        fascent, fheight (int): current font ascent/height metrics
-        baseline_x/baseline_y (int): coordinate of the left baseline cairo point
-        pango_alignment (enum): pango.ALIGN_ constant value
+    Parameters
+    ----------
+        ctx : cairo.Context
+            The context to draw into
+        layout : pango.Layout
+            Pango layout to draw into (get_with() important)
+        fascent : float
+            Current font ascent (TODO: get from layout?)
+        baseline_x : float
+            Horizontal position of baseline start point (TODO: Unit?)
+        baseline_y : float
+            Vertical position of baseline start point (TODO: Unit?)
 
-    Results:
-        A 3-uple left_x, baseline_y, right_x of the text rendered (cairo units)
+    Results
+    -------
+    list of float
+        Horizontal start and end position of drawn text (TODO: Unit?)
     """
-    txt_width, txt_height = draw_text(ctx, pc, layout, fascent, fheight,
-                                      baseline_x, baseline_y,
-                                      text, Pango.Alignment.RIGHT)
+    text_width,text_height = draw_text(ctx, layout, fascent,
+                                     baseline_x, baseline_y,
+                                     text, Pango.Alignment.RIGHT)
     layout_width = layout.get_width() / Pango.SCALE
-    return (baseline_x + layout_width - txt_width,
-            baseline_y,
+    return (baseline_x + layout_width - text_width,
             baseline_x + layout_width)
 
 def draw_simpletext_center(ctx, text, x, y):
     """
-    Draw the given text centered at x,y.
+    Draw the given text centered at position x,y.
 
     Parameters
     ----------
