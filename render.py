@@ -325,8 +325,7 @@ def main():
 
     rc.import_files = []
 
-    # handle legacy file options
-    # TODO: add file format detection here, too, instead of relying on user input?
+    # handle deprecated legacy file options
     if (options.poi_file):
         rc.import_files.append(('poi', options.poi_file))
     if (options.gpx_file):
