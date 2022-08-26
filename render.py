@@ -37,6 +37,22 @@ from coords import BoundingBox
 LOG = logging.getLogger('ocitysmap')
 
 def main():
+    """ Parse cmdline options and start actual renderer
+
+    This is mostly just a wrapper that converts command line options
+    into an ocitysmap config object, and then fires of the actual
+    renderer using this config setup.
+
+    Parameters
+    ----------
+    none
+        The actual input is in the cmldine parameters.
+
+    Returns
+    -------
+    int
+        Exit status, 0 for success and non-zero for error codes.
+    """
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
     # Known renderer names
@@ -78,39 +94,44 @@ def main():
                       default='en_US.UTF-8')
     parser.add_option('-s', '--stylesheet', dest='stylesheet',
                       metavar='NAME',
-                      help='specify which stylesheet to use. Defaults to the '
-                      'first specified in the configuration file.')
+                      help="specify which stylesheet to use. "
+                           "Defaults to the first onespecified in the configuration file. "
+                           "Use '--list=stylesheets' to show avaiable choices"
+                     )
     parser.add_option('--overlay', dest='overlays',
                       metavar='NAME',
-                      help='comma separated list of overlay stylesheets to use. '
-                      'Defaults to none')
+                      help="comma separated list of overlay stylesheets to use. "
+                           "Defaults to none. "
+                           "Use '--list-overlays' to show available choices."
+                      )
     parser.add_option('-l', '--layout', dest='layout',
                       metavar='NAME',
-#                      default=KNOWN_RENDERERS_NAMES[0].split()[0],
-#                      help=('specify which layout to use. Available layouts '
-#                            'are: %s. Defaults to %s.' %
-#                            (', '.join(KNOWN_RENDERERS_NAMES),
-#                             KNOWN_RENDERERS_NAMES[0].split()[0]))
+                      default=KNOWN_RENDERERS_NAMES[0].split()[0],
+                      help="specify which page layout to use. "
+                           "Use '--list=layouts' to show available choices"
                      )
     parser.add_option('--paper-format', metavar='FMT',
                       help='set the output paper format. Either "default", '
                            '"Best fit", one of the paper size names '
                            'defined in the configuration file, '
-                           'or a custom size in millimeters like e.g. 100x100',
+                           'or a custom size in millimeters like e.g. 100x100. '
+                           "Use '--list=paper-formats' to show predefined sizes.",
                       default='default')
     parser.add_option('--orientation', metavar='ORIENTATION',
                       help='set the output paper orientation. Either '
                             '"portrait" or "landscape". Defaults to portrait.',
                       default='portrait')
-    parser.add_option('--poi-file', metavar='FILE',
-                      help='provide a file containing POI information to '
-                           'create an index instead of auto-generating it.')
-    parser.add_option('--gpx-file', metavar='FILE',
-                      help='a GPX track to be put on top of the rendered map.')
-    parser.add_option('--umap-file', metavar='FILE',
-                      help='a Umap export file to be put on top of the rendered map.')
     parser.add_option('--import-file', metavar='FILE', action='append',
                       help='import file, any of GPX, Umap, GeoJson or POI file, can be used multiple times')
+    parser.add_option('--list', metavar='NAME', help="List avaibable choices for 'stylesheets', 'overlays', 'layouts' or 'paper-formats' option.")
+
+    # deprecated legacy options
+    parser.add_option('--poi-file', metavar='FILE',
+                      help=optparse.SUPPRESS_HELP)
+    parser.add_option('--gpx-file', metavar='FILE',
+                      help=optparse.SUPPRESS_HELP)
+    parser.add_option('--umap-file', metavar='FILE',
+                      help=optparse.SUPPRESS_HELP)
 
     (options, args) = parser.parse_args()
     if len(args):
@@ -123,6 +144,38 @@ def main():
         if var:
             optcnt += 1
 
+    # Parse config file and instanciate main object
+    mapper = ocitysmap.OCitySMap(
+        [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')])
+
+    if options.list:
+        if options.list == "styles" or options.list == "stylesheets":
+            print("Available --stylesheet=... choices:\n")
+            is_default =  True
+            for name in mapper.get_all_style_names():
+                if is_default:
+                    print("%s (default)" % name)
+                    is_default = False
+                else:
+                    print(name)
+            sys.exit(0)
+        if options.list == "overlays":
+            print("Available --overlay=... choices:\n")
+            for name in mapper.get_all_overlay_names():
+                print(name)
+            sys.exit(0)
+        if options.list == "layouts":
+            print("Available --layout=... choices:\n")
+            for name in mapper.get_all_renderer_names():
+                print(name)
+            sys.exit(0)
+        if options.list == "paper-formats":
+            print("Available --paper-format=... choices:\n")
+            for name in mapper.get_all_paper_size_names():
+                print(name)
+            sys.exit(0)
+        parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts' and 'paper-formats'" % options.list)
+
     if optcnt == 0:
         parser.error("One of --bounding-box "
                      "or --osmid is mandatory")
@@ -130,10 +183,6 @@ def main():
     if optcnt > 1:
         parser.error("Options --bounding-box "
                      "or --osmid are exclusive")
-
-    # Parse config file and instanciate main object
-    mapper = ocitysmap.OCitySMap(
-        [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')])
 
     # Parse bounding box arguments when given
     bbox = None
