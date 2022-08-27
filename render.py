@@ -133,21 +133,20 @@ def main():
     parser.add_option('--umap-file', metavar='FILE',
                       help=optparse.SUPPRESS_HELP)
 
+    # parse command line arguments
     (options, args) = parser.parse_args()
+
+    # if there are any unparsed options left something was wrong
     if len(args):
         parser.print_help()
         return 1
-
-    # Make sure either -b or -c is given
-    optcnt = 0
-    for var in options.bbox, options.osmid:
-        if var:
-            optcnt += 1
 
     # Parse config file and instanciate main object
     mapper = ocitysmap.OCitySMap(
         [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')])
 
+    # process the --list option if present
+    # just generate output and exit then
     if options.list:
         if options.list == "styles" or options.list == "stylesheets":
             print("Available --stylesheet=... choices:\n")
@@ -158,23 +157,30 @@ def main():
                     is_default = False
                 else:
                     print(name)
-            sys.exit(0)
+            return 0
         if options.list == "overlays":
             print("Available --overlay=... choices:\n")
             for name in mapper.get_all_overlay_names():
                 print(name)
-            sys.exit(0)
+            return 0
         if options.list == "layouts":
             print("Available --layout=... choices:\n")
             for name in mapper.get_all_renderer_names():
                 print(name)
-            sys.exit(0)
+            return 0
         if options.list == "paper-formats":
             print("Available --paper-format=... choices:\n")
             for name in mapper.get_all_paper_size_names():
                 print(name)
-            sys.exit(0)
+            return 0
+        # no match so far?
         parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts' and 'paper-formats'" % options.list)
+
+    # Make sure either -b or -c is given
+    optcnt = 0
+    for var in options.bbox, options.osmid:
+        if var:
+            optcnt += 1
 
     if optcnt == 0:
         parser.error("One of --bounding-box "
@@ -207,7 +213,7 @@ def main():
         except LookupError:
             parser.error('No such OSM id: %d' % options.osmid)
 
-    # Parse stylesheet (defaults to 1st one)
+    # Parse stylesheet (defaults to 1st one in config file)
     if options.stylesheet is None:
         stylesheet = mapper.get_all_style_configurations()[0]
     else:
@@ -333,22 +339,29 @@ def main():
     if (options.umap_file):
         rc.import_files.append(('umap', options.umap_file))
 
+    # add actual import files
     if options.import_file:
         for import_file in options.import_file:
             import_file = os.path.realpath(import_file)
             file_type = ocitysmap.guess_filetype(import_file)
             rc.import_files.append((file_type, import_file))
+
+    ä set paper size
     if paper_width and paper_height:
+        # actual dimensions given
         rc.paper_width_mm  = paper_width
         rc.paper_height_mm = paper_height
     elif options.orientation == 'portrait':
+        # take dimension from choosen predefind paper
         rc.paper_width_mm  = paper_descr['width']
         rc.paper_height_mm = paper_descr['height']
     else:
+        # take dimension from choosen predefind paper
+        # swapping width and height to go landscape
         rc.paper_width_mm  = paper_descr['height']
         rc.paper_height_mm = paper_descr['width']
 
-    # Go !...
+    # now we are ready to render
     mapper.render(rc, cls_renderer.name, options.output_formats,
                   options.output_prefix)
 

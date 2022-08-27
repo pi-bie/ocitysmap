@@ -69,6 +69,7 @@ class SinglePageRenderer(Renderer):
     name = 'generic_single_page'
     description = 'A generic full-page layout with or without index.'
 
+    # TODO make configurable
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix,
@@ -76,14 +77,21 @@ class SinglePageRenderer(Renderer):
         """
         Create the renderer.
 
-        Args:
-           db (psycopg2 DB): The GIS database
-           rc (RenderingConfiguration): rendering parameters.
-           tmpdir (os.path): Path to a temp dir that can hold temp files.
-           file_prefix: prefix for all output file formats to be generated
-           dpi (integer): output resolution for bitmap formats
-           index_position (str): None or 'side' (index on side),
-              'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
+        Parameters
+        ----------
+           db : psycopg2 DB
+               GIS database connection handle
+           rc : RenderingConfiguration
+               Rendering configurationparameters.
+           tmpdir : str
+               Path to a temp dir that can hold temp files the renderer creates.
+           dpi : int
+               Output resolution for bitmap formats
+           file_prefix : str
+               File name refix for all output file formats to be generated
+           index_position : str, optional
+               None or 'side' (index on side), 'bottom' (index at bottom),
+               or 'extra_page' (index on 2nd page for PDF output only).
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
@@ -92,10 +100,11 @@ class SinglePageRenderer(Renderer):
 
         # Prepare the index
         self.index_position = index_position
-        if index_position is None: 
+        if index_position is None:
             self.street_index = None
         else:
             if rc.poi_file:
+                # if we have a POI file attached we apply special handling
                 self.street_index = PoiIndex(rc.poi_file)
             else:
                 try:
@@ -131,8 +140,8 @@ class SinglePageRenderer(Renderer):
         # reserve space for the page footer
         self._copyright_margin_pt = Renderer.ANNOTATION_MARGIN_RATIO * self.paper_height_pt
 
-        # calculate remaining usable paper space after taking header
-        # and footer into account
+        # calculate remaining usable render space for the actual map
+        # after taking header and footer into account
         self._usable_area_width_pt = (self.paper_width_pt -
                                       2 * Renderer.PRINT_SAFE_MARGIN_PT)
         self._usable_area_height_pt = (self.paper_height_pt -
@@ -160,11 +169,12 @@ class SinglePageRenderer(Renderer):
             dpi,
             rc.osmid is not None )
 
-        # Prepare overlay styles for uploaded files
+        # Prepare overlay styles from config
         self._overlays = copy(self.rc.overlays)
         self._overlay_effects  = {}
 
         # Prepare overlays for all additional import files
+        # we cycle through a predefined color list for gpx track colors
         gpx_colors = ['red', 'blue', 'green', 'violet', 'orange']
         gpx_color_index = 0
         if self.rc.import_files:
@@ -199,9 +209,11 @@ class SinglePageRenderer(Renderer):
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
+                # overlay plugin implemented using Python code
                 plugin_name = path.lstrip('internal:')
                 self._overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
+                # Mapnix style overlay
                 self._overlay_canvases.append(MapCanvas(overlay,
                                               self.rc.bounding_box,
                                               float(self._map_coords[2]),  # W
@@ -219,7 +231,20 @@ class SinglePageRenderer(Renderer):
            overlay_canvas.render()
 
     def _get_map_coords(self, index_position):
-        # Prepare the layout of the whole page
+        """ Determine actual map output dimensions
+
+        Parameters
+        ----------
+        index_position : str, optional
+            One of 'side' or 'bottom' if an index is to be rendered
+            on the same page.
+
+        Returns
+        -------
+        list of float
+            A list containing x and y coordinates of the upper left
+            of the actual map render area, and its widht and height.
+        """
 
         x = Renderer.PRINT_SAFE_MARGIN_PT
         y = Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt
@@ -245,21 +270,28 @@ class SinglePageRenderer(Renderer):
         return (x, y, w, h)
 
     def _create_index_rendering(self, index_position):
-        """
-        Prepare to render the Street index.
+        """Prepare to render the index.
 
-        Args:
-           index_position (string): None, side, bottom or extra_page
-        Return a couple (StreetIndexRenderer, StreetIndexRenderingArea).
+        Parameters
+        ----------
+           index_position : str, optional
+               None, "side", "bottom" or "extra_page"
+
+        Returns
+        -------
+        List of (IndexRenderer, IndexRenderingArea).
+            The actual index renderer and the area it will cover.
         """
 
         index_area = None
 
         # Now we determine the actual occupation of the index
         if self.rc.poi_file:
+            # a special index is createad when a POI file is attached
             index_renderer = PoiIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
         else:
+            # TODO: use actual renderer type here?
             index_renderer = GeneralIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
 
@@ -269,7 +301,7 @@ class SinglePageRenderer(Renderer):
                                         self.paper_width_pt,
                                         self.paper_height_pt)
 
-        # calculate the area required for the index
+        # calculate the area required for the index, depending on its position
         if index_position == 'side':
             index_max_width_pt \
                 = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_width_pt
@@ -313,17 +345,28 @@ class SinglePageRenderer(Renderer):
 
 
     def _draw_title(self, ctx, w_dots, h_dots, font_face):
-        """
+        """ Draw mao title
+
         Draw the title at the current position inside a
         w_dots*h_dots rectangle.
 
-        Args:
-           ctx (cairo.Context): The Cairo context to use to draw.
-           w_dots,h_dots (number): Rectangle dimension (ciaro units)
-           font_face (str): Pango font specification.
+        Parameters
+        ----------
+        ctx : cairo.Context
+            The context to draw into
+        w_dots : float
+            Width of title bar in cairo units
+        h_dots : float
+            Height of title bar in cairo units
+        font_face : str
+            Pango font name
+
+        Returns
+        -------
+        void
         """
 
-        # Title background
+        # Title background bar
         ctx.save()
         ctx.set_source_rgb(0.8, 0.9, 0.96) # TODO: make title bar color configurable?
         ctx.rectangle(0, 0, w_dots, h_dots)
@@ -331,6 +374,7 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Retrieve and paint the OSM logo
+        # TODO make logo configurable
         ctx.save()
         grp, logo_width = self._get_osm_logo(ctx, 0.8*h_dots)
         if grp:
@@ -343,7 +387,9 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # Retrieve and paint the extra logo
-        # TODO: make configurable 
+        # this is currently a hard coded feature when having
+        # a POI import file only
+        # TODO: make configurable
         logo_width2 = 0
         if self.rc.poi_file:
             ctx.save()
@@ -387,19 +433,35 @@ class SinglePageRenderer(Renderer):
 
     def _draw_copyright_notice(self, ctx, w_dots, h_dots, notice=None,
                                osm_date=None):
-        """
+        """ Draw copyright / annotation notice
+
         Draw a copyright notice at current location and within the
         given w_dots*h_dots rectangle.
 
-        Args:
-           ctx (cairo.Context): The Cairo context to use to draw.
+        Parameters
+        ----------
+        ctx : cairo.Context
+            Cairo context to draw into
+        w_dots : float
+            Width of bottom bar in cairo units
+        h_dots : float
+            Height of bottom bar in cairo units
+        notice : str, optional
+            Optional notice text to replace the default.
+        osm_date : datetime, optional
+            Timestamp the OSM data was last updated at.
+
+        Returns
+        -------
+        void
+
            w_dots,h_dots (number): Rectangle dimension (ciaro units).
            font_face (str): Pango font specification.
            notice (str): Optional notice to replace the default.
         """
 
         today = datetime.date.today()
-        if notice is None: 
+        if notice is None:
             notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
             notice+= ' '
             notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
@@ -448,6 +510,7 @@ class SinglePageRenderer(Renderer):
         finally:
             locale.setlocale(locale.LC_TIME, prev_locale)
 
+        # do the actual output drawing
         ctx.save()
         pc = PangoCairo.create_context(ctx)
         fd = Pango.FontDescription('DejaVu')
@@ -461,12 +524,23 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
     def render(self, cairo_surface, dpi, osm_date):
-        """Renders the map, the index and all other visual map features on the
+        """ Render the complete map page, including all components
+
+        Renders the map, the index and all other visual map features on the
         given Cairo surface.
 
-        Args:
-            cairo_surface (Cairo.Surface): the destination Cairo device.
-            dpi (int): dots per inch of the device.
+        Parameters
+        ----------
+        cairo_surface : cairo.Surface
+            Cairo destination device surface to render into
+        dpi : int
+            Dots per inch to use with this surface
+        osm_date : datetime
+            Timestamp of last OSM database update
+
+        Returns
+        -------
+        void
         """
         LOG.info('SinglePageRenderer rendering -%s- on %dx%dmm paper at %d dpi.' %
                  (self.rc.output_format, self.rc.paper_width_mm, self.rc.paper_height_mm, dpi))
@@ -490,12 +564,14 @@ class SinglePageRenderer(Renderer):
         map_coords_dots = list(map(lambda l: commons.convert_pt_to_dots(l, dpi),
                               self._map_coords))
 
+        # create the cairo context to draw into
         ctx = cairo.Context(cairo_surface)
 
-        # Set a white background
+        # Set a white background (so that generated bitmaps are not transparent)
         ctx.save()
         ctx.set_source_rgb(1, 1, 1)
-        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+        ctx.rectangle(0, 0,
+                      commons.convert_pt_to_dots(self.paper_width_pt, dpi),
                       commons.convert_pt_to_dots(self.paper_height_pt, dpi))
         ctx.fill()
         ctx.restore()
@@ -521,11 +597,11 @@ class SinglePageRenderer(Renderer):
         LOG.info('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
         LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
 
-        # now perform the actual drawing
+        # now perform the actual map drawing
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
 
-        # Draw the rescaled Overlays
+        # Draw the rescaled Overlays on top of the map one by one
         for overlay_canvas in self._overlay_canvases:
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
@@ -549,16 +625,6 @@ class SinglePageRenderer(Renderer):
         ctx.stroke()
         ctx.restore()
 
-        ##
-        ## Draw the title
-        ##
-        if self.rc.title:
-            ctx.save()
-            ctx.translate(safe_margin_dots, safe_margin_dots)
-            self._draw_title(ctx, usable_area_width_dots,
-                             title_margin_dots, 'Droid Sans Bold')
-            ctx.restore()
-
         # make sure that plugins do not render outside the actual map area
         ctx.save()
         ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
@@ -572,6 +638,16 @@ class SinglePageRenderer(Renderer):
                 # TODO better logging
                 LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
         ctx.restore()
+
+        ##
+        ## Draw the title
+        ##
+        if self.rc.title:
+            ctx.save()
+            ctx.translate(safe_margin_dots, safe_margin_dots)
+            self._draw_title(ctx, usable_area_width_dots,
+                             title_margin_dots, 'Droid Sans Bold')
+            ctx.restore()
 
         ##
         ## Draw the index, when applicable
@@ -667,6 +743,20 @@ class SinglePageRenderer(Renderer):
     def _generic_get_minimal_paper_size(bounding_box,
                                         scale=Renderer.DEFAULT_SCALE,
                                         index_position = None):
+        """
+
+        Parameters
+        ----------
+        bounding_box : coords.BoundingBox
+        scale : float, optional
+        index_position : str, optional
+
+        Returns
+        -------
+        list of int
+            Minimal necessary widht and height
+        """
+        # TODO describe parameters
 
         # the mapnik scale depends on the latitude
         lat = bounding_box.get_top_left()[0]
@@ -685,7 +775,7 @@ class SinglePageRenderer(Renderer):
 
         paper_width_mm  = canvas_width_mm
         paper_height_mm = canvas_height_mm
-        
+
         # Take index into account, when applicable
         if index_position == 'side':
             paper_width_mm /= (1. -
@@ -730,7 +820,7 @@ class SinglePageRenderer(Renderer):
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
             scale (int): minimum mapnik scale of the map.
-           index_position (str): None or 'side' (index on side),
+            index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
 
         Returns a list of tuples (paper name, width in mm, height in
@@ -762,7 +852,7 @@ class SinglePageRenderer(Renderer):
         # Test both portrait and landscape orientations when checking for paper
         # sizes.
         for name, w, h in paper_sizes:
-            if w is None: 
+            if w is None:
                 continue
 
             portrait_ok  = paper_width_mm <= w and paper_height_mm <= h

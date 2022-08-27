@@ -48,7 +48,7 @@ def render(renderer, ctx):
         notes = json.loads(notes_json)
     except Exception as e:
         LOG.error("JSON decode exception %s / %s." % (e.code, e.reason))
-        return 
+        return
 
     index_items = []
 

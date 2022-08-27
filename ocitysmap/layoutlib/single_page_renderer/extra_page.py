@@ -3,7 +3,10 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
 
 class SinglePageRendererIndexExtraPage(SinglePageRenderer):
-
+    """
+    Single page renderer that renders the index on a separate 2nd page
+    if the output file format supports multiple pages.
+    """
     name = 'single_page_index_extra_page'
     description = 'Full-page layout with index on extra page.'
 
@@ -11,9 +14,18 @@ class SinglePageRendererIndexExtraPage(SinglePageRenderer):
         """
         Create the renderer.
 
-        Args:
-           rc (RenderingConfiguration): rendering parameters.
-           tmpdir (os.path): Path to a temp dir that can hold temp files.
+        Parameters
+        ----------
+           db : psycopg2 DB
+               GIS database connection handle
+           rc : RenderingConfiguration
+               Rendering configurationparameters.
+           tmpdir : str
+               Path to a temp dir that can hold temp files the renderer creates.
+           file_prefix : str
+               File name refix for all output file formats to be generated
+           dpi : int
+               Output resolution for bitmap formats
         """
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'extra_page')
 

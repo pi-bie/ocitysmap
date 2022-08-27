@@ -3,7 +3,9 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
 
 class SinglePageRendererNoIndex(SinglePageRenderer):
-
+    """
+    Render single page map without index
+    """
     name = 'plain'
     description = 'Full-page layout without index.'
 
@@ -11,9 +13,18 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
         """
         Create the renderer.
 
-        Args:
-           rc (RenderingConfiguration): rendering parameters.
-           tmpdir (os.path): Path to a temp dir that can hold temp files.
+        Parameters
+        ----------
+           db : psycopg2 DB
+               GIS database connection handle
+           rc : RenderingConfiguration
+               Rendering configurationparameters.
+           tmpdir : str
+               Path to a temp dir that can hold temp files the renderer creates.
+           dpi : int
+               Output resolution for bitmap formats
+           file_prefix : str
+               File name refix for all output file formats to be generated
         """
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, None)
 

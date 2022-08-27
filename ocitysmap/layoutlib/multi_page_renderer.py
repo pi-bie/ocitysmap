@@ -77,6 +77,23 @@ class MultiPageRenderer(Renderer):
     MAX_MULTIPAGE_MAPPAGES  = 50
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+        """
+        Create the renderer.
+
+        Parameters
+        ----------
+           db : psycopg2 DB
+               GIS database connection handle
+           rc : RenderingConfiguration
+               Rendering configurationparameters.
+           tmpdir : str
+               Path to a temp dir that can hold temp files the renderer creates.
+           dpi : int
+               Output resolution for bitmap formats
+           file_prefix : str
+               File name refix for all output file formats to be generated
+        """
+
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
         self._grid_legend_margin_pt = \
@@ -92,7 +109,7 @@ class MultiPageRenderer(Renderer):
         self._map_coords = ( Renderer.PRINT_SAFE_MARGIN_PT,
                              Renderer.PRINT_SAFE_MARGIN_PT,
                              self._usable_area_width_pt,
-                             self._usable_area_height_pt ) 
+                             self._usable_area_height_pt )
 
         scale_denom = self.DEFAULT_MULTIPAGE_SCALE
 
@@ -312,7 +329,7 @@ class MultiPageRenderer(Renderer):
 
         self.overview_overlay_canvases = []
         self.overview_overlay_effects  = {}
-        
+
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
@@ -453,7 +470,10 @@ class MultiPageRenderer(Renderer):
 
         return all_categories_merged
 
-    def _my_cmp(self, x, y):
+    @staticmethod
+    def _my_cmp(x, y):
+        """Helper method used for sorting later
+        """
         return locale.strcoll(x.label, y.label)
 
     def _merge_index_same_categories(self, categories, is_street=True):
@@ -486,7 +506,7 @@ class MultiPageRenderer(Renderer):
 
             try:
                 grouped_items_sorted = \
-                    sorted(grouped_items, key = cmp_to_key(self._my_cmp))        
+                    sorted(grouped_items, key = cmp_to_key(self._my_cmp))
             finally:
                 locale.setlocale(locale.LC_COLLATE, prev_locale)
 
@@ -499,9 +519,12 @@ class MultiPageRenderer(Renderer):
 
         return categories_merged
 
-    # We set the label to empty string in case of duplicated item. In
-    # multi-page renderer we won't draw the dots in that case
-    def _blank_duplicated_names(self, grouped_items_sorted):
+    @staticmethod
+    def _blank_duplicated_names(grouped_items_sorted):
+        """
+        We set the label to empty string in case of duplicated item. In
+        multi-page renderer we won't draw the dots in that case
+        """
         prev_label = ''
         for item in grouped_items_sorted:
             if prev_label == item.label:
@@ -510,7 +533,9 @@ class MultiPageRenderer(Renderer):
                 prev_label = item.label
 
     def _project_envelope(self, bbox):
-        """Project the given bounding box into the rendering projection."""
+        """
+        Project the given bounding box into the rendering projection.
+        """
         envelope = mapnik.Box2d(bbox.get_top_left()[1],
                                 bbox.get_top_left()[0],
                                 bbox.get_bottom_right()[1],
@@ -520,8 +545,10 @@ class MultiPageRenderer(Renderer):
         return mapnik.Box2d(c0.x, c0.y, c1.x, c1.y)
 
     def _inverse_envelope(self, envelope):
-        """Inverse the given cartesian envelope (in 3587) back to a 4326
-        bounding box."""
+        """
+        Inverse the given cartesian envelope (in 3587) back to a 4326
+        bounding box.
+        """
         c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
@@ -595,7 +622,7 @@ class MultiPageRenderer(Renderer):
 
         # Render the map !
         mapnik.render(self._front_page_map.get_rendered_map(), ctx)
-        
+
         for ov_canvas in self._frontpage_overlay_canvases:
             rendered_map = ov_canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
@@ -612,9 +639,9 @@ class MultiPageRenderer(Renderer):
                 # TODO better logging
                 LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
         ctx.restore()
-    
 
-            
+
+
         ctx.restore()
 
     def _render_front_page_footer(self, ctx, w, h, osm_date):
@@ -796,7 +823,7 @@ class MultiPageRenderer(Renderer):
                 LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
 
         ctx.restore()
-            
+
         # draw pages numbers
         self._draw_overview_labels(ctx, self.overview_canvas, self.overview_grid,
               commons.convert_pt_to_dots(self._usable_area_width_pt),

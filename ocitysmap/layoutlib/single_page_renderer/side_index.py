@@ -3,7 +3,9 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
 
 class SinglePageRendererIndexOnSide(SinglePageRenderer):
-
+    """
+    This renderer adds a side index to the basic SinglePageRenderer
+    """
     name = 'single_page_index_side'
     description = 'Full-page layout with the index on the side.'
 
@@ -11,9 +13,18 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
         """
         Create the renderer.
 
-        Args:
-           rc (RenderingConfiguration): rendering parameters.
-           tmpdir (os.path): Path to a temp dir that can hold temp files.
+        Parameters
+        ----------
+           db : psycopg2 DB
+               GIS database connection handle
+           rc : RenderingConfiguration
+               Rendering configurationparameters.
+           tmpdir : str
+               Path to a temp dir that can hold temp files the renderer creates.
+           dpi : int
+               Output resolution for bitmap formats
+           file_prefix : str
+               File name refix for all output file formats to be generated
         """
         SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'side')
 
