@@ -11,7 +11,7 @@ from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.coords import Point
 
-from ocitysmap.indexlib.commons import StreetIndexItem
+from ocitysmap.indexlib.commons import GeneralIndexItem
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -62,7 +62,7 @@ def render(renderer, ctx):
 
         index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
 
-        index_items.append(StreetIndexItem(index_text[0:50], point, point, None))
+        index_items.append(GeneralIndexItem(index_text[0:50], point, point, None))
 
         renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
 
