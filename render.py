@@ -346,7 +346,7 @@ def main():
             file_type = ocitysmap.guess_filetype(import_file)
             rc.import_files.append((file_type, import_file))
 
-    ä set paper size
+    # set paper size
     if paper_width and paper_height:
         # actual dimensions given
         rc.paper_width_mm  = paper_width
