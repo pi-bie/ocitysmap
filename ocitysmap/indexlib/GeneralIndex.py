@@ -73,6 +73,9 @@ class GeneralIndex:
     def categories(self):
         return self._categories
 
+    def clear_categories(self):
+        self._categories = []
+
     def add_category(self, name, items=None, is_street=False):
         """
         Add a new named category to the index.
