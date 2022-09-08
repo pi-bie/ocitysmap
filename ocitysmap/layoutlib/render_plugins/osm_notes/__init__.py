@@ -11,7 +11,7 @@ from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.coords import Point
 
-from ocitysmap.indexlib.commons import GeneralIndexItem
+from ocitysmap.indexlib.GeneralIndex import GeneralIndexItem
 
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
@@ -66,4 +66,4 @@ def render(renderer, ctx):
 
         renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
 
-    renderer.street_index.add_category("OSM Notes", index_items)
+#    renderer.street_index.add_category("OSM Notes", index_items)
