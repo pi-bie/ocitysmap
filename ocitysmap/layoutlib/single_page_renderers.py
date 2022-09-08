@@ -108,7 +108,7 @@ class SinglePageRenderer(Renderer):
                 self.street_index = PoiIndex(rc.poi_file)
             else:
                 try:
-                    indexer_class = globals()[rc.indexer]
+                    indexer_class = globals()[rc.indexer+"Index"]
                     # TODO: check that it actually implements a working indexer class
                 except:
                     LOG.warning("Indexer class '%s' not found" % rc.indexer)
