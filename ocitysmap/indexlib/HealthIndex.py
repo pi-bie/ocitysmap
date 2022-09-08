@@ -49,14 +49,14 @@ class HealthIndexItem(GeneralIndexItem):
     """
 
 class HealthIndex(GeneralIndex):
-    def __init__(self, db, polygon_wkt, i18n, page_number=None):
-        GeneralIndex.__init__(self,db, polygon_wkt, i18n, page_number)
+    def __init__(self, db, bbox, polygon_wkt, i18n, page_number=None):
+        GeneralIndex.__init__(self, db, bbox, polygon_wkt, i18n, page_number)
         
         # Build the contents of the index
-        self._categories = (self._list_amenities(db, polygon_wkt))
+        self._categories = (self._list_amenities(db))
 
-    def _list_amenities(self, db, polygon_wkt):
-        return self.get_index_entries(db, polygon_wkt,
+    def _list_amenities(self, db):
+        return self.get_index_entries(db,
                                       ["point","polygon"],
                                       ["tags->'healthcare'", "coalesce(name, '***???***')"],
                                       # "amenity = 'health_post' AND tags->'healthcare' IS NOT NULL")

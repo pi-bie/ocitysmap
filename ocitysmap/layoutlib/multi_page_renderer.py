@@ -431,6 +431,7 @@ class MultiPageRenderer(Renderer):
                 LOG.warning("Indexer class '%s' not found" % self.rc.indexer)
             else:
                 index = indexer_class(self.db,
+                                      bb_inner,
                                       inside_contour_wkt,
                                       self.rc.i18n, page_number=(i + self._first_map_page_number))
 

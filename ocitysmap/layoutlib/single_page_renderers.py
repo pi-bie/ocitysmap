@@ -46,6 +46,7 @@ from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.GeneralIndex import GeneralIndexRenderer
 from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.HealthIndex import HealthIndex
+from ocitysmap.indexlib.NotesIndex import NotesIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from ocitysmap.indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils
@@ -116,6 +117,7 @@ class SinglePageRenderer(Renderer):
                     self.index_position = None
                 else:
                     self.street_index = indexer_class(db,
+                                                      rc.bounding_box,
                                                       rc.polygon_wkt,
                                                       rc.i18n)
 

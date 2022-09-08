@@ -65,14 +65,14 @@ class StreetIndexItem(GeneralIndexItem):
     """
 
 class StreetIndex(GeneralIndex):
-    def __init__(self, db, polygon_wkt, i18n, page_number=None):
-        GeneralIndex.__init__(self,db, polygon_wkt, i18n, page_number)
+    def __init__(self, db, bbox, polygon_wkt, i18n, page_number=None):
+        GeneralIndex.__init__(self, db, bbox, polygon_wkt, i18n, page_number)
         
         # Build the contents of the index
         self._categories = \
-            (self._list_streets(db, polygon_wkt)
-             + self._list_amenities(db, polygon_wkt)
-             + self._list_villages(db, polygon_wkt))
+            (self._list_streets(db)
+             + self._list_amenities(db)
+             + self._list_villages(db))
 
     def _get_selected_amenities(self):
         """
@@ -174,14 +174,13 @@ class StreetIndex(GeneralIndex):
 
         return result
 
-    def _list_streets(self, db, polygon_wkt):
+    def _list_streets(self, db):
         """Get the list of streets inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
         field remains undefined).
 
         Args:
            db (psycopg2 DB): The GIS database
-           polygon_wkt (str): The WKT of the surrounding polygon of interest
 
         Returns a list of commons.IndexCategory objects, with their IndexItems
         having no specific grid square location
@@ -190,7 +189,7 @@ class StreetIndex(GeneralIndex):
         cursor = db.cursor()
         LOG.debug("Getting streets...")
 
-        query = self._build_query(polygon_wkt, ["line"], ["name"], "TRIM(name) != '' AND highway IS NOT NULL", True)
+        query = self._build_query(["line"], ["name"], "TRIM(name) != '' AND highway IS NOT NULL", True)
         self._run_query(cursor, query)
 
         sl = cursor.fetchall()
@@ -203,14 +202,13 @@ class StreetIndex(GeneralIndex):
         return self._convert_street_index(sl)
 
 
-    def _list_amenities(self, db, polygon_wkt):
+    def _list_amenities(self, db):
         """Get the list of amenities inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
         field remains undefined).
 
         Args:
            db (psycopg2 DB): The GIS database
-           polygon_wkt (str): The WKT of the surrounding polygon of interest
 
         Returns a list of commons.IndexCategory objects, with their IndexItems
         having no specific grid square location
@@ -220,20 +218,19 @@ class StreetIndex(GeneralIndex):
         amenities = self._get_selected_amenities()
         amenities_in = "'" + sep.join(amenities) + "'"
         
-        return self.get_index_entries(db, polygon_wkt,
+        return self.get_index_entries(db,
                                       ["point","polygon"],
                                       ["amenity", "name"],
                                       ("TRIM(name) != '' AND amenity in (%s)" % amenities_in),
                                       category_mapping = amenities)
 
-    def _list_villages(self, db, polygon_wkt):
+    def _list_villages(self, db):
         """Get the list of villages inside the given polygon. Don't
         try to map them onto the grid of squares (there location_str
         field remains undefined).
 
         Args:
            db (psycopg2 DB): The GIS database
-           polygon_wkt (str): The WKT of the surrounding polygon of interest
 
         Returns a list of commons.IndexCategory objects, with their IndexItems
         having no specific grid square location
@@ -256,7 +253,7 @@ class StreetIndex(GeneralIndex):
         sep = "','"
         places_in = "'" + sep.join(places) + "'"
 
-        return self.get_index_entries(db, polygon_wkt,
+        return self.get_index_entries(db,
                                       ["point"],
                                       ["'Village'", "name"],
                                       ("TRIM(name) != '' AND place IN (%s)" % places_in),

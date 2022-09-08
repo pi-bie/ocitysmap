@@ -48,7 +48,7 @@ PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
 class GeneralIndex:
 
-    def __init__(self, db, polygon_wkt, i18n, page_number=None):
+    def __init__(self, db, bounding_box, polygon_wkt, i18n, page_number=None):
         """
         Prepare the index of the items inside the given WKT. This
         constructor will perform all the SQL queries.
@@ -57,17 +57,21 @@ class GeneralIndex:
         ----------
         db : psycopg2 DB) handle
             The GIS database
+        bounding_box : ocitysmap.BoundingBox
+            The bounding box of the map area
         polygon_wkt : str
             The WKT of the surrounding polygon of interest
         i18n : i18n.i18n
             Internationalization configuration
         page_number : int, optional
             Page number to show when creating multi page index pages
-
         """
+        self._bounding_box = bounding_box
+        self._polygon_wkt = polygon_wkt
         self._i18n = i18n
         self._page_number = page_number
         self._categories = []
+
 
     @property
     def categories(self):
@@ -92,16 +96,13 @@ class GeneralIndex:
         """
         self._categories.append(GeneralIndexCategory(name, items, is_street))
 
-    @staticmethod
-    def _build_query(polygon_wkt, tables, columns, where, group=False):
+    def _build_query(self, tables, columns, where, group=False):
         """
         Helper function builing a SQL query string to extract index information
         from the osm2pgsql database.
 
         Parameters
         ----------
-	polygon_wkt: str
-            Bounding polygon of the area to index, in WKT format
 	tables: list of str
 	    osm2pgsql model tables to retrive data from, one or more of
 	    "point", "line", "polygon", "roads"
@@ -148,7 +149,7 @@ SELECT %(columns)s,
                     'columns': ",".join(column_expressions),
                     'where': where,
                     'wkb_limits': ("ST_TRANSFORM(ST_GEOMFROMTEXT('%s' , 4326), 3857)"
-                                   % (polygon_wkt,)),
+                                   % (self._polygon_wkt,)),
                     'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
                     'aggreg_end': "))" if group else "",
                     'order_group': ("GROUP BY %s" % (",".join(column_aliases))) if group else "",
@@ -200,7 +201,7 @@ SELECT %(columns)s,
             db.rollback()
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
-    def get_index_entries(self, db, polygon_wkt, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize):
+    def get_index_entries(self, db, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize):
         """
         Generates an index entry from query snippets. The generated query is supposed
         to return three columns: category name, index entry text, and the entries geometry.
@@ -209,8 +210,6 @@ SELECT %(columns)s,
         ----------
         db : psycopg2 database connection
 	    The database to retrieve the information from
-	polygon_wkt: str
-            Bounding polygon of the area to index, in WKT format
 	tables: list of str
 	    osm2pgsql model tables to retrive data from, one or more of
 	    "point", "line", "polygon", "roads"
@@ -234,7 +233,7 @@ SELECT %(columns)s,
         cursor = db.cursor()
         result = {}
 
-        query = self._build_query(polygon_wkt, tables, columns, where, group)
+        query = self._build_query(tables, columns, where, group)
 
         self._run_query(cursor, query)
 
