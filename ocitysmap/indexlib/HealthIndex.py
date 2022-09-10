@@ -56,10 +56,40 @@ class HealthIndex(GeneralIndex):
         self._categories = (self._list_amenities(db))
 
     def _list_amenities(self, db):
+        facilities = {
+            "centre":          _(u"Health Centre"),
+            "hospital":        _(u"Hospital"),
+            "clinic":          _(u"Clinic"),
+            "doctor":          _(u"Doctor"),
+            "dentist":         _(u"Dentist"),
+            "birthing_centre": _(u"Birthing Centre"),
+            "midwife":         _(u"Midwife"),
+            "nurse":           _(u"Nurse"),
+            "alternative":     _(u"Alternative"),
+            "optometrist":     _(u"Optometrist"),
+            "physiotherapist": _(u"Physiotherapist"),
+            "psychotherapist": _(u"Psychotherapist"),
+            # "audiologist":     _(u""),
+            # "podiatrist": _(u""),
+            # "blood_bank": _(u""),
+            # "blood_donation": _(u""),
+            # "counselling": _(u""),
+            # "dialysis": _(u""),
+            # "hospice": _(u""),
+            # "laboratory": _(u""),
+            # "occupational_therapist": _(u""),
+            # "rehabilitation": _(u""),
+            # "sample_collection": _(u""),
+            # "speech_therapist": _(u""),
+            # "vaccination_centre": _(u""),
+            }
+
         return self.get_index_entries(db,
                                       ["point","polygon"],
                                       ["tags->'healthcare'", "coalesce(name, '***???***')"],
-                                      # "amenity = 'health_post' AND tags->'healthcare' IS NOT NULL")
-                                      "tags->'healthcare' IS NOT NULL AND tags->'healthcare' != ''",
+                                      """    amenity = 'health_post'
+                                         AND tags->'healthcare' IS NOT NULL
+                                         AND tags->'healthcare' != ''""",
+                                      category_mapping = facilities,
         )
 
