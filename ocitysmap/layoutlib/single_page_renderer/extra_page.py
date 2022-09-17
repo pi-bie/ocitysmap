@@ -8,7 +8,7 @@ class SinglePageRendererIndexExtraPage(SinglePageRenderer):
     if the output file format supports multiple pages.
     """
     name = 'single_page_index_extra_page'
-    description = 'Full-page layout with index on extra page.'
+    description = 'Full-page layout with index on extra page (PDF only).'
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
         """

@@ -632,6 +632,12 @@ class OCitySMap:
             renderer_names.append(r.name)
         return renderer_names;
 
+    def get_all_renderer_name_desc(self):
+        result = []
+        for renderer in renderers.get_indexers():
+            result.append((renderer.name, renderer.description))
+        return result
+
     def get_all_indexers(self):
         """Returns the list of all available layout indexers (list of
         Indexer classes)."""
