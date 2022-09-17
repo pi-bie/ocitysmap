@@ -172,7 +172,7 @@ SELECT %(columns)s,
         return query
 
     @staticmethod
-    def _run_query(cursor, query):
+    def _run_query(cursor, query, debug=False):
         """
         Simple helper to execute a SQL query on the osm2pgsql tables
 
@@ -192,6 +192,8 @@ SELECT %(columns)s,
         void
         """
         try:
+            if debug:
+                LOG.warning(query % {'way':'way'})
             cursor.execute(query % {'way':'way'})
         except psycopg2.InternalError:
             # This exception generaly occurs when inappropriate ways have
@@ -201,7 +203,7 @@ SELECT %(columns)s,
             db.rollback()
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
-    def get_index_entries(self, db, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize):
+    def get_index_entries(self, db, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize,debug=False):
         """
         Generates an index entry from query snippets. The generated query is supposed
         to return three columns: category name, index entry text, and the entries geometry.
@@ -235,7 +237,7 @@ SELECT %(columns)s,
 
         query = self._build_query(tables, columns, where, group)
 
-        self._run_query(cursor, query)
+        self._run_query(cursor, query, debug)
 
         for amenity_type, amenity_name, linestring in cursor.fetchall():
             # Parse the WKT from the largest linestring in shape
