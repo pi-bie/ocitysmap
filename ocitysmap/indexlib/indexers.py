@@ -3,6 +3,7 @@
 from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.HealthIndex import HealthIndex
 from ocitysmap.indexlib.NotesIndex import NotesIndex
+from ocitysmap.indexlib.TreeIndex import TreeIndex
 
 _INDEXERS = [
     StreetIndex,
