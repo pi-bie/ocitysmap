@@ -49,6 +49,9 @@ class HealthIndexItem(GeneralIndexItem):
     """
 
 class HealthIndex(GeneralIndex):
+    name = "Health"
+    description = "Health related facilities"
+
     def __init__(self, db, bbox, polygon_wkt, i18n, page_number=None):
         GeneralIndex.__init__(self, db, bbox, polygon_wkt, i18n, page_number)
         

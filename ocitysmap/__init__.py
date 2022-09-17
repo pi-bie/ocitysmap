@@ -95,6 +95,7 @@ from . import i18n
 from .indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 from .layoutlib import renderers
 from .layoutlib import commons
+from .indexlib import indexers
 from .stylelib import Stylesheet
 
 LOG = logging.getLogger('ocitysmap')
@@ -630,6 +631,24 @@ class OCitySMap:
         for r in renderers.get_renderers():
             renderer_names.append(r.name)
         return renderer_names;
+
+    def get_all_indexers(self):
+        """Returns the list of all available layout indexers (list of
+        Indexer classes)."""
+        return indexers.get_indexers()
+
+    def get_all_indexer_names(self):
+        """Returns the list of all available layout indexers names"""
+        indexer_names = []
+        for r in indexers.get_indexers():
+            indexer_names.append(r.name)
+        return indexer_names;
+
+    def get_all_indexers_name_desc(self):
+        result = []
+        for indexer in indexers.get_indexers():
+            result.append((indexer.name, indexer.description))
+        return result
 
     def get_all_paper_sizes(self, section = None):
         if section is None:

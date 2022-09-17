@@ -41,6 +41,9 @@ PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 MAX_INDEX_CATEGORY_ITEMS = 300
 
 class NotesIndex(GeneralIndex):
+    name = "Notes"
+    description = "OSM Notes index"
+
     def __init__(self, db, bounding_box, polygon_wkt, i18n, page_number=None):
         GeneralIndex.__init__(self, db, bounding_box, polygon_wkt, i18n, page_number)
         
