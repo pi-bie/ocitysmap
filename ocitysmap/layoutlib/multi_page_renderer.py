@@ -50,6 +50,9 @@ from . import commons
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.GeneralIndex import GeneralIndex, GeneralIndexCategory, MultiPageIndexRenderer
 from ocitysmap.indexlib.StreetIndex import StreetIndex
+from ocitysmap.indexlib.HealthIndex import HealthIndex
+from ocitysmap.indexlib.NotesIndex import NotesIndex
+from ocitysmap.indexlib.TreeIndex import TreeIndex
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid
@@ -425,7 +428,7 @@ class MultiPageRenderer(Renderer):
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             # TODO: other index types
             try:
-                indexer_class = globals()[self.rc.indexer]
+                indexer_class = globals()[self.rc.indexer+"Index"]
                 # TODO: check that it actually implements a working indexer class
             except:
                 LOG.warning("Indexer class '%s' not found" % self.rc.indexer)
