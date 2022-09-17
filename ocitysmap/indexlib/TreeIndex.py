@@ -58,11 +58,12 @@ class TreeIndex(GeneralIndex):
         # Build the contents of the index
         self._categories = (self._list_amenities(db))
 
+    def _list_amenities(self, db):
         return self.get_index_entries(db,
                                       ["point"],
-                                      ["tags->'genus'", "COALESCE(tags->'species', tags->genus')"],
+                                      ["COALESCE(tags->'genus', SUBSTR(tags->'species',1, POSITION(' ' IN tags->'species')))", "COALESCE(tags->'species', tags->'genus')"],
                                       """    tags->'natural' = 'tree'
-                                         AND tags->'genus' IS NOT NULL
+                                         AND (tags->'genus' IS NOT NULL OR tags->'species' IS NOT NULL)
                                       """,
         )
 
