@@ -8,6 +8,7 @@ _INDEXERS = [
     StreetIndex,
     HealthIndex,
     NotesIndex,
+    TreeIndex,
     # do not include special PoiIndex or generic GeneralIndex here!
     ]
 
