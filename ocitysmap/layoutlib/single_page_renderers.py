@@ -118,9 +118,11 @@ class SinglePageRenderer(Renderer):
                     self.index_position = None
                 else:
                     self.street_index = indexer_class(db,
+                                                      self,
                                                       rc.bounding_box,
                                                       rc.polygon_wkt,
-                                                      rc.i18n)
+                                                      rc.i18n,
+                    )
 
             if not self.street_index.categories:
                 LOG.warning("Designated area leads to an empty index")

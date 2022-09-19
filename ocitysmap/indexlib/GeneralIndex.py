@@ -48,7 +48,7 @@ PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
 class GeneralIndex:
 
-    def __init__(self, db, bounding_box, polygon_wkt, i18n, page_number=None):
+    def __init__(self, db, renderer, bounding_box, polygon_wkt, i18n, page_number=None):
         """
         Prepare the index of the items inside the given WKT. This
         constructor will perform all the SQL queries.
@@ -57,6 +57,8 @@ class GeneralIndex:
         ----------
         db : psycopg2 DB) handle
             The GIS database
+        renderer: ocitysmap.Renderer
+            The renderer that called us
         bounding_box : ocitysmap.BoundingBox
             The bounding box of the map area
         polygon_wkt : str
@@ -66,6 +68,7 @@ class GeneralIndex:
         page_number : int, optional
             Page number to show when creating multi page index pages
         """
+        self._renderer = renderer
         self._bounding_box = bounding_box
         self._polygon_wkt = polygon_wkt
         self._i18n = i18n
@@ -245,8 +248,8 @@ SELECT %(columns)s,
                 s_endpoint1, s_endpoint2 = map(lambda s: s.split(),
                                                linestring[11:-1].split(','))
             except (ValueError, TypeError):
-                LOG.exception("Error parsing %s for %s/%s/%s"
-                              % (repr(linestring), catname, db_amenity,
+                LOG.exception("Error parsing %s for %s"
+                              % (repr(linestring),
                                  repr(amenity_name)))
                 continue
             endpoint1 = Point(s_endpoint1[1], s_endpoint1[0])

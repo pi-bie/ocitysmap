@@ -34,26 +34,12 @@ PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 # FIXME: make truely configurable
 MAX_INDEX_CATEGORY_ITEMS = 300
 
-class HealthIndexCategory(GeneralIndexCategory):
-    """
-    The IndexCategory represents a set of index items that belong to the same
-    category, here e.g. having the same 'healthcare=...' value.
-    """    
-
-    def __init__(self, name, items=None, is_street=False):
-        GeneralIndexCategory.__init__(self, name, items, is_street)
-
-
-class HealthIndexItem(GeneralIndexItem):
-    """
-    """
-
 class HealthIndex(GeneralIndex):
     name = "Health"
     description = "Health related facilities"
 
-    def __init__(self, db, bbox, polygon_wkt, i18n, page_number=None):
-        GeneralIndex.__init__(self, db, bbox, polygon_wkt, i18n, page_number)
+    def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
+        GeneralIndex.__init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number)
         
         # Build the contents of the index
         self._categories = (self._list_amenities(db))

@@ -34,9 +34,9 @@ if __name__ == '__main__':
 
     from ocitysmap import i18n, coords
     from ocitysmap.maplib.grid import Grid
-    from StreetIndex import StreetIndex, StreetIndexRenderer, StreetIndexCategory, StreetIndexItem
-    from HealthIndex import HealthIndex, HealthIndexCategiry, HealthIndexItem
-    from TreeIndex import TreeIndex, TreeIndexCategiry, TreeIndexItem
+    from StreetIndex import StreetIndex, StreetIndexRenderer, StreetIndexCategory
+    from HealthIndex import HealthIndex
+    from TreeIndex import TreeIndex
 
     logging.basicConfig(level=logging.DEBUG)
     random.seed(42)

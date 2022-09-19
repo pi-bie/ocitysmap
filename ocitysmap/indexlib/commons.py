@@ -177,8 +177,8 @@ if __name__ == "__main__":
     fheight = ((font_metric.get_ascent() + font_metric.get_descent())
                / Pango.SCALE)
 
-    first_item  = StreetIndexItem('First Item', None, None)
-    second_item = StreetIndexItem('Second Item', None, None)
+    first_item  = GeneralIndexItem('First Item', None, None)
+    second_item = GeneralIndexItem('Second Item', None, None)
     category    = StreetIndexCategory('Hello world !', [first_item, second_item])
 
     category.draw(False, ctx, pc, layout, fascent, fheight,

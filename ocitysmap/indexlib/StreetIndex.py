@@ -57,19 +57,12 @@ class StreetIndexCategory(GeneralIndexCategory):
         GeneralIndexCategory.__init__(self, name, items, is_street)
 
 
-class StreetIndexItem(GeneralIndexItem):
-    """
-    An IndexItem represents one item in the index (a street or a POI). It
-    contains the item label (street name, POI name or description) and the
-    humanized squares description.
-    """
-
 class StreetIndex(GeneralIndex):
     name = "Street"
     description = "Streets and selected amenities"
 
-    def __init__(self, db, bbox, polygon_wkt, i18n, page_number=None):
-        GeneralIndex.__init__(self, db, bbox, polygon_wkt, i18n, page_number)
+    def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
+        GeneralIndex.__init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number)
 
         # Build the contents of the index
         self._categories = \
@@ -170,10 +163,10 @@ class StreetIndex(GeneralIndex):
                 raise
             endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
             endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
-            current_category.items.append(StreetIndexItem(street_name,
-                                                          endpoint1,
-                                                          endpoint2,
-                                                          self._page_number))
+            current_category.items.append(GeneralIndexItem(street_name,
+                                                           endpoint1,
+                                                           endpoint2,
+                                                           self._page_number))
 
         return result
 
