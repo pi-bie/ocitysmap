@@ -47,9 +47,13 @@ class TreeIndex(GeneralIndex):
     def _list_amenities(self, db):
         return self.get_index_entries(db,
                                       ["point"],
-                                      ["COALESCE(tags->'genus', SUBSTR(tags->'species',1, POSITION(' ' IN tags->'species')))", "COALESCE(tags->'species', tags->'genus')"],
+                                      ["TRIM(COALESCE( tab1.tags->'genus:de', tab1.tags->'genus', SUBSTR(tab1.tags->'species',1, POSITION(' ' IN tab1.tags->'species')) ))",
+                                       "COALESCE( tab1.tags->'species:de', s.name, tab1.tags->'species', tab1.tags->'genus:de' , tab1.tags->'genus' )"],
                                       """    tags->'natural' = 'tree'
                                          AND (tags->'genus' IS NOT NULL OR tags->'species' IS NOT NULL)
                                       """,
+                                      join="LEFT JOIN tree_species s ON LOWER(tab1.tags->'species') = s.species AND s.lang='de_DE'",
+                                      group=False,
+                                      debug=False,
         )
 
