@@ -99,7 +99,7 @@ class GeneralIndex:
         """
         self._categories.append(GeneralIndexCategory(name, items, is_street))
 
-    def _build_query(self, tables, columns, where, group=False):
+    def _build_query(self, tables, columns, where, group=False, join=None):
         """
         Helper function builing a SQL query string to extract index information
         from the osm2pgsql database.
@@ -137,8 +137,9 @@ class GeneralIndex:
         # template string and iterating over the table names
         subquery_template = """
 SELECT %(columns)s,
-       ST_INTERSECTION(%(wkb_limits)s, %(aggregate)s%%(way)s%(aggreg_end)s) AS contour
-           FROM planet_osm_%(table)s
+       ST_INTERSECTION(%(wkb_limits)s, %(aggregate)stab1.%%(way)s%(aggreg_end)s) AS contour
+           FROM planet_osm_%(table)s tab1
+           %(join)s
           WHERE %(where)s
             AND ST_INTERSECTS(%%(way)s, %(wkb_limits)s)
           %(order_group)s
@@ -156,6 +157,7 @@ SELECT %(columns)s,
                     'aggregate': "ST_LINEMERGE(ST_COLLECT(" if group else "",
                     'aggreg_end': "))" if group else "",
                     'order_group': ("GROUP BY %s" % (",".join(column_aliases))) if group else "",
+                    'join': join or '',
                 }
                 )
 
@@ -206,7 +208,7 @@ SELECT %(columns)s,
             db.rollback()
             cursor.execute(query % {'way':'st_buffer(way, 0)'})
 
-    def get_index_entries(self, db, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize,debug=False):
+    def get_index_entries(self, db, tables, columns, where, group=False, category_mapping=None, max_category_items=maxsize, join=None, debug=False):
         """
         Generates an index entry from query snippets. The generated query is supposed
         to return three columns: category name, index entry text, and the entries geometry.
@@ -238,7 +240,7 @@ SELECT %(columns)s,
         cursor = db.cursor()
         result = {}
 
-        query = self._build_query(tables, columns, where, group)
+        query = self._build_query(tables, columns, where, group, join=join)
 
         self._run_query(cursor, query, debug)
 
