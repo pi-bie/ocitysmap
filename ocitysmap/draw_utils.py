@@ -31,6 +31,9 @@ from gi.repository import Pango, PangoCairo
 
 import layoutlib.commons as commons
 
+LEFT_SIDE = 1
+RIGHT_SIDE = 2
+
 def create_layout_with_font(ctx, font_desc):
     """ Create a Pango layout from given font destription
 
@@ -396,7 +399,7 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
 
 def render_page_number(ctx, page_number,
                        usable_area_width_pt, usable_area_height_pt, margin_pt,
-                       transparent_background = True):
+                       transparent_background = True, side = None):
     """ Render page number
 
     Parameters
@@ -414,17 +417,28 @@ def render_page_number(ctx, page_number,
     transparent_background : bool
        Should the number be printed on opaque white background, or should
        map content below it shine through?
+    side : int
+       Side of the page to render the page number at:
+       LEFT_SIDE, RIGHT_SIDE, or None to auto-detect
 
     Returns
     -------
     """
     ctx.save()
+
+    if side is None:
+        if page_number % 2:
+            side = RIGHT_SIDE
+        else:
+            side = LEFT_SIDE
+
     x_offset = 0
-    if page_number % 2:
+    if side == RIGHT_SIDE:
         x_offset += commons.convert_pt_to_dots(usable_area_width_pt)\
                   - commons.convert_pt_to_dots(margin_pt)
     y_offset = commons.convert_pt_to_dots(usable_area_height_pt)\
              - commons.convert_pt_to_dots(margin_pt)
+
     ctx.translate(x_offset, y_offset)
 
     # TODO: these are actually both tranparent, just using different shades of white/gray?

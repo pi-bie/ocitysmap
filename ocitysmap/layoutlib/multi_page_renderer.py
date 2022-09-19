@@ -118,8 +118,8 @@ class MultiPageRenderer(Renderer):
 
         # offset to the first map page number
         # there are currently three header pages
-        # making the first actual map detail page number 4
-        self._first_map_page_number = 4
+        # making the first actual map detail page number 1
+        self._first_map_page_number = 1
 
         # the mapnik scale depends on the latitude. However we are
         # always using Mapnik conversion functions (lat,lon <->
@@ -793,11 +793,13 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.6,.6,.6)
         draw_utils.draw_simpletext_center(ctx, _('This page is intentionally left '\
                                             'blank.'), w/2.0, 0.95*h)
-        draw_utils.render_page_number(ctx, 2,
+        draw_utils.render_page_number(ctx, 'ii',
                                       self._usable_area_width_pt,
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
-                                      transparent_background=False)
+                                      transparent_background = False,
+                                      side = draw_utils.LEFT_SIDE
+        )
         try: # set_page_label() does not exist in older pycairo versions
             cairo_surface.set_page_label(_(u'Blank'))
         except:
@@ -834,11 +836,13 @@ class MultiPageRenderer(Renderer):
               commons.convert_pt_to_dots(self._usable_area_width_pt),
               commons.convert_pt_to_dots(self._usable_area_height_pt))
         # Render the page number
-        draw_utils.render_page_number(ctx, 3,
+        draw_utils.render_page_number(ctx, "iii",
                                       self._usable_area_width_pt,
                                       self._usable_area_height_pt,
                                       self.grayed_margin_pt,
-                                      transparent_background = True)
+                                      transparent_background = True,
+                                      side = draw_utils.RIGHT_SIDE
+        )
 
         try: # set_page_label() does not exist in older pycairo versions
             cairo_surface.set_page_label(_(u'Overview'))
