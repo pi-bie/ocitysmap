@@ -154,10 +154,10 @@ msgid "Test gettext"
 msgstr "Prova el gettext"
 
 #~ msgid ""
-#~ "Erstellt mit http://umgebungsplaene.osm-baustelle.de/  -  Kontakt: "
+#~ "Erstellt mit http://around.get-map.org/  -  Kontakt: "
 #~ "Hartmut Holzgraefe (hartmut@php.net)"
 #~ msgstr ""
-#~ "Creat amb http://umgebungsplaene.osm-baustelle.de/  -  Contacte: Hartmut "
+#~ "Creat amb http://around.get-map.org/  -  Contacte: Hartmut "
 #~ "Holzgraefe (hartmut@php.net)"
 
 #~ msgid ""
