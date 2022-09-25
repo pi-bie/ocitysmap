@@ -825,9 +825,6 @@ class GeneralIndexRenderer:
             LOG.warning("Rounding/security margin lost some space (%d actual cols vs. allocated %d" % (actual_n_cols, rendering_area.n_cols))
         if actual_n_cols > rendering_area.n_cols:
             LOG.warning("Rounding/security margin used more space (%d actual cols vs. allocated %d" % (actual_n_cols, rendering_area.n_cols))
-        # TODO removed the assertion here, so rendering can overflow the index area right now
-        # far from perfect visually, but at least better than bailing out completely without
-        # any rendered result ... see also Issue #52
 
 
     def _compute_lines_occupation(self, ctx, pc, font_desc, n_em_padding,
