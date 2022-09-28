@@ -736,6 +736,16 @@ class SinglePageRenderer(Renderer):
                 usable_area_height_pt,
                 'width', 'left')
 
+            # Set a white background (so that generated bitmaps are not transparent)
+            ctx.save()
+            ctx.set_source_rgb(1, 1, 1)
+            ctx.rectangle(0, 0,
+                          commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                          commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+            ctx.fill()
+            ctx.restore()
+
+            # render the actual index
             ctx.save()
             self._index_renderer.render(ctx, index_area, dpi)
             ctx.restore()
