@@ -1105,11 +1105,11 @@ class MultiPageRenderer(Renderer):
         mpsir = MultiPageIndexRenderer(self.rc.i18n,
                                        ctx, cairo_surface,
                                        self.index_categories,
-                                       (Renderer.PRINT_SAFE_MARGIN_PT,
-                                        Renderer.PRINT_SAFE_MARGIN_PT,
+                                       (0, #Renderer.PRINT_SAFE_MARGIN_PT,
+                                        0, #Renderer.PRINT_SAFE_MARGIN_PT,
                                         self._usable_area_width_pt,
                                         self._usable_area_height_pt),
-                                       map_number+5)
+                                       map_number + 2) # TODO: actually calc. the page offset here 
 
         mpsir.render()
 

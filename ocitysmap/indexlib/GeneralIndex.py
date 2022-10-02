@@ -509,6 +509,7 @@ class GeneralIndexItem(IndexItem):
             location_str = self.location_str
 
         ctx.save()
+        ctx.set_source_rgb(0.0, 0.0, 0.0)
         if not rtl:
             # _, _,
             _, line_start = draw_utils.draw_text_left(ctx, label_layout,
@@ -989,8 +990,8 @@ class MultiPageIndexRenderer:
 
     def _draw_page_number(self):
         self.ctx.save()
-        self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
-                           Renderer.PRINT_SAFE_MARGIN_PT)
+#        self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
+#                           Renderer.PRINT_SAFE_MARGIN_PT)
         draw_utils.render_page_number(self.ctx,
                                       self.index_page_num + self.page_offset,
                                       self.rendering_area_w,
@@ -1006,6 +1007,14 @@ class MultiPageIndexRenderer:
     def _new_page(self):
         if self.index_page_num > 0:
             self.surface.show_page()
+
+        # Set a white background (so that generated bitmaps are not transparent)
+        self.ctx.save()
+        self.ctx.set_source_rgb(1, 1, 1)
+        self.ctx.rectangle(0, 0, self.rendering_area_w, self.rendering_area_h)
+        self.ctx.fill()
+        self.ctx.restore()
+
         self._draw_page_number()
         self.index_page_num = self.index_page_num + 1
 
