@@ -110,6 +110,10 @@ def main():
                       help="specify which page layout to use. "
                            "Use '--list=layouts' to show available choices"
                      )
+    parser.add_option('-i', '--indexer', dest='indexer',
+                      metavar='NAME',
+                      default='Street',
+                      help="specify which indexer to use.") # TODO list choices
     parser.add_option('--paper-format', metavar='FMT',
                       help='set the output paper format. Either "default", '
                            '"Best fit", one of the paper size names '
@@ -247,6 +251,12 @@ def main():
                           % (lo.name, lo.description),
                           ocitysmap.layoutlib.renderers.get_renderers()))))
 
+    # Parse Indexer
+    if options.indexer is None:
+        indexer = 'Street'
+    else:
+        indexer = options.indexer
+            
     # Output file formats
     if not options.output_formats:
         options.output_formats = ['pdf']
@@ -325,6 +335,7 @@ def main():
     rc.title        = options.output_title
     rc.osmid        = options.osmid or None # Force to None if absent
     rc.bounding_box = bbox
+    rc.indexer      = indexer
     rc.language     = options.language
     rc.stylesheet   = stylesheet
     rc.overlays     = overlays
