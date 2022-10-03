@@ -558,6 +558,19 @@ class MultiPageRenderer(Renderer):
         c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
+    def _prepare_page(self, ctx):
+        # make whole page un-transparent white
+        ctx.set_source_rgb(1.0, 1.0, 1.0)
+        ctx.rectangle(0, 0, self.paper_width_pt, self.paper_height_pt)
+        ctx.fill()
+
+        # Prepare to draw the map within the right bounding area
+        ctx.translate(
+                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
+                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+        ctx.rectangle(0, 0, self._usable_area_width_pt, self._usable_area_height_pt)
+        ctx.clip()
+
     def _prepare_front_page_map(self, dpi):
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
@@ -605,8 +618,9 @@ class MultiPageRenderer(Renderer):
                 self._frontpage_overlay_canvases.append(ov_canvas)
 
     def _render_front_page_header(self, ctx, w, h):
-        # Draw a grey block which will contain the map title
         ctx.save()
+
+        # Draw a grey block which will contain the map title
         blue_w = w
         blue_h = 0.3 * h
         ctx.set_source_rgb(.80,.80,.80)
@@ -748,21 +762,12 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
-        # Draw a nice grey rectangle covering the whole page
         ctx.save()
-        ctx.set_source_rgb(.95,.95,.95)
-        ctx.rectangle(Renderer.PRINT_SAFE_MARGIN_PT,
-                      Renderer.PRINT_SAFE_MARGIN_PT,
-                      self._usable_area_width_pt,
-                      self._usable_area_height_pt)
-        ctx.fill()
-        ctx.restore()
+        self._prepare_page(ctx)
 
         # Translate into the working area, taking another
         # PRINT_SAFE_MARGIN_PT inside the grey area.
-        ctx.save()
-        ctx.translate(2 * Renderer.PRINT_SAFE_MARGIN_PT,
-                      2 * Renderer.PRINT_SAFE_MARGIN_PT)
+        ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,Renderer.PRINT_SAFE_MARGIN_PT)
         w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
 
@@ -770,22 +775,21 @@ class MultiPageRenderer(Renderer):
         self._render_front_page_header(ctx, w, h)
         self._render_front_page_footer(ctx, w, h, osm_date)
 
-        ctx.restore()
-
         try: # set_page_label() does not exist in older pycairo versions
             cairo_surface.set_page_label(_(u'Front page'))
         except:
             pass
+
+        ctx.restore()
         cairo_surface.show_page()
 
     def _render_blank_page(self, ctx, cairo_surface, dpi):
         """
         Render a blank page with a nice "intentionally blank" notice
         """
+
         ctx.save()
-        ctx.translate(
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+        self._prepare_page(ctx)
 
         # footer notice
         w = self._usable_area_width_pt
@@ -804,10 +808,14 @@ class MultiPageRenderer(Renderer):
             cairo_surface.set_page_label(_(u'Blank'))
         except:
             pass
-        cairo_surface.show_page()
+
         ctx.restore()
+        cairo_surface.show_page()
 
     def _render_overview_page(self, ctx, cairo_surface, dpi):
+        ctx.save()
+        self._prepare_page(ctx)
+
         rendered_map = self.overview_canvas.get_rendered_map()
         mapnik.render(rendered_map, ctx)
 
@@ -835,6 +843,7 @@ class MultiPageRenderer(Renderer):
         self._draw_overview_labels(ctx, self.overview_canvas, self.overview_grid,
               commons.convert_pt_to_dots(self._usable_area_width_pt),
               commons.convert_pt_to_dots(self._usable_area_height_pt))
+
         # Render the page number
         draw_utils.render_page_number(ctx, "iii",
                                       self._usable_area_width_pt,
@@ -848,6 +857,8 @@ class MultiPageRenderer(Renderer):
             cairo_surface.set_page_label(_(u'Overview'))
         except:
             pass
+
+        ctx.restore()
         cairo_surface.show_page()
 
     def _draw_arrow(self, ctx, cairo_surface, number, max_digit_number,
@@ -1029,23 +1040,18 @@ class MultiPageRenderer(Renderer):
 
         self._render_front_page(ctx, cairo_surface, dpi, osm_date)
         self._render_blank_page(ctx, cairo_surface, dpi)
-
-        ctx.save()
-
-        # Prepare to draw the map at the right location
-        ctx.translate(
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
-        ctx.rectangle(0, 0, self._usable_area_width_pt, self._usable_area_height_pt)
-        ctx.clip()
-
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            LOG.info('Map page %d of %d' % (map_number + 1, len(self.pages)))
+            ctx.save()
+            self._prepare_page(ctx)
+
             rendered_map = canvas.get_rendered_map()
-            LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
-            LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
+            if (map_number == 0):
+                LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+                LOG.debug('Actual scale: 1/%f' % canvas.get_actual_scale())
+
+            LOG.info('Map page %d of %d' % (map_number + 1, len(self.pages)))
 
             dest_tag = "mypage%d" % (map_number + self._first_map_page_number)
             draw_utils.anchor(ctx, dest_tag)
@@ -1100,16 +1106,17 @@ class MultiPageRenderer(Renderer):
             except:
                 pass
             cairo_surface.show_page()
-        ctx.restore
+            ctx.restore()
 
         mpsir = MultiPageIndexRenderer(self.rc.i18n,
                                        ctx, cairo_surface,
                                        self.index_categories,
-                                       (0, #Renderer.PRINT_SAFE_MARGIN_PT,
-                                        0, #Renderer.PRINT_SAFE_MARGIN_PT,
+                                       (self.paper_width_pt, self.paper_height_pt),
+                                       (Renderer.PRINT_SAFE_MARGIN_PT,
+                                        Renderer.PRINT_SAFE_MARGIN_PT,
                                         self._usable_area_width_pt,
                                         self._usable_area_height_pt),
-                                       map_number + 2) # TODO: actually calc. the page offset here 
+                                       map_number + 2) # TODO: actually calc. the page offset here
 
         mpsir.render()
 

@@ -975,12 +975,14 @@ class MultiPageIndexRenderer:
 
     # ctx: Cairo context
     # surface: Cairo surface
-    def __init__(self, i18n, ctx, surface, index_categories, rendering_area,
+    def __init__(self, i18n, ctx, surface, index_categories, paper_size, rendering_area,
                  page_offset):
         self._i18n           = i18n
         self.ctx            = ctx
         self.surface        = surface
         self.index_categories = index_categories
+        self.paper_width_pt   = paper_size[0]
+        self.paper_height_pt  = paper_size[1]
         self.rendering_area_x = rendering_area[0]
         self.rendering_area_y = rendering_area[1]
         self.rendering_area_w = rendering_area[2]
@@ -990,8 +992,8 @@ class MultiPageIndexRenderer:
 
     def _draw_page_number(self):
         self.ctx.save()
-#        self.ctx.translate(Renderer.PRINT_SAFE_MARGIN_PT,
-#                           Renderer.PRINT_SAFE_MARGIN_PT)
+        self.ctx.translate(self.rendering_area_x,
+                           self.rendering_area_y)
         draw_utils.render_page_number(self.ctx,
                                       self.index_page_num + self.page_offset,
                                       self.rendering_area_w,
@@ -1011,7 +1013,7 @@ class MultiPageIndexRenderer:
         # Set a white background (so that generated bitmaps are not transparent)
         self.ctx.save()
         self.ctx.set_source_rgb(1, 1, 1)
-        self.ctx.rectangle(0, 0, self.rendering_area_w, self.rendering_area_h)
+        self.ctx.rectangle(0, 0, self.paper_width_pt, self.paper_height_pt)
         self.ctx.fill()
         self.ctx.restore()
 
