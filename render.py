@@ -127,7 +127,7 @@ def main():
                       default='portrait')
     parser.add_option('--import-file', metavar='FILE', action='append',
                       help='import file, any of GPX, Umap, GeoJson or POI file, can be used multiple times')
-    parser.add_option('--list', metavar='NAME', help="List avaibable choices for 'stylesheets', 'overlays', 'layouts' or 'paper-formats' option.")
+    parser.add_option('--list', metavar='NAME', help="List avaibable choices for 'stylesheets', 'overlays', 'layouts', 'indexers' or 'paper-formats' option.")
 
     # deprecated legacy options
     parser.add_option('--poi-file', metavar='FILE',
@@ -170,6 +170,11 @@ def main():
         if options.list == "layouts":
             print("Available --layout=... choices:\n")
             for name in mapper.get_all_renderer_names():
+                print(name)
+            return 0
+        if options.list == "indexes" or options.list == "indexers":
+            print("Available --indexer=... choices:\n")
+            for name in mapper.get_all_indexer_names():
                 print(name)
             return 0
         if options.list == "paper-formats":
@@ -255,7 +260,12 @@ def main():
     if options.indexer is None:
         indexer = 'Street'
     else:
-        indexer = options.indexer
+        indexers = mapper.get_all_indexer_names()
+        if options.indexer in indexers:
+            indexer = options.indexer
+        else:
+            parser.error("Unknown indexer '%s'.\nAvailable indexers: %s"
+                         % (options.indexer, ", ".join(indexers)))
             
     # Output file formats
     if not options.output_formats:
