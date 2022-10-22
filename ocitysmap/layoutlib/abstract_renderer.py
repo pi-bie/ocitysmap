@@ -40,6 +40,7 @@ import re
 import shapely.wkt
 import sys
 from colour import Color
+import datetime
 
 from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -480,5 +481,44 @@ class Renderer:
 
         ctx.restore()
 
+    def _annotations(self, osm_date = None):
+        annotations = {'styles': [], 'sources': [], }
 
+        today = datetime.date.today()
 
+        dates = { 'year' : today.year,
+                  'date' : today.strftime("%d %B %Y"), # TODO: localise
+                  }
+
+        if osm_date and osm_date.date() != today:
+            dates['osmyear'] = osm_date.year
+            dates['osmdate'] = osm_date.strftime("%d %B %Y")
+        else:
+            dates['osmyear'] = today.year
+            
+        ### our own annotation string
+        annotations['maposmatic'] = _(u'Created using MapOSMatic & OCitySMap on %(date)s.') % dates 
+
+        ### OSM data
+        # TODO add exact OSM snapshot date?
+        annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see http://osm.org/copyright)') % dates) 
+
+        ### process styles and overlays
+
+        # base style
+        if self.rc.stylesheet.annotation != '':
+            annotations['styles'].append(self.rc.stylesheet.annotation)
+        if self.rc.stylesheet.datasource != '':
+            annotations['sources'].append(self.rc.stylesheet.datasource)
+
+        # overlays
+        for overlay in self._overlays:
+            if overlay.annotation != '':
+                annotations['styles'].append(overlay.annotation)
+            if overlay.datasource != '':
+                annotations['sources'].append(overlay.datasource)
+
+        return annotations
+
+        
+        

@@ -465,55 +465,18 @@ class SinglePageRenderer(Renderer):
            notice (str): Optional notice to replace the default.
         """
 
-        today = datetime.date.today()
         if notice is None:
-            notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
-            notice+= ' '
-            notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
-            notice+= '\n'
+            annotations = self._annotations(osm_date)
 
-            annotations = []
-            if self.rc.stylesheet.annotation != '':
-                annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self._overlays:
-                if overlay.annotation != '':
-                    annotations.append(overlay.annotation)
-            if len(annotations) > 0:
-                notice+= _(u'Map styles:')
-                notice+= ' ' + '; '.join(annotations) + '\n'
+            notice = annotations['maposmatic'] + '\n'
 
-            datasources = set()
-            if self.rc.stylesheet.datasource != '':
-                datasources.add(self.rc.stylesheet.datasource)
-            for overlay in self._overlays:
-                if overlay.datasource != '':
-                    datasources.add(overlay.datasource)
-            if len(datasources) > 0:
-                notice+= _(u'Additional data sources:')
-                notice+= ' ' + '; '.join(list(datasources)) + '\n'
+            if annotations['styles']:
+                notice+= _(u'Map styles:') # TODO singular/plural
+                notice+= ' ' + '; '.join(annotations['styles']) + '\n'
 
-            notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
-            notice+= ' '
-            notice+= _(u'The map may be incomplete or inaccurate.')
-
-        # We need the correct locale to be set for strftime().
-        prev_locale = locale.getlocale(locale.LC_TIME)
-        try:
-            locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
-        except Exception:
-            LOG.warning('error while setting LC_COLLATE to "%s"' % self.rc.i18n.language_code())
-
-        try:
-            if osm_date is None:
-                osm_date_str = _(u'unknown')
-            else:
-                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
-
-            notice = notice % {'year': today.year,
-                               'date': today.strftime("%d %B %Y"),
-                               'osmdate': osm_date_str}
-        finally:
-            locale.setlocale(locale.LC_TIME, prev_locale)
+            if annotations['sources']:
+                notice+= _(u'Data sources:') # TODO singular/plural
+                notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
 
         # do the actual output drawing
         ctx.save()

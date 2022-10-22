@@ -663,7 +663,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
-    def _render_front_page_footer(self, ctx, w, h, osm_date):
+    def _render_front_page_footer(self, ctx, w, h, osm_date=None, notice=None):
         ctx.save()
 
         # Draw the footer
@@ -721,41 +721,19 @@ class MultiPageRenderer(Renderer):
                 ctx.restore()
 
         # Prepare the text for the left of the footer
-        today = datetime.date.today()
-        notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
-        notice+= '\n\n'
-        notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
-        notice+= '\n'
-        annotations = []
+        if notice is None:
+            annotations = self._annotations(osm_date)
 
-        if self.rc.stylesheet.annotation != '':
-            annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self._overlays:
-                if overlay.annotation != '':
-                    annotations.append(overlay.annotation)
-        if len(annotations) > 0:
-            notice+= _(u'Map styles:')
-            notice+= ' ' + '; '.join(annotations) + '\n'
+            notice = annotations['maposmatic'] + '\n'
 
-        notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
-        notice+= '\n'
-        notice+= _(u'The map may be incomplete or inaccurate.')
+            if annotations['styles']:
+                notice+= _(u'Map styles:') # TODO singular/plural
+                notice+= ' ' + '; '.join(annotations['styles']) + '\n'
 
-        # We need the correct locale to be set for strftime().
-        prev_locale = locale.getlocale(locale.LC_TIME)
-        locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
-        try:
-            if osm_date is None:
-                osm_date_str = _(u'unknown')
-            else:
-                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
-
-            notice = notice % {'year': today.year,
-                               'date': today.strftime("%d %B %Y"),
-                               'osmdate': osm_date_str}
-        finally:
-            locale.setlocale(locale.LC_TIME, prev_locale)
-
+            if annotations['sources']:
+                notice+= _(u'Data sources:') # TODO singular/plural
+                notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
+            
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
                 footer_h, align=Pango.Alignment.LEFT)
