@@ -128,7 +128,9 @@ def main():
     parser.add_option('--import-file', metavar='FILE', action='append',
                       help='import file, any of GPX, Umap, GeoJson or POI file, can be used multiple times')
     parser.add_option('--list', metavar='NAME', help="List avaibable choices for 'stylesheets', 'overlays', 'layouts', 'indexers' or 'paper-formats' option.")
-
+    parser.add_option('--logo', metavar='NAME', help="SVG logo image URL, defaults to 'builtin:osm-logo.svg'")
+    parser.add_option('--extra-logo', metavar='NAME', help="SVG logo image URL, defaults to None")
+    
     # deprecated legacy options
     parser.add_option('--poi-file', metavar='FILE',
                       help=optparse.SUPPRESS_HELP)
@@ -352,6 +354,11 @@ def main():
 
     rc.import_files = []
 
+    if options.logo:
+        rc.logo = options.logo
+    if options.extra_logo:
+        rc.extra_logo = options.extra_logo
+                
     # handle deprecated legacy file options
     if (options.poi_file):
         rc.import_files.append(('poi', options.poi_file))
