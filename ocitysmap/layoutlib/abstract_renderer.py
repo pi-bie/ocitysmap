@@ -41,6 +41,7 @@ import shapely.wkt
 import sys
 from colour import Color
 import datetime
+from urllib.parse import urlparse
 
 from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -137,6 +138,30 @@ class Renderer:
         ctx.restore()
         return ctx.pop_group(), svg.props.width * factor
 
+    @staticmethod
+    def _get_logo(ctx, logo_url, height):
+        parts = urlparse(logo_url)
+
+        if parts.scheme == 'bundled':
+            logo_path = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '..', '..', 'images', parts.path))
+            LOG.warning("1st try: %s" % logo_path)
+            if not os.path.exists(logo_path):
+                logo_path = os.path.join(
+                    sys.exec_prefix, 'share', 'images', 'ocitysmap',
+                    parts.path)
+                LOG.warning("2nd try: %s" % logo_path)
+        elif parts.scheme == 'file' or parts.scheme == '':
+            logo_path = parts.path
+        else:
+            # TODO allow for external http/https logos
+            raise ValueError("Unknown URL scheme '%s' for logo image '%s'" % (parts.scheme, logo_url))
+
+        if not os.path.exists(logo_path):
+            raise FileNotFoundError("Logo file '%s' not found (%s)" % (logo_url, logo_path))
+
+        return Renderer._get_svg(ctx, logo_path, height)
+
 
     @staticmethod
     def _get_osm_logo(ctx, height):
@@ -150,15 +175,7 @@ class Renderer:
         Return a tuple (cairo group object for the logo, logo width in
                         cairo units).
         """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.svg'))
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'osm-logo.svg')
-
-        return Renderer._get_svg(ctx, logo_path, height)
-
+        return Renderer._get_logo(ctx, 'bundled:osm-logo.svg', height)
 
     @staticmethod
     def _get_extra_logo(ctx, height):
@@ -172,15 +189,7 @@ class Renderer:
         Return a tuple (cairo group object for the logo, logo width in
                         cairo units).
         """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'extra-logo.svg'))
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'extra-logo.svg')
-
-        return Renderer._get_svg(ctx, logo_path, height)
-
+        return Renderer._get_logo(ctx, 'bundled:extra-logo.svg', height)
 
     @staticmethod
     def _draw_labels(ctx, map_grid,
