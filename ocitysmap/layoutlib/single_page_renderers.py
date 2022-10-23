@@ -288,7 +288,7 @@ class SinglePageRenderer(Renderer):
 
         # Now we determine the actual occupation of the index
         # TODO: index type choice should not be hard coded here
-        if self.rc.poi_file:
+        if self.rc.indexer == 'Poi':
             # a special index is createad when a POI file is attached
             index_renderer = PoiIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
