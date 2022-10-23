@@ -373,9 +373,10 @@ def draw_text_adjusted(ctx, text, x, y, width, height, max_char_number=None,
         adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
 
     # set the real text
-    layout.set_text(text, -1)
+    layout.set_markup(text, -1)
     if not max_char_number:
         adjust_font_size(layout, fd, width_adjust*width, height_adjust*height)
+    layout.set_wrap(Pango.WrapMode.WORD)
 
     # draw
     ink, logical = layout.get_extents()

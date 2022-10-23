@@ -89,8 +89,8 @@ class PoiIndexItem(IndexItem):
 
 class PoiIndex:
 
-    def __init__(self, filename):
-        f = codecs.open(filename, "r", "utf-8-sig")
+    def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
+        f = codecs.open(renderer.rc.poi_file, "r", "utf-8-sig")
         self._read_json(f)
         f.close()
 

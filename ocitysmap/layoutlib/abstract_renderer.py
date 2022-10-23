@@ -40,6 +40,8 @@ import re
 import shapely.wkt
 import sys
 from colour import Color
+import datetime
+from urllib.parse import urlparse
 
 from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -136,49 +138,41 @@ class Renderer:
         ctx.restore()
         return ctx.pop_group(), svg.props.width * factor
 
-
     @staticmethod
-    def _get_osm_logo(ctx, height):
+    def _get_logo(ctx, logo_url, height):
         """
-        Read the OSM logo file and rescale it to fit within height.
+        Read a SVG logo file URL and rescale it to fit within height.
 
         Args:
            ctx (cairo.Context): The cairo context to use to draw.
+           logo_url (string): where to find the logo
            height (number): final height of the logo (cairo units).
 
         Return a tuple (cairo group object for the logo, logo width in
                         cairo units).
         """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'osm-logo.svg'))
+        parts = urlparse(logo_url)
+
+        if parts.scheme == 'bundled':
+            logo_path = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '..', '..', 'images', parts.path))
+            LOG.warning("1st try: %s" % logo_path)
+            if not os.path.exists(logo_path):
+                logo_path = os.path.join(
+                    sys.exec_prefix, 'share', 'images', 'ocitysmap',
+                    parts.path)
+                LOG.warning("2nd try: %s" % logo_path)
+        elif parts.scheme == 'file' or parts.scheme == '':
+            logo_path = parts.path
+        else:
+            # TODO allow for external http/https logos
+            raise ValueError("Unknown URL scheme '%s' for logo image '%s'" % (parts.scheme, logo_url))
+
         if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'osm-logo.svg')
+            raise FileNotFoundError("Logo file '%s' not found (%s)" % (logo_url, logo_path))
 
         return Renderer._get_svg(ctx, logo_path, height)
 
-
-    @staticmethod
-    def _get_extra_logo(ctx, height):
-        """
-        Read the Extra logo file and rescale it to fit within height.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           height (number): final height of the logo (cairo units).
-
-        Return a tuple (cairo group object for the logo, logo width in
-                        cairo units).
-        """
-        logo_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..', 'images', 'extra-logo.svg'))
-        if not os.path.exists(logo_path):
-            logo_path = os.path.join(
-                sys.exec_prefix, 'share', 'images', 'ocitysmap',
-                'extra-logo.svg')
-
-        return Renderer._get_svg(ctx, logo_path, height)
 
 
     @staticmethod
@@ -480,5 +474,46 @@ class Renderer:
 
         ctx.restore()
 
+    def _annotations(self, osm_date = None):
+        annotations = {'styles': [], 'sources': [], }
 
+        today = datetime.date.today()
 
+        dates = { 'year' : today.year,
+                  'date' : today.strftime("%d %B %Y"), # TODO: localise
+                  }
+
+        if osm_date and osm_date.date() != today:
+            dates['osmyear'] = osm_date.year
+            dates['osmdate'] = osm_date.strftime("%d %B %Y")
+        else:
+            dates['osmyear'] = today.year
+            
+        ### our own annotation string
+        annotations['maposmatic'] = _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
+
+        ### OSM data
+        # TODO add exact OSM snapshot date?
+        annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/copyright)') % dates)
+
+        ### process styles and overlays
+
+        # base style
+        if self.rc.stylesheet.annotation != '':
+            annotations['styles'].append(self.rc.stylesheet.annotation)
+        if self.rc.stylesheet.datasource != '':
+            annotations['sources'].append(self.rc.stylesheet.datasource)
+
+        # overlays
+        for overlay in self._overlays:
+            if overlay.annotation != '':
+                annotations['styles'].append(overlay.annotation)
+            if overlay.datasource != '':
+                annotations['sources'].append(overlay.datasource)
+
+        # TODO: remove duplicate data source
+
+        return annotations
+
+        
+        

@@ -43,6 +43,7 @@ from copy import copy
 import qrcode
 import qrcode.image.svg
 from io import BytesIO
+import html
 
 import ocitysmap
 import coords
@@ -626,7 +627,7 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.80,.80,.80)
         ctx.rectangle(0, 0, blue_w, blue_h)
         ctx.fill()
-        draw_utils.draw_text_adjusted(ctx, self.rc.title, blue_w/2, blue_h/2,
+        draw_utils.draw_text_adjusted(ctx, html.escape(self.rc.title), blue_w/2, blue_h/2,
                  blue_w, blue_h)
         ctx.restore()
 
@@ -663,7 +664,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
-    def _render_front_page_footer(self, ctx, w, h, osm_date):
+    def _render_front_page_footer(self, ctx, w, h, osm_date=None, notice=None):
         ctx.save()
 
         # Draw the footer
@@ -678,15 +679,16 @@ class MultiPageRenderer(Renderer):
         ctx.fill()
 
         # Draw the OpenStreetMap logo to the right of the footer
-        logo_height = footer_h / 2
-        grp, logo_width = self._get_osm_logo(ctx, logo_height)
-        if grp:
-            ctx.save()
-            ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,
-                          logo_height / 2)
-            ctx.set_source(grp)
-            ctx.paint_with_alpha(0.8)
-            ctx.restore()
+        if self.rc.logo:
+            logo_height = footer_h / 2
+            grp, logo_width = self._get_logo(ctx, self.rc.logo, logo_height)
+            if grp:
+                ctx.save()
+                ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,
+                              logo_height / 2)
+                ctx.set_source(grp)
+                ctx.paint_with_alpha(0.8)
+                ctx.restore()
 
         # add QRcode if qrcode text is provided
         if self.rc.qrcode_text:
@@ -721,44 +723,24 @@ class MultiPageRenderer(Renderer):
                 ctx.restore()
 
         # Prepare the text for the left of the footer
-        today = datetime.date.today()
-        notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
-        notice+= '\n\n'
-        notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
-        notice+= '\n'
-        annotations = []
+        if notice is None:
+            annotations = self._annotations(osm_date)
 
-        if self.rc.stylesheet.annotation != '':
-            annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self._overlays:
-                if overlay.annotation != '':
-                    annotations.append(overlay.annotation)
-        if len(annotations) > 0:
-            notice+= _(u'Map styles:')
-            notice+= ' ' + '; '.join(annotations) + '\n'
+            notice = html.escape(annotations['maposmatic']) + '\n'
 
-        notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
-        notice+= '\n'
-        notice+= _(u'The map may be incomplete or inaccurate.')
+            if annotations['styles']:
+                notice+= "<u>" + html.escape(_(u'Map style(s):')) + '</u>\n'
+                notice+= html.escape('; '.join(annotations['styles'])) + '\n'
 
-        # We need the correct locale to be set for strftime().
-        prev_locale = locale.getlocale(locale.LC_TIME)
-        locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
-        try:
-            if osm_date is None:
-                osm_date_str = _(u'unknown')
-            else:
-                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
+            if annotations['sources']:
+                notice+= "<u>"+html.escape(_(u'Data source(s):')) + '</u>\n'
+                notice+= html.escape('; '.join(list(annotations['sources']))) + '\n'
 
-            notice = notice % {'year': today.year,
-                               'date': today.strftime("%d %B %Y"),
-                               'osmdate': osm_date_str}
-        finally:
-            locale.setlocale(locale.LC_TIME, prev_locale)
-
+        # draw footer text
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
                 footer_h, align=Pango.Alignment.LEFT)
+
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):

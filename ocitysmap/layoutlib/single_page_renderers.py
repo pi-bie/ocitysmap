@@ -105,24 +105,20 @@ class SinglePageRenderer(Renderer):
         if index_position is None:
             self.street_index = None
         else:
-            if rc.poi_file:
-                # if we have a POI file attached we apply special handling
-                self.street_index = PoiIndex(rc.poi_file)
+            try:
+                indexer_class = globals()[rc.indexer+"Index"]
+                # TODO: check that it actually implements a working indexer class
+            except:
+                LOG.warning("Indexer class '%s' not found" % rc.indexer)
+                self.street_index = None
+                self.index_position = None
             else:
-                try:
-                    indexer_class = globals()[rc.indexer+"Index"]
-                    # TODO: check that it actually implements a working indexer class
-                except:
-                    LOG.warning("Indexer class '%s' not found" % rc.indexer)
-                    self.street_index = None
-                    self.index_position = None
-                else:
-                    self.street_index = indexer_class(db,
-                                                      self,
-                                                      rc.bounding_box,
-                                                      rc.polygon_wkt,
-                                                      rc.i18n,
-                    )
+                self.street_index = indexer_class(db,
+                                                  self,
+                                                  rc.bounding_box,
+                                                  rc.polygon_wkt,
+                                                  rc.i18n,
+                )
 
             if not self.street_index.categories:
                 LOG.warning("Designated area leads to an empty index")
@@ -291,7 +287,8 @@ class SinglePageRenderer(Renderer):
         index_area = None
 
         # Now we determine the actual occupation of the index
-        if self.rc.poi_file:
+        # TODO: index type choice should not be hard coded here
+        if self.rc.indexer == 'Poi':
             # a special index is createad when a POI file is attached
             index_renderer = PoiIndexRenderer(self.rc.i18n,
                                                  self.street_index.categories)
@@ -378,35 +375,27 @@ class SinglePageRenderer(Renderer):
         ctx.fill()
         ctx.restore()
 
-        # Retrieve and paint the OSM logo
-        # TODO make logo configurable
-        ctx.save()
-        grp, logo_width = self._get_osm_logo(ctx, 0.8*h_dots)
-        if grp:
+        # Retrieve and paint logo to put to the right of the title
+        logo_width = 0
+        if self.rc.logo:
+            ctx.save()
+            grp, logo_width = self._get_logo(ctx, self.rc.logo, 0.8*h_dots)
+            # TODO catch exceptions and just print warning instead?
             ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
-        else:
-            LOG.warning("OSM Logo not available.")
-            logo_width = 0
-        ctx.restore()
+            ctx.restore()
 
-        # Retrieve and paint the extra logo
-        # this is currently a hard coded feature when having
-        # a POI import file only
-        # TODO: make configurable
+        # Retrieve and paint the extra logo to put to the left of the title
         logo_width2 = 0
-        if self.rc.poi_file:
+        if self.rc.extra_logo:
             ctx.save()
-            grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
-            if grp:
-                ctx.translate(0.4*h_dots, 0.1*h_dots)
-                ctx.set_source(grp)
-                ctx.paint_with_alpha(0.5)
-                logo_width2 += 0.4*h_dots
-            else:
-                LOG.warning("Extra Logo not available.")
-                logo_width2 = 0
+            grp, logo_width2 = self._get_logo(ctx, self.rc.extra_logo, 0.8*h_dots)
+            # TODO catch exceptions and just print warning instead?
+            ctx.translate(0.4*h_dots, 0.1*h_dots)
+            ctx.set_source(grp)
+            ctx.paint_with_alpha(0.5)
+            logo_width2 += 0.4*h_dots # TODO: why hardcoding the distance between logo and text?
             ctx.restore()
 
         # Prepare the title
@@ -465,55 +454,18 @@ class SinglePageRenderer(Renderer):
            notice (str): Optional notice to replace the default.
         """
 
-        today = datetime.date.today()
         if notice is None:
-            notice = _(u'Copyright © %(year)d MapOSMatic/OCitySMap developers.')
-            notice+= ' '
-            notice+= _(u'Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)')
-            notice+= '\n'
+            annotations = self._annotations(osm_date)
 
-            annotations = []
-            if self.rc.stylesheet.annotation != '':
-                annotations.append(self.rc.stylesheet.annotation)
-            for overlay in self._overlays:
-                if overlay.annotation != '':
-                    annotations.append(overlay.annotation)
-            if len(annotations) > 0:
-                notice+= _(u'Map styles:')
-                notice+= ' ' + '; '.join(annotations) + '\n'
+            notice = annotations['maposmatic'] + '\n'
 
-            datasources = set()
-            if self.rc.stylesheet.datasource != '':
-                datasources.add(self.rc.stylesheet.datasource)
-            for overlay in self._overlays:
-                if overlay.datasource != '':
-                    datasources.add(overlay.datasource)
-            if len(datasources) > 0:
-                notice+= _(u'Additional data sources:')
-                notice+= ' ' + '; '.join(list(datasources)) + '\n'
+            if annotations['styles']:
+                notice+= _(u'Map styles:') # TODO singular/plural
+                notice+= ' ' + '; '.join(annotations['styles']) + '\n'
 
-            notice+= _(u'Map rendered on: %(date)s. OSM data updated on: %(osmdate)s.')
-            notice+= ' '
-            notice+= _(u'The map may be incomplete or inaccurate.')
-
-        # We need the correct locale to be set for strftime().
-        prev_locale = locale.getlocale(locale.LC_TIME)
-        try:
-            locale.setlocale(locale.LC_TIME, self.rc.i18n.language_code())
-        except Exception:
-            LOG.warning('error while setting LC_COLLATE to "%s"' % self.rc.i18n.language_code())
-
-        try:
-            if osm_date is None:
-                osm_date_str = _(u'unknown')
-            else:
-                osm_date_str = osm_date.strftime("%d %B %Y %H:%M")
-
-            notice = notice % {'year': today.year,
-                               'date': today.strftime("%d %B %Y"),
-                               'osmdate': osm_date_str}
-        finally:
-            locale.setlocale(locale.LC_TIME, prev_locale)
+            if annotations['sources']:
+                notice+= _(u'Data sources:') # TODO singular/plural
+                notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
 
         # do the actual output drawing
         ctx.save()
