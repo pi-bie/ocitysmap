@@ -43,6 +43,7 @@ from copy import copy
 import qrcode
 import qrcode.image.svg
 from io import BytesIO
+import html
 
 import ocitysmap
 import coords
@@ -626,7 +627,7 @@ class MultiPageRenderer(Renderer):
         ctx.set_source_rgb(.80,.80,.80)
         ctx.rectangle(0, 0, blue_w, blue_h)
         ctx.fill()
-        draw_utils.draw_text_adjusted(ctx, self.rc.title, blue_w/2, blue_h/2,
+        draw_utils.draw_text_adjusted(ctx, html.escape(self.rc.title), blue_w/2, blue_h/2,
                  blue_w, blue_h)
         ctx.restore()
 
@@ -725,19 +726,21 @@ class MultiPageRenderer(Renderer):
         if notice is None:
             annotations = self._annotations(osm_date)
 
-            notice = annotations['maposmatic'] + '\n'
+            notice = html.escape(annotations['maposmatic']) + '\n'
 
             if annotations['styles']:
-                notice+= _(u'Map styles:') # TODO singular/plural
-                notice+= ' ' + '; '.join(annotations['styles']) + '\n'
+                notice+= "<u>" + html.escape(_(u'Map style(s):')) + '</u>\n'
+                notice+= html.escape('; '.join(annotations['styles'])) + '\n'
 
             if annotations['sources']:
-                notice+= _(u'Data sources:') # TODO singular/plural
-                notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
-            
+                notice+= "<u>"+html.escape(_(u'Data source(s):')) + '</u>\n'
+                notice+= html.escape('; '.join(list(annotations['sources']))) + '\n'
+
+        # draw footer text
         draw_utils.draw_text_adjusted(ctx, notice,
                 Renderer.PRINT_SAFE_MARGIN_PT, footer_h/2, footer_w,
                 footer_h, align=Pango.Alignment.LEFT)
+
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):

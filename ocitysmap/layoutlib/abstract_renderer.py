@@ -490,11 +490,11 @@ class Renderer:
             dates['osmyear'] = today.year
             
         ### our own annotation string
-        annotations['maposmatic'] = _(u'Created using MapOSMatic & OCitySMap on %(date)s.') % dates 
+        annotations['maposmatic'] = _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
 
         ### OSM data
         # TODO add exact OSM snapshot date?
-        annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see http://osm.org/copyright)') % dates) 
+        annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/copyright)') % dates)
 
         ### process styles and overlays
 
@@ -510,6 +510,8 @@ class Renderer:
                 annotations['styles'].append(overlay.annotation)
             if overlay.datasource != '':
                 annotations['sources'].append(overlay.datasource)
+
+        # TODO: remove duplicate data source
 
         return annotations
 
