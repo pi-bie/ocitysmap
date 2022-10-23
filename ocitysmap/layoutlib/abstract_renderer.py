@@ -140,6 +140,17 @@ class Renderer:
 
     @staticmethod
     def _get_logo(ctx, logo_url, height):
+        """
+        Read a SVG logo file URL and rescale it to fit within height.
+
+        Args:
+           ctx (cairo.Context): The cairo context to use to draw.
+           logo_url (string): where to find the logo
+           height (number): final height of the logo (cairo units).
+
+        Return a tuple (cairo group object for the logo, logo width in
+                        cairo units).
+        """
         parts = urlparse(logo_url)
 
         if parts.scheme == 'bundled':
@@ -163,33 +174,6 @@ class Renderer:
         return Renderer._get_svg(ctx, logo_path, height)
 
 
-    @staticmethod
-    def _get_osm_logo(ctx, height):
-        """
-        Read the OSM logo file and rescale it to fit within height.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           height (number): final height of the logo (cairo units).
-
-        Return a tuple (cairo group object for the logo, logo width in
-                        cairo units).
-        """
-        return Renderer._get_logo(ctx, 'bundled:osm-logo.svg', height)
-
-    @staticmethod
-    def _get_extra_logo(ctx, height):
-        """
-        Read the Extra logo file and rescale it to fit within height.
-
-        Args:
-           ctx (cairo.Context): The cairo context to use to draw.
-           height (number): final height of the logo (cairo units).
-
-        Return a tuple (cairo group object for the logo, logo width in
-                        cairo units).
-        """
-        return Renderer._get_logo(ctx, 'bundled:extra-logo.svg', height)
 
     @staticmethod
     def _draw_labels(ctx, map_grid,

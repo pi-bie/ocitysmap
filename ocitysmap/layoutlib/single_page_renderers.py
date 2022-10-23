@@ -381,7 +381,7 @@ class SinglePageRenderer(Renderer):
         # Retrieve and paint the OSM logo
         # TODO make logo configurable
         ctx.save()
-        grp, logo_width = self._get_osm_logo(ctx, 0.8*h_dots)
+        grp, logo_width = self._get_logo(ctx, 'bundled:osm-logo.svg', 0.8*h_dots)
         if grp:
             ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
             ctx.set_source(grp)
@@ -398,7 +398,7 @@ class SinglePageRenderer(Renderer):
         logo_width2 = 0
         if self.rc.poi_file:
             ctx.save()
-            grp, logo_width2 = self._get_extra_logo(ctx, 0.8*h_dots)
+            grp, logo_width2 = self._get_logo(ctx, 'bundled:extra-logo.svg', 0.8*h_dots)
             if grp:
                 ctx.translate(0.4*h_dots, 0.1*h_dots)
                 ctx.set_source(grp)
