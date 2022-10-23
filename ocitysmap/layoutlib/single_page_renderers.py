@@ -105,24 +105,20 @@ class SinglePageRenderer(Renderer):
         if index_position is None:
             self.street_index = None
         else:
-            if rc.poi_file:
-                # if we have a POI file attached we apply special handling
-                self.street_index = PoiIndex(rc.poi_file)
+            try:
+                indexer_class = globals()[rc.indexer+"Index"]
+                # TODO: check that it actually implements a working indexer class
+            except:
+                LOG.warning("Indexer class '%s' not found" % rc.indexer)
+                self.street_index = None
+                self.index_position = None
             else:
-                try:
-                    indexer_class = globals()[rc.indexer+"Index"]
-                    # TODO: check that it actually implements a working indexer class
-                except:
-                    LOG.warning("Indexer class '%s' not found" % rc.indexer)
-                    self.street_index = None
-                    self.index_position = None
-                else:
-                    self.street_index = indexer_class(db,
-                                                      self,
-                                                      rc.bounding_box,
-                                                      rc.polygon_wkt,
-                                                      rc.i18n,
-                    )
+                self.street_index = indexer_class(db,
+                                                  self,
+                                                  rc.bounding_box,
+                                                  rc.polygon_wkt,
+                                                  rc.i18n,
+                )
 
             if not self.street_index.categories:
                 LOG.warning("Designated area leads to an empty index")
@@ -291,6 +287,7 @@ class SinglePageRenderer(Renderer):
         index_area = None
 
         # Now we determine the actual occupation of the index
+        # TODO: index type choice should not be hard coded here
         if self.rc.poi_file:
             # a special index is createad when a POI file is attached
             index_renderer = PoiIndexRenderer(self.rc.i18n,
@@ -388,11 +385,6 @@ class SinglePageRenderer(Renderer):
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
             ctx.restore()
-
-        # TODO get rid of this special handling by having the
-        #      neighborhood POI project set this itself
-        if self.rc.poi_file and not self.rc.extra_logo:
-            self.rc.extra_logo = 'bundled:extra-logo.svg'
 
         # Retrieve and paint the extra logo to put to the left of the title
         logo_width2 = 0
