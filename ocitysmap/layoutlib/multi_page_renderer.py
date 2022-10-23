@@ -678,15 +678,16 @@ class MultiPageRenderer(Renderer):
         ctx.fill()
 
         # Draw the OpenStreetMap logo to the right of the footer
-        logo_height = footer_h / 2
-        grp, logo_width = self._get_logo(ctx, 'bundled:osm-logo.svg', logo_height)
-        if grp:
-            ctx.save()
-            ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,
-                          logo_height / 2)
-            ctx.set_source(grp)
-            ctx.paint_with_alpha(0.8)
-            ctx.restore()
+        if self.rc.logo:
+            logo_height = footer_h / 2
+            grp, logo_width = self._get_logo(ctx, self.rc.logo, logo_height)
+            if grp:
+                ctx.save()
+                ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,
+                              logo_height / 2)
+                ctx.set_source(grp)
+                ctx.paint_with_alpha(0.8)
+                ctx.restore()
 
         # add QRcode if qrcode text is provided
         if self.rc.qrcode_text:

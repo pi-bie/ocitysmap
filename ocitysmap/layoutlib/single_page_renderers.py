@@ -378,35 +378,32 @@ class SinglePageRenderer(Renderer):
         ctx.fill()
         ctx.restore()
 
-        # Retrieve and paint the OSM logo
-        # TODO make logo configurable
-        ctx.save()
-        grp, logo_width = self._get_logo(ctx, 'bundled:osm-logo.svg', 0.8*h_dots)
-        if grp:
+        # Retrieve and paint logo to put to the right of the title
+        logo_width = 0
+        if self.rc.logo:
+            ctx.save()
+            grp, logo_width = self._get_logo(ctx, self.rc.logo, 0.8*h_dots)
+            # TODO catch exceptions and just print warning instead?
             ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
-        else:
-            LOG.warning("OSM Logo not available.")
-            logo_width = 0
-        ctx.restore()
+            ctx.restore()
 
-        # Retrieve and paint the extra logo
-        # this is currently a hard coded feature when having
-        # a POI import file only
-        # TODO: make configurable
+        # TODO get rid of this special handling by having the
+        #      neighborhood POI project set this itself
+        if self.rc.poi_file and not self.rc.extra_logo:
+            self.rc.extra_logo = 'bundled:extra-logo.svg'
+
+        # Retrieve and paint the extra logo to put to the left of the title
         logo_width2 = 0
-        if self.rc.poi_file:
+        if self.rc.extra_logo:
             ctx.save()
-            grp, logo_width2 = self._get_logo(ctx, 'bundled:extra-logo.svg', 0.8*h_dots)
-            if grp:
-                ctx.translate(0.4*h_dots, 0.1*h_dots)
-                ctx.set_source(grp)
-                ctx.paint_with_alpha(0.5)
-                logo_width2 += 0.4*h_dots
-            else:
-                LOG.warning("Extra Logo not available.")
-                logo_width2 = 0
+            grp, logo_width2 = self._get_logo(ctx, self.rc.extra_logo, 0.8*h_dots)
+            # TODO catch exceptions and just print warning instead?
+            ctx.translate(0.4*h_dots, 0.1*h_dots)
+            ctx.set_source(grp)
+            ctx.paint_with_alpha(0.5)
+            logo_width2 += 0.4*h_dots # TODO: why hardcoding the distance between logo and text?
             ctx.restore()
 
         # Prepare the title
