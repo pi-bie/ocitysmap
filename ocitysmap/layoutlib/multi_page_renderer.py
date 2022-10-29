@@ -44,6 +44,7 @@ import qrcode
 import qrcode.image.svg
 from io import BytesIO
 import html
+from submodules.robinson import robinson
 
 import ocitysmap
 import coords
@@ -61,6 +62,23 @@ from ocitysmap.maplib.overview_grid import OverviewGrid
 from ocitysmap.stylelib import GpxStylesheet, UmapStylesheet
 
 LOG = logging.getLogger('ocitysmap')
+
+
+def load_resourcefn (fn):
+    res = None
+    with open(fn, 'rb') as f:
+        res = f.read()
+    return res
+
+def text_extents(ctx, font_face, font_size, text):
+    ctx.select_font_face (font_face)
+    ctx.set_font_size (font_size)
+    return ctx.text_extents (text)
+
+def font_extents(ctx, font_face, font_size):
+    ctx.select_font_face (font_face)
+    ctx.set_font_size (font_size)
+    return ctx.font_extents ()
 
 class MultiPageRenderer(Renderer):
     """
@@ -772,10 +790,47 @@ class MultiPageRenderer(Renderer):
 
         ctx.save()
         self._prepare_page(ctx)
-
-        # footer notice
+        
         w = self._usable_area_width_pt
         h = self._usable_area_height_pt
+
+        ctx.save()
+        ctx.rectangle( 0, 0, w, 0.9 * h)
+        ctx.clip()
+
+        template_dir = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '..', '..', 'templates', 'markup'))
+
+        with open(os.path.join(template_dir, "multipage-details.html")) as f:
+            html_template = Template(f.read())
+
+        with open(os.path.join(template_dir, "multipage-details.css")) as f:
+            css = f.read()
+
+        bbox_txt = self.rc.bounding_box.as_text()
+        bbox_txt+= "<br/>(";
+        (bbox_h, bbox_w) = self.rc.bounding_box.spheric_sizes()
+        if bbox_w >= 1000 and bbox_h >= 1000:
+            bbox_txt += "ca. %d x %d km²" % (bbox_w/1000, bbox_h/1000)
+        else:
+            bbox_txt += "ca. %d x %d m²" % (bbox_w, bbox_h)
+        bbox_txt+= ")"
+
+        html = html_template.substitute(
+            bbox       = bbox_txt,
+            paper      = '%d × %d mm²' % (self.rc.paper_width_mm, self.rc.paper_height_mm),
+            layout     = 'Multi Page',
+            stylesheet = self.rc.stylesheet.name,
+            indexer    = self.rc.indexer,
+            locale     = self.rc.i18n.language_desc(),
+        )
+
+        rob = robinson.html (html, css, w/2, load_resourcefn, text_extents, font_extents, ctx)
+        rob.render(ctx)
+
+        ctx.restore()
+
+        # footer notice
         ctx.set_source_rgb(.6,.6,.6)
         draw_utils.draw_simpletext_center(ctx, _('This page is intentionally left '\
                                             'blank.'), w/2.0, 0.95*h)

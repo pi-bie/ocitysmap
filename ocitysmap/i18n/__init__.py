@@ -83,21 +83,15 @@ class i18n_template_code_CODE(i18n):
     def isrtl(self):
         return False
 
+    def language_desc(self):
+        return self.language_code()
+
 
 
 class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         self.language = str(language)
         _install_language(language, locale_path)
-
-    def language_code(self):
-        return self.language
-
-    def user_readable_street(self, name):
-        return name
-
-    def first_letter_equal(self, a, b):
-        return a == b
 
 from .ar    import i18n_ar_generic
 from .al    import i18n_al_generic

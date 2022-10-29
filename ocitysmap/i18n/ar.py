@@ -42,3 +42,7 @@ class i18n_ar_generic(i18n):
 
     def isrtl(self):
         return True
+
+    def language_desc(self):
+        return 'العربية (%s)' % self.language
+

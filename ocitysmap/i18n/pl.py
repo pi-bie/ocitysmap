@@ -52,3 +52,7 @@ class i18n_pl_generic(i18n):
     def first_letter_equal(self, a, b):
         return a == b
 
+
+    def language_desc(self):
+        return 'Polski (%s)' % self.language
+

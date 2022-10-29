@@ -41,3 +41,7 @@ class i18n_hr_HR(i18n):
            e.g. É and E are equals in French map index"""
         return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
+
+    def language_desc(self):
+        return 'Magyarország (%s)' % self.language
+

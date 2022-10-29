@@ -40,6 +40,15 @@ _MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
 
 EARTH_RADIUS = 6370986 # meters
 
+def dd2dms(value):
+    abs_value = abs(value)
+    degrees  = int(abs_value)
+    frac     = abs_value - degrees
+    minutes  = int(frac * 60)
+    seconds  = (frac * 3600) % 60
+
+    return (degrees, minutes, seconds)
+
 class Point:
     def __init__(self, lat, long_):
         self._lat, self._long = float(lat), float(long_)
@@ -177,6 +186,43 @@ class BoundingBox:
         if with_polygon_statement:
             return "POLYGON((%s))" % s_coords
         return s_coords
+
+    def as_text(self):
+        txt = ""
+
+        (deg, min, sec) = dd2dms(self._lat1)
+        if deg >= 0:
+            chr = 'N'
+        else:
+            chr = 'S'
+            deg = -deg
+        txt += "%d°%02d'%02d\"%s, " % (deg, min, sec, chr)
+
+        (deg, min, sec) = dd2dms(self._long1)
+        if deg >= 0:
+            chr = 'E'
+        else:
+            chr = 'W'
+            deg = -deg
+        txt += "%d°%02d'%02d\"%s<br/>" % (deg, min, sec, chr)
+
+        (deg, min, sec) = dd2dms(self._lat2)
+        if deg >= 0:
+            chr = 'N'
+        else:
+            chr = 'S'
+            deg = -deg
+        txt += "%d°%02d'%02d\"%s, " % (deg, min, sec, chr)
+
+        (deg, min, sec) = dd2dms(self._long2)
+        if deg >= 0:
+            chr = 'E'
+        else:
+            chr = 'W'
+            deg = -deg
+        txt += "%d°%02d'%02d\"%s" % (deg, min, sec, chr)
+
+        return txt
 
     def spheric_sizes(self):
         """Metric distances at the bounding box top latitude.

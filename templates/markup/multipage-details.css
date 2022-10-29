@@ -1,0 +1,96 @@
+* {
+    display: block;
+}
+
+span {
+    display: inline;
+}
+
+img {
+    display: img;
+}
+
+table {
+    display: table;
+}
+
+tbody {
+    border-width: 0px;
+}
+
+tr {
+    display: tr;
+}
+
+tr.striped:nth-child(even) {background: #CCCCCC}
+tr.striped:nth-child(odd) {background: #F0F0F0}
+
+th {
+    display: td;
+    color: white;
+    background : black;
+    padding: 2px;
+}
+
+td {
+    display            : td;
+    border-width       : 0px;
+    border-right-width : 0px;
+    border-bottom-width: 0px;
+    padding            : 0px;
+    padding-top        : 3px;
+    padding-bottom     : 3px;
+    border-color       : white;
+    text-align         : left;
+    font-size   : 16px;
+}
+
+td.tocname {
+    text-align: left;
+}
+
+td.tocnumber {
+    text-align: right;
+}
+
+td.current {
+}
+
+html {
+  width       : 530px;
+  padding-top : 10px;
+  padding-left: 15px;
+  padding-right: 25px;
+  padding     : 00px;
+  border-width: 0px;
+  border-color: red;
+  margin      : auto;
+  background  : #ffffff;
+
+  font-family : "DejaVu";
+  font-size   : 16px;
+  color       : #000000;
+}
+
+head {
+  display: none;
+  padding-top : 20px;
+}
+
+.vspace {
+}
+
+.heading {
+  margin-top    : 10px;
+  margin-bottom : 5px;
+  font-size     : 28px;
+  font-family   : "DejaVu";
+}
+
+.current {
+  font-size     : 24px;
+}
+
+.white {
+  color       : #FFFFFF;
+}

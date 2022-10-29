@@ -36,3 +36,7 @@ class i18n_tr_generic(i18n):
     def first_letter_equal(self, a, b):
         return self.upper_unaccent_string(a) == self.upper_unaccent_string(b)
 
+
+    def language_desc(self):
+        return 'Türkçe (%s)' % self.language
+

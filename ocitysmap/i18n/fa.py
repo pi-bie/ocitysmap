@@ -72,3 +72,7 @@ class i18n_fa_generic(i18n):
 
     def number_category_name(self):
         return "۰-۹"
+
+    def language_desc(self):
+        return 'فارسی  (%s)' % self.language
+
