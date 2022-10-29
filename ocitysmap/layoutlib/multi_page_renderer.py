@@ -816,14 +816,26 @@ class MultiPageRenderer(Renderer):
             bbox_txt += "ca. %d x %d m²" % (bbox_w, bbox_h)
         bbox_txt+= ")"
 
+        overlay_names = ""
+        if self.rc.overlays:
+            for overlay in self.rc.overlays:
+                overlay_names+= overlay.name + "<br/>"
+
+        import_names = ""
+        if self.rc.import_files:
+            for (file_type, import_file) in self.rc.import_files:
+                import_names+= os.path.basename(import_file) + "<br/>";
+
         html = html_template.substitute(
             bbox       = bbox_txt,
             paper      = '%d × %d mm²' % (self.rc.paper_width_mm, self.rc.paper_height_mm),
             layout     = 'Multi Page',
             stylesheet = self.rc.stylesheet.name,
+            overlays   = overlay_names,
             indexer    = self.rc.indexer,
             locale     = self.rc.i18n.language_desc(),
-            first_index_page = len(self.pages) + 1
+            first_index_page = len(self.pages) + 1,
+            imports    = import_names,
         )
 
         rob = robinson.html (html, css, w/2, load_resourcefn, text_extents, font_extents, ctx)
