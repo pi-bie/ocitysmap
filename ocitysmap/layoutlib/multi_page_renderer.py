@@ -783,9 +783,9 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
         cairo_surface.show_page()
 
-    def _render_blank_page(self, ctx, cairo_surface, dpi):
+    def _render_contents_page(self, ctx, cairo_surface, dpi):
         """
-        Render a blank page with a nice "intentionally blank" notice
+        Render table of contents and map setting details
         """
 
         ctx.save()
@@ -844,9 +844,6 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
 
         # footer notice
-        ctx.set_source_rgb(.6,.6,.6)
-        draw_utils.draw_simpletext_center(ctx, _('This page is intentionally left '\
-                                            'blank.'), w/2.0, 0.95*h)
         draw_utils.render_page_number(ctx, 'ii',
                                       self._usable_area_width_pt,
                                       self._usable_area_height_pt,
@@ -855,7 +852,7 @@ class MultiPageRenderer(Renderer):
                                       side = draw_utils.LEFT_SIDE
         )
         try: # set_page_label() does not exist in older pycairo versions
-            cairo_surface.set_page_label(_(u'Blank'))
+            cairo_surface.set_page_label(_(u'Contents'))
         except:
             pass
 
@@ -1089,7 +1086,7 @@ class MultiPageRenderer(Renderer):
         ctx = cairo.Context(cairo_surface)
 
         self._render_front_page(ctx, cairo_surface, dpi, osm_date)
-        self._render_blank_page(ctx, cairo_surface, dpi)
+        self._render_contents_page(ctx, cairo_surface, dpi)
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
