@@ -823,6 +823,7 @@ class MultiPageRenderer(Renderer):
             stylesheet = self.rc.stylesheet.name,
             indexer    = self.rc.indexer,
             locale     = self.rc.i18n.language_desc(),
+            first_index_page = len(self.pages) + 1
         )
 
         rob = robinson.html (html, css, w/2, load_resourcefn, text_extents, font_extents, ctx)
