@@ -783,7 +783,7 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
         cairo_surface.show_page()
 
-    def _render_contents_page(self, ctx, cairo_surface, dpi):
+    def _render_contents_page(self, ctx, cairo_surface, dpi, osm_date):
         """
         Render table of contents and map setting details
         """
@@ -836,6 +836,9 @@ class MultiPageRenderer(Renderer):
             locale     = self.rc.i18n.language_desc(),
             first_index_page = len(self.pages) + 1,
             imports    = import_names,
+            # TODO use current locale for date fromatting below
+            render_date= datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_date  = osm_date,
         )
 
         rob = robinson.html (html, css, w/2, load_resourcefn, text_extents, font_extents, ctx)
@@ -1086,7 +1089,7 @@ class MultiPageRenderer(Renderer):
         ctx = cairo.Context(cairo_surface)
 
         self._render_front_page(ctx, cairo_surface, dpi, osm_date)
-        self._render_contents_page(ctx, cairo_surface, dpi)
+        self._render_contents_page(ctx, cairo_surface, dpi, osm_date)
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
