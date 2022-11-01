@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-13 08:53+0000\n"
+"POT-Creation-Date: 2022-11-01 11:15+0000\n"
 "PO-Revision-Date: 2019-04-12 21:01+0000\n"
 "Last-Translator: Nikolay Parukhin <parukhin@gmail.com>\n"
 "Language-Team: Russian <http://translate.get-map.org/projects/maposmatic/"
@@ -21,138 +21,119 @@ msgstr ""
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Generator: Weblate 3.5.1\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:296
+#: ocitysmap/indexlib/StreetIndex.py:89
 msgid "Places of worship"
 msgstr "Религиозные места"
 
-#: ocitysmap/indexlib/StreetIndex.py:297
-msgid "Place of worship"
-msgstr "Религиозное место"
-
-#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
-#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
-#: ocitysmap/indexlib/StreetIndex.py:302
+#: ocitysmap/indexlib/StreetIndex.py:90 ocitysmap/indexlib/StreetIndex.py:91
+#: ocitysmap/indexlib/StreetIndex.py:92 ocitysmap/indexlib/StreetIndex.py:93
+#: ocitysmap/indexlib/StreetIndex.py:94
 msgid "Education"
 msgstr "Образование"
 
-#: ocitysmap/indexlib/StreetIndex.py:298
-msgid "Kindergarten"
-msgstr "Детский сад"
-
-#: ocitysmap/indexlib/StreetIndex.py:299
-msgid "School"
-msgstr "Школа"
-
-#: ocitysmap/indexlib/StreetIndex.py:300
-msgid "College"
-msgstr "Колледж"
-
-#: ocitysmap/indexlib/StreetIndex.py:301
-msgid "University"
-msgstr "Университет"
-
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Library"
-msgstr "Библиотека"
-
-#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
-#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
+#: ocitysmap/indexlib/StreetIndex.py:95 ocitysmap/indexlib/StreetIndex.py:96
+#: ocitysmap/indexlib/StreetIndex.py:97 ocitysmap/indexlib/StreetIndex.py:98
 msgid "Public buildings"
 msgstr "Публичные здания"
 
-#: ocitysmap/indexlib/StreetIndex.py:303
-msgid "Town hall"
-msgstr "Мэрия"
-
-#: ocitysmap/indexlib/StreetIndex.py:304
-msgid "Post office"
-msgstr "Почтовое отделение"
-
-#: ocitysmap/indexlib/StreetIndex.py:306
-msgid "Public building"
-msgstr "Публичное здание"
-
-#: ocitysmap/indexlib/StreetIndex.py:307
-msgid "Police"
-msgstr "Полиция"
-
-#: ocitysmap/indexlib/StreetIndex.py:538
+#: ocitysmap/indexlib/StreetIndex.py:238
 msgid "Villages"
 msgstr "Поселки"
 
-#: ocitysmap/indexlib/StreetIndex.py:1071
-#, python-format
-msgid "Index page %d"
-msgstr ""
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:616
-#: ocitysmap/layoutlib/single_page_renderers.py:388
-#, python-format
-msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
-msgstr "© %(year)d разработчики MapOSMatic/OCitySMap."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:618
-#: ocitysmap/layoutlib/single_page_renderers.py:390
-#, python-format
-msgid ""
-"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
-msgstr ""
-"Данные карты © %(year)d участники OpenStreetMap.org (see http://osm.org/"
-"copyright)"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:628
-#: ocitysmap/layoutlib/single_page_renderers.py:400
-msgid "Map styles:"
+#: ocitysmap/layoutlib/multi_page_renderer.py:750
+#, fuzzy
+#| msgid "Map styles:"
+msgid "Map style(s):"
 msgstr "Стили карты:"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:631
-#: ocitysmap/layoutlib/single_page_renderers.py:413
-#, python-format
-msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
-msgstr "Карта отрисована: %(date)s. Данные OSM обновлены: %(osmdate)s."
+#: ocitysmap/layoutlib/multi_page_renderer.py:754
+msgid "Data source(s):"
+msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:633
-#: ocitysmap/layoutlib/single_page_renderers.py:415
-msgid "The map may be incomplete or inaccurate."
-msgstr "Данные этой карты могут быть неполными или неточными."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:640
-#: ocitysmap/layoutlib/single_page_renderers.py:426
-msgid "unknown"
-msgstr "неизвестно"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:681
+#: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:699
-msgid "This page is intentionally left blank."
-msgstr "Эта страница намеренно оставлена пустой."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:707
-msgid "Blank"
+#: ocitysmap/layoutlib/multi_page_renderer.py:858
+msgid "Contents"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:749
+#: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#: ocitysmap/layoutlib/multi_page_renderer.py:1155
 #, python-format
 msgid "Map page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:410
-msgid "Additional data sources:"
+#: ocitysmap/layoutlib/single_page_renderers.py:463
+msgid "Map styles:"
+msgstr "Стили карты:"
+
+#: ocitysmap/layoutlib/single_page_renderers.py:467
+msgid "Data sources:"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:796
+#: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
 msgstr "Тест gettext"
 
+#~ msgid "Place of worship"
+#~ msgstr "Религиозное место"
+
+#~ msgid "Kindergarten"
+#~ msgstr "Детский сад"
+
+#~ msgid "School"
+#~ msgstr "Школа"
+
+#~ msgid "College"
+#~ msgstr "Колледж"
+
+#~ msgid "University"
+#~ msgstr "Университет"
+
+#~ msgid "Library"
+#~ msgstr "Библиотека"
+
+#~ msgid "Town hall"
+#~ msgstr "Мэрия"
+
+#~ msgid "Post office"
+#~ msgstr "Почтовое отделение"
+
+#~ msgid "Public building"
+#~ msgstr "Публичное здание"
+
+#~ msgid "Police"
+#~ msgstr "Полиция"
+
+#~ msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+#~ msgstr "© %(year)d разработчики MapOSMatic/OCitySMap."
+
 #~ msgid ""
-#~ "Erstellt mit http://around.get-map.org/  -  Kontakt: "
-#~ "Hartmut Holzgraefe (hartmut@php.net)"
+#~ "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/"
+#~ "copyright)"
 #~ msgstr ""
-#~ "Создано с помощью http://around.get-map.org/  -  Контакты: "
-#~ "Hartmut Holzgraefe (hartmut@php.net)"
+#~ "Данные карты © %(year)d участники OpenStreetMap.org (see http://osm.org/"
+#~ "copyright)"
+
+#~ msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+#~ msgstr "Карта отрисована: %(date)s. Данные OSM обновлены: %(osmdate)s."
+
+#~ msgid "The map may be incomplete or inaccurate."
+#~ msgstr "Данные этой карты могут быть неполными или неточными."
+
+#~ msgid "unknown"
+#~ msgstr "неизвестно"
+
+#~ msgid "This page is intentionally left blank."
+#~ msgstr "Эта страница намеренно оставлена пустой."
+
+#~ msgid ""
+#~ "Erstellt mit http://around.get-map.org/  -  Kontakt: Hartmut Holzgraefe "
+#~ "(hartmut@php.net)"
+#~ msgstr ""
+#~ "Создано с помощью http://around.get-map.org/  -  Контакты: Hartmut "
+#~ "Holzgraefe (hartmut@php.net)"

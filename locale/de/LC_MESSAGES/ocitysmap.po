@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-13 08:53+0000\n"
+"POT-Creation-Date: 2022-11-01 11:15+0000\n"
 "PO-Revision-Date: 2021-10-07 23:30+0000\n"
 "Last-Translator: Weblate Admin <admin@example.com>\n"
 "Language-Team: German <https://translate.get-map.org/projects/maposmatic/"
@@ -21,134 +21,125 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.6.2\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:296
+#: ocitysmap/indexlib/StreetIndex.py:89
 msgid "Places of worship"
 msgstr "Anbetungsstätten"
 
-#: ocitysmap/indexlib/StreetIndex.py:297
-msgid "Place of worship"
-msgstr "Anbetungsstätte"
-
-#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
-#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
-#: ocitysmap/indexlib/StreetIndex.py:302
+#: ocitysmap/indexlib/StreetIndex.py:90 ocitysmap/indexlib/StreetIndex.py:91
+#: ocitysmap/indexlib/StreetIndex.py:92 ocitysmap/indexlib/StreetIndex.py:93
+#: ocitysmap/indexlib/StreetIndex.py:94
 msgid "Education"
 msgstr "Bildung"
 
-#: ocitysmap/indexlib/StreetIndex.py:298
-msgid "Kindergarten"
-msgstr "Kindergarten"
-
-#: ocitysmap/indexlib/StreetIndex.py:299
-msgid "School"
-msgstr "Schule"
-
-#: ocitysmap/indexlib/StreetIndex.py:300
-msgid "College"
-msgstr "Hochschule"
-
-#: ocitysmap/indexlib/StreetIndex.py:301
-msgid "University"
-msgstr "Universität"
-
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Library"
-msgstr "Bibliothek"
-
-#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
-#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
+#: ocitysmap/indexlib/StreetIndex.py:95 ocitysmap/indexlib/StreetIndex.py:96
+#: ocitysmap/indexlib/StreetIndex.py:97 ocitysmap/indexlib/StreetIndex.py:98
 msgid "Public buildings"
 msgstr "Öffentliche Gebäude"
 
-#: ocitysmap/indexlib/StreetIndex.py:303
-msgid "Town hall"
-msgstr "Rathaus"
-
-#: ocitysmap/indexlib/StreetIndex.py:304
-msgid "Post office"
-msgstr "Postamt"
-
-#: ocitysmap/indexlib/StreetIndex.py:306
-msgid "Public building"
-msgstr "Öffentliches Gebäude"
-
-#: ocitysmap/indexlib/StreetIndex.py:307
-msgid "Police"
-msgstr "Polizei"
-
-#: ocitysmap/indexlib/StreetIndex.py:538
+#: ocitysmap/indexlib/StreetIndex.py:238
 msgid "Villages"
 msgstr "Ortsteile"
 
-#: ocitysmap/indexlib/StreetIndex.py:1071
-#, python-format
-msgid "Index page %d"
-msgstr "Index Seite %d"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:616
-#: ocitysmap/layoutlib/single_page_renderers.py:388
-#, python-format
-msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
-msgstr "Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:618
-#: ocitysmap/layoutlib/single_page_renderers.py:390
-#, python-format
-msgid ""
-"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
-msgstr ""
-"Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (siehe http://osm."
-"org/copyright)"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:628
-#: ocitysmap/layoutlib/single_page_renderers.py:400
-msgid "Map styles:"
+#: ocitysmap/layoutlib/multi_page_renderer.py:750
+#, fuzzy
+#| msgid "Map styles:"
+msgid "Map style(s):"
 msgstr "Kartenstile:"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:631
-#: ocitysmap/layoutlib/single_page_renderers.py:413
-#, python-format
-msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
-msgstr "Erstellt am %(date)s mit OSM-Daten vom %(osmdate)s."
+#: ocitysmap/layoutlib/multi_page_renderer.py:754
+#, fuzzy
+#| msgid "Additional data sources:"
+msgid "Data source(s):"
+msgstr "Weitere Datenquellen:"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:633
-#: ocitysmap/layoutlib/single_page_renderers.py:415
-msgid "The map may be incomplete or inaccurate."
-msgstr "Dieser Plan kann ungenau oder unvollständig sein."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:640
-#: ocitysmap/layoutlib/single_page_renderers.py:426
-msgid "unknown"
-msgstr "unbekannt"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:681
+#: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
 msgstr "Titelseite"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:699
-msgid "This page is intentionally left blank."
-msgstr "Diese Seite ist absichtlich frei."
+#: ocitysmap/layoutlib/multi_page_renderer.py:858
+msgid "Contents"
+msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:707
-msgid "Blank"
-msgstr "Frei"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:749
+#: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
 msgstr "Übersicht"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#: ocitysmap/layoutlib/multi_page_renderer.py:1155
 #, python-format
 msgid "Map page %d"
 msgstr "Kartenseite %d"
 
-#: ocitysmap/layoutlib/single_page_renderers.py:410
-msgid "Additional data sources:"
+#: ocitysmap/layoutlib/single_page_renderers.py:463
+msgid "Map styles:"
+msgstr "Kartenstile:"
+
+#: ocitysmap/layoutlib/single_page_renderers.py:467
+#, fuzzy
+#| msgid "Additional data sources:"
+msgid "Data sources:"
 msgstr "Weitere Datenquellen:"
 
-#: ocitysmap/layoutlib/single_page_renderers.py:796
+#: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
 msgstr "Test gettext"
+
+#~ msgid "Place of worship"
+#~ msgstr "Anbetungsstätte"
+
+#~ msgid "Kindergarten"
+#~ msgstr "Kindergarten"
+
+#~ msgid "School"
+#~ msgstr "Schule"
+
+#~ msgid "College"
+#~ msgstr "Hochschule"
+
+#~ msgid "University"
+#~ msgstr "Universität"
+
+#~ msgid "Library"
+#~ msgstr "Bibliothek"
+
+#~ msgid "Town hall"
+#~ msgstr "Rathaus"
+
+#~ msgid "Post office"
+#~ msgstr "Postamt"
+
+#~ msgid "Public building"
+#~ msgstr "Öffentliches Gebäude"
+
+#~ msgid "Police"
+#~ msgstr "Polizei"
+
+#~ msgid "Index page %d"
+#~ msgstr "Index Seite %d"
+
+#~ msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+#~ msgstr "Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler."
+
+#~ msgid ""
+#~ "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/"
+#~ "copyright)"
+#~ msgstr ""
+#~ "Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (siehe http://"
+#~ "osm.org/copyright)"
+
+#~ msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+#~ msgstr "Erstellt am %(date)s mit OSM-Daten vom %(osmdate)s."
+
+#~ msgid "The map may be incomplete or inaccurate."
+#~ msgstr "Dieser Plan kann ungenau oder unvollständig sein."
+
+#~ msgid "unknown"
+#~ msgstr "unbekannt"
+
+#~ msgid "This page is intentionally left blank."
+#~ msgstr "Diese Seite ist absichtlich frei."
+
+#~ msgid "Blank"
+#~ msgstr "Frei"
 
 #~ msgid ""
 #~ "Copyright © %(year)d MapOSMatic/OCitySMap developers. Map data © %(year)d "
