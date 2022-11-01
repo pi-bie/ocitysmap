@@ -4,13 +4,13 @@
 # Translators:
 # Hakan Tandogan <hakan.tandogan@gmail.com>, 2013
 # Hartmut Holzgraefe <hartmut@php.net>, 2019, 2021.
-# Weblate Admin <admin@example.com>, 2021.
+# Weblate Admin <admin@example.com>, 2021, 2022.
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-01 11:15+0000\n"
-"PO-Revision-Date: 2021-10-07 23:30+0000\n"
+"PO-Revision-Date: 2022-11-01 16:58+0000\n"
 "Last-Translator: Weblate Admin <admin@example.com>\n"
 "Language-Team: German <https://translate.get-map.org/projects/maposmatic/"
 "ocitysmap/de/>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.6.2\n"
+"X-Generator: Weblate 4.14.1\n"
 
 #: ocitysmap/indexlib/StreetIndex.py:89
 msgid "Places of worship"
@@ -41,16 +41,12 @@ msgid "Villages"
 msgstr "Ortsteile"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:750
-#, fuzzy
-#| msgid "Map styles:"
 msgid "Map style(s):"
-msgstr "Kartenstile:"
+msgstr "Kartenstil(e):"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:754
-#, fuzzy
-#| msgid "Additional data sources:"
 msgid "Data source(s):"
-msgstr "Weitere Datenquellen:"
+msgstr "Datenquellen:"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
@@ -58,7 +54,7 @@ msgstr "Titelseite"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:858
 msgid "Contents"
-msgstr ""
+msgstr "Inhalt"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
@@ -74,10 +70,8 @@ msgid "Map styles:"
 msgstr "Kartenstile:"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:467
-#, fuzzy
-#| msgid "Additional data sources:"
 msgid "Data sources:"
-msgstr "Weitere Datenquellen:"
+msgstr "Datenquellen:"
 
 #: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
