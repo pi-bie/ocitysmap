@@ -45,6 +45,7 @@ import qrcode.image.svg
 from io import BytesIO
 import html
 from submodules.robinson import robinson
+from gettext import gettext
 
 import ocitysmap
 import coords
@@ -87,7 +88,7 @@ class MultiPageRenderer(Renderer):
     """
 
     name = 'multi_page'
-    description = 'A multi-page layout.'
+    description = gettext(u'A multi-page layout.')
     multipages = True
 
     # The DEFAULT SCALE values represents the minimum acceptable mapnik scale

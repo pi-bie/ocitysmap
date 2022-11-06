@@ -33,6 +33,7 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 from copy import copy
+from gettext import gettext
 
 from ocitysmap.layoutlib import commons
 import ocitysmap
@@ -57,7 +58,7 @@ class TK25Renderer(Renderer):
     """
 
     name = 'tk25'
-    description = "German TK25 'Messtischblatt' style"
+    description = gettext(u"German TK25 'Messtischblatt' style")
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix,
                  index_position = 'side'):

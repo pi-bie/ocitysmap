@@ -1,3 +1,5 @@
+from gettext import gettext
+
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
@@ -7,7 +9,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
     This renderer adds a side index to the basic SinglePageRenderer
     """
     name = 'single_page_index_side'
-    description = 'Full-page layout with the index on the side.'
+    description = gettext(u'Full-page layout with the index on the side.')
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
         """

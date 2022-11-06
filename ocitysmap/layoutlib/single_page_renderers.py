@@ -39,6 +39,7 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 from copy import copy
+from gettext import gettext
 
 from ocitysmap.layoutlib import commons
 import ocitysmap
@@ -69,7 +70,7 @@ class SinglePageRenderer(Renderer):
     """
 
     name = 'generic_single_page'
-    description = 'A generic full-page layout with or without index.'
+    description = gettext(u'A generic full-page layout with or without index.')
 
     # TODO make configurable
     MAX_INDEX_OCCUPATION_RATIO = 1/3.

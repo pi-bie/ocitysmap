@@ -1,3 +1,5 @@
+from gettext import gettext
+
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
@@ -7,7 +9,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
     Render single page map without index
     """
     name = 'plain'
-    description = 'Full-page layout without index.'
+    description = gettext(u'Full-page layout without index.')
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
         """
