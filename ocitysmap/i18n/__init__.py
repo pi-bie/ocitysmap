@@ -39,7 +39,7 @@ class i18n:
         pass
 
     def user_readable_street(self, name):
-        pass
+        return name
 
     def first_letter_equal(self, a, b):
         pass
