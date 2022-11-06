@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-01 11:15+0000\n"
+"POT-Creation-Date: 2022-11-06 08:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,23 +17,87 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:89
+#: ocitysmap/indexlib/StreetIndex.py:63
+msgid "Streets and selected amenities"
+msgstr ""
+
+#: ocitysmap/indexlib/StreetIndex.py:90
 msgid "Places of worship"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:90 ocitysmap/indexlib/StreetIndex.py:91
-#: ocitysmap/indexlib/StreetIndex.py:92 ocitysmap/indexlib/StreetIndex.py:93
-#: ocitysmap/indexlib/StreetIndex.py:94
+#: ocitysmap/indexlib/StreetIndex.py:91 ocitysmap/indexlib/StreetIndex.py:92
+#: ocitysmap/indexlib/StreetIndex.py:93 ocitysmap/indexlib/StreetIndex.py:94
+#: ocitysmap/indexlib/StreetIndex.py:95
 msgid "Education"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:95 ocitysmap/indexlib/StreetIndex.py:96
-#: ocitysmap/indexlib/StreetIndex.py:97 ocitysmap/indexlib/StreetIndex.py:98
+#: ocitysmap/indexlib/StreetIndex.py:96 ocitysmap/indexlib/StreetIndex.py:97
+#: ocitysmap/indexlib/StreetIndex.py:98 ocitysmap/indexlib/StreetIndex.py:99
 msgid "Public buildings"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:238
+#: ocitysmap/indexlib/StreetIndex.py:241
 msgid "Villages"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:40
+msgid "Health related facilities"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:50
+msgid "Health Centre"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:51
+msgid "Hospital"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:52
+msgid "Clinic"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:53
+msgid "Doctor"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:54
+msgid "Dentist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:55
+msgid "Birthing Centre"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:56
+msgid "Midwife"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:57
+msgid "Nurse"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:58
+msgid "Alternative"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:59
+msgid "Optometrist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:60
+msgid "Physiotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:61
+msgid "Psychotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/NotesIndex.py:46
+msgid "OSM Notes index"
+msgstr ""
+
+#: ocitysmap/indexlib/TreeIndex.py:40
+msgid "Tree genus / species index"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:750

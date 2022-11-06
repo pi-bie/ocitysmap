@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-13 08:53+0000\n"
+"POT-Creation-Date: 2022-11-06 08:39+0000\n"
 "PO-Revision-Date: 2019-06-23 20:46+0000\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak <http://translate.get-map.org/projects/maposmatic/"
@@ -20,132 +20,176 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Weblate 3.5.1\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:296
+#: ocitysmap/indexlib/StreetIndex.py:63
+msgid "Streets and selected amenities"
+msgstr ""
+
+#: ocitysmap/indexlib/StreetIndex.py:90
 msgid "Places of worship"
 msgstr "Kostoly"
 
-#: ocitysmap/indexlib/StreetIndex.py:297
-msgid "Place of worship"
-msgstr "Kostol"
-
-#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
-#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
-#: ocitysmap/indexlib/StreetIndex.py:302
+#: ocitysmap/indexlib/StreetIndex.py:91 ocitysmap/indexlib/StreetIndex.py:92
+#: ocitysmap/indexlib/StreetIndex.py:93 ocitysmap/indexlib/StreetIndex.py:94
+#: ocitysmap/indexlib/StreetIndex.py:95
 msgid "Education"
 msgstr "Vzdelanie"
 
-#: ocitysmap/indexlib/StreetIndex.py:298
-msgid "Kindergarten"
-msgstr "Materská škola"
-
-#: ocitysmap/indexlib/StreetIndex.py:299
-msgid "School"
-msgstr "Základná škola"
-
-#: ocitysmap/indexlib/StreetIndex.py:300
-msgid "College"
-msgstr "Stredná škola"
-
-#: ocitysmap/indexlib/StreetIndex.py:301
-msgid "University"
-msgstr "Univerzita"
-
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Library"
-msgstr "Knižnica"
-
-#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
-#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
+#: ocitysmap/indexlib/StreetIndex.py:96 ocitysmap/indexlib/StreetIndex.py:97
+#: ocitysmap/indexlib/StreetIndex.py:98 ocitysmap/indexlib/StreetIndex.py:99
 msgid "Public buildings"
 msgstr "Verejné budovy"
 
-#: ocitysmap/indexlib/StreetIndex.py:303
-msgid "Town hall"
-msgstr "Radnica"
-
-#: ocitysmap/indexlib/StreetIndex.py:304
-msgid "Post office"
-msgstr "Pošta"
-
-#: ocitysmap/indexlib/StreetIndex.py:306
-msgid "Public building"
-msgstr "Verejná budova"
-
-#: ocitysmap/indexlib/StreetIndex.py:307
-msgid "Police"
-msgstr "Polícia"
-
-#: ocitysmap/indexlib/StreetIndex.py:538
+#: ocitysmap/indexlib/StreetIndex.py:241
 msgid "Villages"
 msgstr "Obce"
 
-#: ocitysmap/indexlib/StreetIndex.py:1071
-#, python-format
-msgid "Index page %d"
+#: ocitysmap/indexlib/HealthIndex.py:40
+msgid "Health related facilities"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:616
-#: ocitysmap/layoutlib/single_page_renderers.py:388
-#, python-format
-msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
-msgstr "Copyright © %(year)d Vývojari MapOSMatic/OCitySMap."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:618
-#: ocitysmap/layoutlib/single_page_renderers.py:390
-#, python-format
-msgid ""
-"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
+#: ocitysmap/indexlib/HealthIndex.py:50
+msgid "Health Centre"
 msgstr ""
-"Údaje o mape © %(year)d Prispievatelia OpenStreetMap (viď http://osm.org/"
-"copyright)"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:628
-#: ocitysmap/layoutlib/single_page_renderers.py:400
-msgid "Map styles:"
+#: ocitysmap/indexlib/HealthIndex.py:51
+msgid "Hospital"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:52
+msgid "Clinic"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:53
+msgid "Doctor"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:54
+msgid "Dentist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:55
+msgid "Birthing Centre"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:56
+msgid "Midwife"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:57
+msgid "Nurse"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:58
+msgid "Alternative"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:59
+msgid "Optometrist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:60
+msgid "Physiotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:61
+msgid "Psychotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/NotesIndex.py:46
+msgid "OSM Notes index"
+msgstr ""
+
+#: ocitysmap/indexlib/TreeIndex.py:40
+msgid "Tree genus / species index"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:750
+#, fuzzy
+msgid "Map style(s):"
 msgstr "Mapové štýly:"
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:631
-#: ocitysmap/layoutlib/single_page_renderers.py:413
-#, python-format
-msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+#: ocitysmap/layoutlib/multi_page_renderer.py:754
+msgid "Data source(s):"
 msgstr ""
-"Mapa vykreslená dňa %(date)s. Údaje OSM aktualizované ku dňu %(osmdate)s."
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:633
-#: ocitysmap/layoutlib/single_page_renderers.py:415
-msgid "The map may be incomplete or inaccurate."
-msgstr "Mapa nemusí byť úplná ani presná."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:640
-#: ocitysmap/layoutlib/single_page_renderers.py:426
-msgid "unknown"
-msgstr "neznáme"
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:681
+#: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:699
-msgid "This page is intentionally left blank."
-msgstr "Táto strana je zámerne prázdna."
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:707
-msgid "Blank"
+#: ocitysmap/layoutlib/multi_page_renderer.py:858
+msgid "Contents"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:749
+#: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#: ocitysmap/layoutlib/multi_page_renderer.py:1155
 #, python-format
 msgid "Map page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:410
-msgid "Additional data sources:"
+#: ocitysmap/layoutlib/single_page_renderers.py:463
+msgid "Map styles:"
+msgstr "Mapové štýly:"
+
+#: ocitysmap/layoutlib/single_page_renderers.py:467
+msgid "Data sources:"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:796
+#: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
 msgstr "Test gettextu"
+
+#~ msgid "Place of worship"
+#~ msgstr "Kostol"
+
+#~ msgid "Kindergarten"
+#~ msgstr "Materská škola"
+
+#~ msgid "School"
+#~ msgstr "Základná škola"
+
+#~ msgid "College"
+#~ msgstr "Stredná škola"
+
+#~ msgid "University"
+#~ msgstr "Univerzita"
+
+#~ msgid "Library"
+#~ msgstr "Knižnica"
+
+#~ msgid "Town hall"
+#~ msgstr "Radnica"
+
+#~ msgid "Post office"
+#~ msgstr "Pošta"
+
+#~ msgid "Public building"
+#~ msgstr "Verejná budova"
+
+#~ msgid "Police"
+#~ msgstr "Polícia"
+
+#~ msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+#~ msgstr "Copyright © %(year)d Vývojari MapOSMatic/OCitySMap."
+
+#~ msgid ""
+#~ "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/"
+#~ "copyright)"
+#~ msgstr ""
+#~ "Údaje o mape © %(year)d Prispievatelia OpenStreetMap (viď http://osm.org/"
+#~ "copyright)"
+
+#~ msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+#~ msgstr ""
+#~ "Mapa vykreslená dňa %(date)s. Údaje OSM aktualizované ku dňu %(osmdate)s."
+
+#~ msgid "The map may be incomplete or inaccurate."
+#~ msgstr "Mapa nemusí byť úplná ani presná."
+
+#~ msgid "unknown"
+#~ msgstr "neznáme"
+
+#~ msgid "This page is intentionally left blank."
+#~ msgstr "Táto strana je zámerne prázdna."

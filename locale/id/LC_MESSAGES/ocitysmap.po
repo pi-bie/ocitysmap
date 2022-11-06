@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-13 08:53+0000\n"
+"POT-Creation-Date: 2022-11-06 08:39+0000\n"
 "PO-Revision-Date: 2013-11-20 09:54+0000\n"
 "Last-Translator: Guttorm Flatabø <post@guttormflatabo.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/dittaeva/maposmatic/"
@@ -18,129 +18,152 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:296
+#: ocitysmap/indexlib/StreetIndex.py:63
+msgid "Streets and selected amenities"
+msgstr ""
+
+#: ocitysmap/indexlib/StreetIndex.py:90
 msgid "Places of worship"
 msgstr "Tempat beribadah"
 
-#: ocitysmap/indexlib/StreetIndex.py:297
-msgid "Place of worship"
-msgstr "Tempat beribadah"
-
-#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
-#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
-#: ocitysmap/indexlib/StreetIndex.py:302
+#: ocitysmap/indexlib/StreetIndex.py:91 ocitysmap/indexlib/StreetIndex.py:92
+#: ocitysmap/indexlib/StreetIndex.py:93 ocitysmap/indexlib/StreetIndex.py:94
+#: ocitysmap/indexlib/StreetIndex.py:95
 msgid "Education"
 msgstr "Pendidikan"
 
-#: ocitysmap/indexlib/StreetIndex.py:298
-msgid "Kindergarten"
-msgstr "Taman Kanak-Kanak"
-
-#: ocitysmap/indexlib/StreetIndex.py:299
-msgid "School"
-msgstr "Sekolah"
-
-#: ocitysmap/indexlib/StreetIndex.py:300
-msgid "College"
-msgstr "Perguruan Tinggi"
-
-#: ocitysmap/indexlib/StreetIndex.py:301
-msgid "University"
-msgstr "Universitas"
-
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Library"
-msgstr "Perpustakaan"
-
-#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
-#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
+#: ocitysmap/indexlib/StreetIndex.py:96 ocitysmap/indexlib/StreetIndex.py:97
+#: ocitysmap/indexlib/StreetIndex.py:98 ocitysmap/indexlib/StreetIndex.py:99
 msgid "Public buildings"
 msgstr "Bangunan Publik"
 
-#: ocitysmap/indexlib/StreetIndex.py:303
-msgid "Town hall"
-msgstr "Balai Kota"
-
-#: ocitysmap/indexlib/StreetIndex.py:304
-msgid "Post office"
-msgstr "Kantor Pos"
-
-#: ocitysmap/indexlib/StreetIndex.py:306
-msgid "Public building"
-msgstr "Bangunan Publik"
-
-#: ocitysmap/indexlib/StreetIndex.py:307
-msgid "Police"
-msgstr "Polisi"
-
-#: ocitysmap/indexlib/StreetIndex.py:538
+#: ocitysmap/indexlib/StreetIndex.py:241
 msgid "Villages"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:1071
-#, python-format
-msgid "Index page %d"
+#: ocitysmap/indexlib/HealthIndex.py:40
+msgid "Health related facilities"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:616
-#: ocitysmap/layoutlib/single_page_renderers.py:388
-#, python-format
-msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+#: ocitysmap/indexlib/HealthIndex.py:50
+msgid "Health Centre"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:618
-#: ocitysmap/layoutlib/single_page_renderers.py:390
-#, python-format
-msgid ""
-"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
+#: ocitysmap/indexlib/HealthIndex.py:51
+msgid "Hospital"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:628
-#: ocitysmap/layoutlib/single_page_renderers.py:400
-msgid "Map styles:"
+#: ocitysmap/indexlib/HealthIndex.py:52
+msgid "Clinic"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:631
-#: ocitysmap/layoutlib/single_page_renderers.py:413
-#, python-format
-msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+#: ocitysmap/indexlib/HealthIndex.py:53
+msgid "Doctor"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:633
-#: ocitysmap/layoutlib/single_page_renderers.py:415
-msgid "The map may be incomplete or inaccurate."
+#: ocitysmap/indexlib/HealthIndex.py:54
+msgid "Dentist"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:640
-#: ocitysmap/layoutlib/single_page_renderers.py:426
-msgid "unknown"
+#: ocitysmap/indexlib/HealthIndex.py:55
+msgid "Birthing Centre"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:681
+#: ocitysmap/indexlib/HealthIndex.py:56
+msgid "Midwife"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:57
+msgid "Nurse"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:58
+msgid "Alternative"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:59
+msgid "Optometrist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:60
+msgid "Physiotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:61
+msgid "Psychotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/NotesIndex.py:46
+msgid "OSM Notes index"
+msgstr ""
+
+#: ocitysmap/indexlib/TreeIndex.py:40
+msgid "Tree genus / species index"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:750
+msgid "Map style(s):"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:754
+msgid "Data source(s):"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:699
-msgid "This page is intentionally left blank."
+#: ocitysmap/layoutlib/multi_page_renderer.py:858
+msgid "Contents"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:707
-msgid "Blank"
-msgstr ""
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:749
+#: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#: ocitysmap/layoutlib/multi_page_renderer.py:1155
 #, python-format
 msgid "Map page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:410
-msgid "Additional data sources:"
+#: ocitysmap/layoutlib/single_page_renderers.py:463
+msgid "Map styles:"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:796
+#: ocitysmap/layoutlib/single_page_renderers.py:467
+msgid "Data sources:"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
 msgstr ""
+
+#~ msgid "Place of worship"
+#~ msgstr "Tempat beribadah"
+
+#~ msgid "Kindergarten"
+#~ msgstr "Taman Kanak-Kanak"
+
+#~ msgid "School"
+#~ msgstr "Sekolah"
+
+#~ msgid "College"
+#~ msgstr "Perguruan Tinggi"
+
+#~ msgid "University"
+#~ msgstr "Universitas"
+
+#~ msgid "Library"
+#~ msgstr "Perpustakaan"
+
+#~ msgid "Town hall"
+#~ msgstr "Balai Kota"
+
+#~ msgid "Post office"
+#~ msgstr "Kantor Pos"
+
+#~ msgid "Public building"
+#~ msgstr "Bangunan Publik"
+
+#~ msgid "Police"
+#~ msgstr "Polisi"
