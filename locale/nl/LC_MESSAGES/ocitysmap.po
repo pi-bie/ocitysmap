@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-06 08:39+0000\n"
+"POT-Creation-Date: 2022-11-06 13:36+0000\n"
 "PO-Revision-Date: 2013-11-20 09:54+0000\n"
 "Last-Translator: Guttorm Flatabø <post@guttormflatabo.com>\n"
 "Language-Team: Dutch (http://www.transifex.com/dittaeva/maposmatic/language/"
@@ -19,6 +19,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ocitysmap/indexlib/NotesIndex.py:46
+msgid "OSM Notes index"
+msgstr ""
+
+#: ocitysmap/indexlib/GeneralIndex.py:51
+msgid "(* General Index *)"
+msgstr ""
+
+#: ocitysmap/indexlib/GeneralIndex.py:1006
+#, python-format
+msgid "Index page %d"
+msgstr ""
 
 #: ocitysmap/indexlib/StreetIndex.py:63
 msgid "Streets and selected amenities"
@@ -42,6 +55,10 @@ msgstr "Openbare gebouwen"
 #: ocitysmap/indexlib/StreetIndex.py:241
 msgid "Villages"
 msgstr "Dorpen"
+
+#: ocitysmap/indexlib/TreeIndex.py:40
+msgid "Tree genus / species index"
+msgstr ""
 
 #: ocitysmap/indexlib/HealthIndex.py:40
 msgid "Health related facilities"
@@ -95,50 +112,84 @@ msgstr ""
 msgid "Psychotherapist"
 msgstr ""
 
-#: ocitysmap/indexlib/NotesIndex.py:46
-msgid "OSM Notes index"
+#: ocitysmap/layoutlib/single_page_renderers.py:73
+msgid "A generic full-page layout with or without index."
 msgstr ""
 
-#: ocitysmap/indexlib/TreeIndex.py:40
-msgid "Tree genus / species index"
+#: ocitysmap/layoutlib/single_page_renderers.py:464
+msgid "Map styles:"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:750
+#: ocitysmap/layoutlib/single_page_renderers.py:468
+msgid "Data sources:"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:869
+msgid "Test gettext"
+msgstr "Test gettext"
+
+#: ocitysmap/layoutlib/abstract_renderer.py:493
+#, fuzzy, python-format
+msgid "Created using MapOSMatic/OCitySMap on %(date)s."
+msgstr "Copyright © %(year)d MapOSMatic/OCitySMap ontwikkelaars."
+
+#: ocitysmap/layoutlib/abstract_renderer.py:497
+#, fuzzy, python-format
+msgid ""
+"Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/"
+"copyright)"
+msgstr ""
+"Kaartgegevens © %(year)d OpenStreetMap.org en bijdragers (see http://osm.org/"
+"copyright)."
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:91
+msgid "A multi-page layout."
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:751
 msgid "Map style(s):"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:754
+#: ocitysmap/layoutlib/multi_page_renderer.py:755
 msgid "Data source(s):"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:779
+#: ocitysmap/layoutlib/multi_page_renderer.py:780
 msgid "Front page"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:858
+#: ocitysmap/layoutlib/multi_page_renderer.py:859
 msgid "Contents"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:907
+#: ocitysmap/layoutlib/multi_page_renderer.py:908
 msgid "Overview"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1155
+#: ocitysmap/layoutlib/multi_page_renderer.py:1156
 #, python-format
 msgid "Map page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:463
-msgid "Map styles:"
+#: ocitysmap/layoutlib/tk25.py:61
+msgid "German TK25 'Messtischblatt' style"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:467
-msgid "Data sources:"
+#: ocitysmap/layoutlib/single_page_renderer/side_index.py:12
+msgid "Full-page layout with the index on the side."
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:868
-msgid "Test gettext"
-msgstr "Test gettext"
+#: ocitysmap/layoutlib/single_page_renderer/extra_page.py:13
+msgid "Full-page layout with index on extra page (PDF only)."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderer/no_index.py:12
+msgid "Full-page layout without index."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderer/bottom_index.py:13
+msgid "Full-page layout with the index at the bottom."
+msgstr ""
 
 #~ msgid "Place of worship"
 #~ msgstr "Gebedshuis"
@@ -169,16 +220,6 @@ msgstr "Test gettext"
 
 #~ msgid "Police"
 #~ msgstr "Politie"
-
-#~ msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
-#~ msgstr "Copyright © %(year)d MapOSMatic/OCitySMap ontwikkelaars."
-
-#~ msgid ""
-#~ "Map data © %(year)d OpenStreetMap contributors (see http://osm.org/"
-#~ "copyright)"
-#~ msgstr ""
-#~ "Kaartgegevens © %(year)d OpenStreetMap.org en bijdragers (see http://osm."
-#~ "org/copyright)."
 
 #~ msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
 #~ msgstr ""
