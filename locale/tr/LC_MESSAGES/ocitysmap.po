@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-11-06 13:36+0000\n"
+"POT-Creation-Date: 2022-11-06 13:37+0000\n"
 "PO-Revision-Date: 2013-11-20 09:54+0000\n"
 "Last-Translator: Hakan Tandogan <hakan.tandogan@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/dittaeva/maposmatic/"
@@ -36,23 +36,22 @@ msgstr ""
 msgid "Streets and selected amenities"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:90 ocitysmap/indexlib/StreetIndex.py:89
+#: ocitysmap/indexlib/StreetIndex.py:90
 msgid "Places of worship"
 msgstr "İbadethane"
 
 #: ocitysmap/indexlib/StreetIndex.py:91 ocitysmap/indexlib/StreetIndex.py:92
 #: ocitysmap/indexlib/StreetIndex.py:93 ocitysmap/indexlib/StreetIndex.py:94
-#: ocitysmap/indexlib/StreetIndex.py:95 ocitysmap/indexlib/StreetIndex.py:90
+#: ocitysmap/indexlib/StreetIndex.py:95
 msgid "Education"
 msgstr "Eğitim"
 
 #: ocitysmap/indexlib/StreetIndex.py:96 ocitysmap/indexlib/StreetIndex.py:97
 #: ocitysmap/indexlib/StreetIndex.py:98 ocitysmap/indexlib/StreetIndex.py:99
-#: ocitysmap/indexlib/StreetIndex.py:95
 msgid "Public buildings"
 msgstr "Kamu binaları"
 
-#: ocitysmap/indexlib/StreetIndex.py:241 ocitysmap/indexlib/StreetIndex.py:238
+#: ocitysmap/indexlib/StreetIndex.py:241
 msgid "Villages"
 msgstr "Köyler"
 
@@ -117,17 +116,14 @@ msgid "A generic full-page layout with or without index."
 msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:464
-#: ocitysmap/layoutlib/single_page_renderers.py:463
 msgid "Map styles:"
 msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:468
-#: ocitysmap/layoutlib/single_page_renderers.py:467
 msgid "Data sources:"
 msgstr ""
 
 #: ocitysmap/layoutlib/single_page_renderers.py:869
-#: ocitysmap/layoutlib/single_page_renderers.py:868
 msgid "Test gettext"
 msgstr "Türkçe Test gettext - ayni anda jenkins denemesi"
 
@@ -150,32 +146,26 @@ msgid "A multi-page layout."
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:751
-#: ocitysmap/layoutlib/multi_page_renderer.py:750
 msgid "Map style(s):"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:755
-#: ocitysmap/layoutlib/multi_page_renderer.py:754
 msgid "Data source(s):"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:780
-#: ocitysmap/layoutlib/multi_page_renderer.py:779
 msgid "Front page"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:859
-#: ocitysmap/layoutlib/multi_page_renderer.py:858
 msgid "Contents"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:908
-#: ocitysmap/layoutlib/multi_page_renderer.py:907
 msgid "Overview"
 msgstr ""
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:1156
-#: ocitysmap/layoutlib/multi_page_renderer.py:1155
 #, python-format
 msgid "Map page %d"
 msgstr ""
