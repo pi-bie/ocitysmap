@@ -27,19 +27,19 @@ import sys
 import shutil
 import optparse
 import subprocess
+import glob
 
 def make_pot():
     print("Make locale/ocitysmap.pot")
     # TODO auto-generate source file list
-    subprocess.check_call(['xgettext', '-o', 'ocitysmap.pot', '-p', 'locale',
-                           '-L', 'Python',
-                           'ocitysmap/indexlib/StreetIndex.py',
-                           'ocitysmap/indexlib/HealthIndex.py',
-                           'ocitysmap/indexlib/NotesIndex.py',
-                           'ocitysmap/indexlib/TreeIndex.py',
-                           'ocitysmap/layoutlib/multi_page_renderer.py',
-                           'ocitysmap/layoutlib/single_page_renderers.py',
-                           ])
+    cmd = ['xgettext',
+           '--output=ocitysmap.pot',
+           '--output-dir=locale',
+           '--language=Python',
+           '--from-code=UTF-8',
+    ]
+    cmd += glob.glob("./**/*.py", recursive = True)
+    subprocess.check_call(cmd)
     return
 
 def make_po(languages):
