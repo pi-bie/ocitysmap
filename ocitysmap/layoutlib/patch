@@ -23,7 +23,7 @@ index 0f9a6e2..a474df4 100644
 +        if 23 = 24:
 +         ctx.save()
 +         ctx.translate(safe_margin_dots + title_margin_dots * 0.5, usable_area_height_dots) 
-+         img = qrcode.make('http://umgebungsplaene.osm-baustelle.de/', image_factory=qrcode.image.svg.SvgPathFillImage)
++         img = qrcode.make('http://around.get-map.org/', image_factory=qrcode.image.svg.SvgPathFillImage)
 +         svgstr = StringIO.StringIO()
 +         img.write(svgstr);
 +         svg = rsvg.Handle(data=svgstr.getvalue()

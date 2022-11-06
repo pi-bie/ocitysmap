@@ -75,9 +75,11 @@ class MultiPageRenderer(Renderer):
     # The DEFAULT SCALE values represents the minimum acceptable mapnik scale
     # 70000 ensures that the zoom level will be 10 or higher
     # 12000 ensures that the zoom level will be 16 or higher
+    # 4200 -> zoom level 17
+    # 2100 -> zoom level 18
     # see entities.xml.inc file from osm style sheet
     # TODO: make configurable
-    DEFAULT_MULTIPAGE_SCALE = 12000
+    DEFAULT_MULTIPAGE_SCALE = 4200
     MAX_MULTIPAGE_MAPPAGES  = 50
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
