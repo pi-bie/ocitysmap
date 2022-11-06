@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Translators:
 # Hakan Tandogan <hakan.tandogan@gmail.com>, 2013
-# Hartmut Holzgraefe <hartmut@php.net>, 2019, 2021.
+# Hartmut Holzgraefe <hartmut@php.net>, 2019, 2021, 2022.
 # Weblate Admin <admin@example.com>, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-06 13:37+0000\n"
-"PO-Revision-Date: 2021-10-07 23:30+0000\n"
-"Last-Translator: Weblate Admin <admin@example.com>\n"
+"PO-Revision-Date: 2022-11-06 15:09+0000\n"
+"Last-Translator: Hartmut Holzgraefe <hartmut@php.net>\n"
 "Language-Team: German <https://translate.get-map.org/projects/maposmatic/"
 "ocitysmap/de/>\n"
 "Language: de\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.6.2\n"
+"X-Generator: Weblate 4.14.1\n"
 
 #: ocitysmap/indexlib/NotesIndex.py:46
 msgid "OSM Notes index"
@@ -27,7 +27,7 @@ msgstr "OSM Notizen"
 
 #: ocitysmap/indexlib/GeneralIndex.py:51
 msgid "(* General Index *)"
-msgstr ""
+msgstr "(* Allgemeiner Index *)"
 
 #: ocitysmap/indexlib/GeneralIndex.py:1006
 #, python-format
@@ -130,18 +130,18 @@ msgid "Test gettext"
 msgstr "Test gettext"
 
 #: ocitysmap/layoutlib/abstract_renderer.py:493
-#, fuzzy, python-format
+#, python-format
 msgid "Created using MapOSMatic/OCitySMap on %(date)s."
-msgstr "Copyright © %(year)d MapOSMatic/OCitySMap-Entwickler."
+msgstr "Erstellt mit MapOSMatic/OCitysMap am %(date)s."
 
 #: ocitysmap/layoutlib/abstract_renderer.py:497
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/"
 "copyright)"
 msgstr ""
-"Kartendaten © %(year)d OpenStreetMap.org und Mitwirkende (siehe http://osm."
-"org/copyright)"
+"Kartendaten © %(osmyear)d OpenStreetMap.org und Mitwirkende (siehe http://osm"
+".org/copyright)"
 
 #: ocitysmap/layoutlib/multi_page_renderer.py:91
 msgid "A multi-page layout."
