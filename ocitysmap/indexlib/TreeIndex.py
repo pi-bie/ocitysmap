@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import psycopg2
+from gettext import gettext
 
 from . import commons
 import ocitysmap
@@ -36,7 +37,7 @@ MAX_INDEX_CATEGORY_ITEMS = 300
 
 class TreeIndex(GeneralIndex):
     name = "Tree"
-    description = "Tree genus / species index"
+    description = gettext(u"Tree genus / species index")
 
     def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
         GeneralIndex.__init__(self, renderer, db, bbox, polygon_wkt, i18n, page_number)

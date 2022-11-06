@@ -17,6 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import psycopg2
+from gettext import gettext
 
 from . import commons
 import ocitysmap
@@ -42,7 +43,7 @@ MAX_INDEX_CATEGORY_ITEMS = 300
 
 class NotesIndex(GeneralIndex):
     name = "Notes"
-    description = "OSM Notes index"
+    description = gettext(u"OSM Notes index")
 
     def __init__(self, db, renderer, bounding_box, polygon_wkt, i18n, page_number=None):
         GeneralIndex.__init__(self, db, renderer, bounding_box, polygon_wkt, i18n, page_number)

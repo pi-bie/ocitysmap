@@ -29,6 +29,7 @@ import locale
 from natsort import natsorted, natsort_keygen, ns
 import psycopg2
 import datetime
+from gettext import gettext
 
 from . import commons
 import ocitysmap
@@ -59,7 +60,7 @@ class StreetIndexCategory(GeneralIndexCategory):
 
 class StreetIndex(GeneralIndex):
     name = "Street"
-    description = "Streets and selected amenities"
+    description = gettext(u"Streets and selected amenities")
 
     def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
         GeneralIndex.__init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number)
@@ -129,9 +130,11 @@ class StreetIndex(GeneralIndex):
             LOG.warning('error while setting LC_COLLATE to "%s"' % self._i18n.language_code())
 
         try:
-            sorted_sl = sorted([(self._i18n.user_readable_street(name),
-                                 linestring) for name,linestring in sl],
-                               key = natsort_keygen(alg=ns.LOCALE|ns.IGNORECASE, key=lambda street: street[0]))
+            sorted_sl = sorted(
+                [(self._i18n.user_readable_street(name), linestring) for name,linestring in sl],
+                key = natsort_keygen(alg=ns.LOCALE|ns.IGNORECASE, key=lambda street: street[0]))
+        except:
+            sorted_sl= sl
         finally:
             locale.setlocale(locale.LC_COLLATE, prev_locale)
 

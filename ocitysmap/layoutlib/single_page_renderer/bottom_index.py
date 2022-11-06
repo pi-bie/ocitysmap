@@ -1,3 +1,5 @@
+from gettext import gettext
+
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
@@ -8,7 +10,7 @@ class SinglePageRendererIndexBottom(SinglePageRenderer):
     """
 
     name = 'single_page_index_bottom'
-    description = 'Full-page layout with the index at the bottom.'
+    description = gettext(u'Full-page layout with the index at the bottom.')
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
         """

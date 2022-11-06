@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MapOSMatic\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-13 08:53+0000\n"
+"POT-Creation-Date: 2022-11-06 13:36+0000\n"
 "PO-Revision-Date: 2012-04-05 22:13+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Kurdish (Iraq) (http://www.transifex.com/dittaeva/maposmatic/"
@@ -18,129 +18,171 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ocitysmap/indexlib/StreetIndex.py:296
-msgid "Places of worship"
+#: ocitysmap/indexlib/NotesIndex.py:46
+msgid "OSM Notes index"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:297
-msgid "Place of worship"
+#: ocitysmap/indexlib/GeneralIndex.py:51
+msgid "(* General Index *)"
 msgstr ""
 
-#: ocitysmap/indexlib/StreetIndex.py:298 ocitysmap/indexlib/StreetIndex.py:299
-#: ocitysmap/indexlib/StreetIndex.py:300 ocitysmap/indexlib/StreetIndex.py:301
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Education"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:298
-msgid "Kindergarten"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:299
-msgid "School"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:300
-msgid "College"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:301
-msgid "University"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:302
-msgid "Library"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:303 ocitysmap/indexlib/StreetIndex.py:304
-#: ocitysmap/indexlib/StreetIndex.py:305 ocitysmap/indexlib/StreetIndex.py:307
-msgid "Public buildings"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:303
-msgid "Town hall"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:304
-msgid "Post office"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:306
-msgid "Public building"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:307
-msgid "Police"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:538
-msgid "Villages"
-msgstr ""
-
-#: ocitysmap/indexlib/StreetIndex.py:1071
+#: ocitysmap/indexlib/GeneralIndex.py:1006
 #, python-format
 msgid "Index page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:616
-#: ocitysmap/layoutlib/single_page_renderers.py:388
-#, python-format
-msgid "Copyright © %(year)d MapOSMatic/OCitySMap developers."
+#: ocitysmap/indexlib/StreetIndex.py:63
+msgid "Streets and selected amenities"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:618
-#: ocitysmap/layoutlib/single_page_renderers.py:390
-#, python-format
-msgid ""
-"Map data © %(year)d OpenStreetMap contributors (see http://osm.org/copyright)"
+#: ocitysmap/indexlib/StreetIndex.py:90
+msgid "Places of worship"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:628
-#: ocitysmap/layoutlib/single_page_renderers.py:400
+#: ocitysmap/indexlib/StreetIndex.py:91 ocitysmap/indexlib/StreetIndex.py:92
+#: ocitysmap/indexlib/StreetIndex.py:93 ocitysmap/indexlib/StreetIndex.py:94
+#: ocitysmap/indexlib/StreetIndex.py:95
+msgid "Education"
+msgstr ""
+
+#: ocitysmap/indexlib/StreetIndex.py:96 ocitysmap/indexlib/StreetIndex.py:97
+#: ocitysmap/indexlib/StreetIndex.py:98 ocitysmap/indexlib/StreetIndex.py:99
+msgid "Public buildings"
+msgstr ""
+
+#: ocitysmap/indexlib/StreetIndex.py:241
+msgid "Villages"
+msgstr ""
+
+#: ocitysmap/indexlib/TreeIndex.py:40
+msgid "Tree genus / species index"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:40
+msgid "Health related facilities"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:50
+msgid "Health Centre"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:51
+msgid "Hospital"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:52
+msgid "Clinic"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:53
+msgid "Doctor"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:54
+msgid "Dentist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:55
+msgid "Birthing Centre"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:56
+msgid "Midwife"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:57
+msgid "Nurse"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:58
+msgid "Alternative"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:59
+msgid "Optometrist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:60
+msgid "Physiotherapist"
+msgstr ""
+
+#: ocitysmap/indexlib/HealthIndex.py:61
+msgid "Psychotherapist"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:73
+msgid "A generic full-page layout with or without index."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:464
 msgid "Map styles:"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:631
-#: ocitysmap/layoutlib/single_page_renderers.py:413
+#: ocitysmap/layoutlib/single_page_renderers.py:468
+msgid "Data sources:"
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderers.py:869
+msgid "Test gettext"
+msgstr ""
+
+#: ocitysmap/layoutlib/abstract_renderer.py:493
 #, python-format
-msgid "Map rendered on: %(date)s. OSM data updated on: %(osmdate)s."
+msgid "Created using MapOSMatic/OCitySMap on %(date)s."
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:633
-#: ocitysmap/layoutlib/single_page_renderers.py:415
-msgid "The map may be incomplete or inaccurate."
+#: ocitysmap/layoutlib/abstract_renderer.py:497
+#, python-format
+msgid ""
+"Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/"
+"copyright)"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:640
-#: ocitysmap/layoutlib/single_page_renderers.py:426
-msgid "unknown"
+#: ocitysmap/layoutlib/multi_page_renderer.py:91
+msgid "A multi-page layout."
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:681
+#: ocitysmap/layoutlib/multi_page_renderer.py:751
+msgid "Map style(s):"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:755
+msgid "Data source(s):"
+msgstr ""
+
+#: ocitysmap/layoutlib/multi_page_renderer.py:780
 msgid "Front page"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:699
-msgid "This page is intentionally left blank."
+#: ocitysmap/layoutlib/multi_page_renderer.py:859
+msgid "Contents"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:707
-msgid "Blank"
-msgstr ""
-
-#: ocitysmap/layoutlib/multi_page_renderer.py:749
+#: ocitysmap/layoutlib/multi_page_renderer.py:908
 msgid "Overview"
 msgstr ""
 
-#: ocitysmap/layoutlib/multi_page_renderer.py:1000
+#: ocitysmap/layoutlib/multi_page_renderer.py:1156
 #, python-format
 msgid "Map page %d"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:410
-msgid "Additional data sources:"
+#: ocitysmap/layoutlib/tk25.py:61
+msgid "German TK25 'Messtischblatt' style"
 msgstr ""
 
-#: ocitysmap/layoutlib/single_page_renderers.py:796
-msgid "Test gettext"
+#: ocitysmap/layoutlib/single_page_renderer/side_index.py:12
+msgid "Full-page layout with the index on the side."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderer/extra_page.py:13
+msgid "Full-page layout with index on extra page (PDF only)."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderer/no_index.py:12
+msgid "Full-page layout without index."
+msgstr ""
+
+#: ocitysmap/layoutlib/single_page_renderer/bottom_index.py:13
+msgid "Full-page layout with the index at the bottom."
 msgstr ""
