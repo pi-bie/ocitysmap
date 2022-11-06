@@ -89,6 +89,7 @@ import shapely
 import shapely.wkt
 import shapely.geometry
 import gpxpy
+import gettext
 
 from . import coords
 from . import i18n
@@ -213,7 +214,7 @@ class OCitySMap:
 
     MULTIPAGE_PAPER_SIZES = []
 
-    def __init__(self, config_files=None):
+    def __init__(self, config_files=None, language=None):
         """Instanciate a new configured OCitySMap instance.
 
         Args:
@@ -226,6 +227,18 @@ class OCitySMap:
             config_files = ['/etc/ocitysmap.conf', '~/.ocitysmap.conf']
         elif not isinstance(config_files, list):
             config_files = [config_files]
+
+        self._language = language
+        self._translator = None
+        if language is not None:
+            try:
+                self._translator = gettext.translation(
+                    'ocitysmap',
+                    localedir = os.path.join(os.path.dirname(__file__), '..', 'locale'),
+                    languages=[language])
+                self._translator.install()
+            except Exception:
+                pass
 
         config_files = set(map(os.path.expanduser, config_files))
         LOG.debug('Reading OCitySMap configuration from %s...' %
@@ -292,6 +305,13 @@ class OCitySMap:
             self.MULTIPAGE_PAPER_SIZES = [('DinA4',     210, 297),
                                           ('US_letter', 216, 279),
                                          ]
+
+    def translate(self, txt):
+        if self._translator is None:
+            result = txt
+        else:
+            result = self._translator.gettext(txt)
+        return result
 
     @property
     def _db(self, name='default'):
@@ -657,7 +677,7 @@ class OCitySMap:
     def get_all_indexers_name_desc(self):
         result = []
         for indexer in indexers.get_indexers():
-            result.append((indexer.name, indexer.description))
+            result.append((indexer.name, (self.translate(indexer.description))))
         return result
 
     def get_all_paper_sizes(self, section = None):

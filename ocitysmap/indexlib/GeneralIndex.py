@@ -25,6 +25,7 @@ import datetime
 import math
 import psycopg2
 from sys import maxsize
+from gettext import gettext
 
 import cairo
 import gi
@@ -39,7 +40,6 @@ from .commons import IndexCategory, IndexItem, IndexDoesNotFitError
 import ocitysmap.layoutlib.commons as UTILS
 from ocitysmap.coords import Point
 from .renderer import IndexRenderingArea
-
 import logging
 LOG = logging.getLogger('ocitysmap')
 
@@ -47,6 +47,8 @@ LOG = logging.getLogger('ocitysmap')
 PAGE_NUMBER_MARGIN_PT  = UTILS.convert_mm_to_pt(10)
 
 class GeneralIndex:
+    name = "Genaral"
+    description = gettext(u"(* General Index *)")
 
     def __init__(self, db, renderer, bounding_box, polygon_wkt, i18n, page_number=None):
         """
@@ -74,7 +76,6 @@ class GeneralIndex:
         self._i18n = i18n
         self._page_number = page_number
         self._categories = []
-
 
     @property
     def categories(self):
