@@ -53,7 +53,7 @@ class i18n:
     def number_category_name(self):
         return "0-9"
 
-class i18n_template_code_CODE(i18n):
+class i18n_generic(i18n):
     def __init__(self, language, locale_path):
         """Install the _() function for the chosen locale other
            object initialisation"""
@@ -85,13 +85,6 @@ class i18n_template_code_CODE(i18n):
 
     def language_desc(self):
         return self.language_code()
-
-
-
-class i18n_generic(i18n):
-    def __init__(self, language, locale_path):
-        self.language = str(language)
-        _install_language(language, locale_path)
 
 from .ar    import i18n_ar_generic
 from .al    import i18n_al_generic
