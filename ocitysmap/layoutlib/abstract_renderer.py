@@ -501,6 +501,10 @@ class Renderer:
         # base style
         if self.rc.stylesheet.annotation != '':
             annotations['styles'].append(self.rc.stylesheet.annotation)
+        elif self.rc.stylesheet.description != '':
+            annotations['styles'].append(self.rc.stylesheet.description)
+        elif self.rc.stylesheet.name != '':
+            annotations['styles'].append(self.rc.stylesheet.name)
         if self.rc.stylesheet.datasource != '':
             annotations['sources'].append(self.rc.stylesheet.datasource)
 
@@ -508,6 +512,10 @@ class Renderer:
         for overlay in self._overlays:
             if overlay.annotation != '':
                 annotations['styles'].append(overlay.annotation)
+            elif overlay.description != '':
+                annotations['styles'].append(overlay.description)
+            elif overlay.name != '':
+                annotations['styles'].append(overlay.dname)
             if overlay.datasource != '':
                 annotations['sources'].append(overlay.datasource)
 
