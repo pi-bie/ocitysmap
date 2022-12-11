@@ -42,6 +42,7 @@ import sys
 from colour import Color
 import datetime
 from urllib.parse import urlparse
+from babel.dates import format_date
 
 from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -480,12 +481,12 @@ class Renderer:
         today = datetime.date.today()
 
         dates = { 'year' : today.year,
-                  'date' : today.strftime("%d %B %Y"), # TODO: localise
+                  'date' : format_date(today, format='long', locale=self.rc.language)
                   }
 
         if osm_date and osm_date.date() != today:
             dates['osmyear'] = osm_date.year
-            dates['osmdate'] = osm_date.strftime("%d %B %Y")
+            dates['osmdate'] = format_date(osm_date, format='long', locale=self.rc.language)
         else:
             dates['osmyear'] = today.year
             
