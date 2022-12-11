@@ -39,7 +39,7 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 from copy import copy
-from gettext import gettext
+from gettext import gettext, ngettext
 
 from ocitysmap.layoutlib import commons
 import ocitysmap
@@ -471,11 +471,11 @@ class SinglePageRenderer(Renderer):
             notice = annotations['maposmatic'] + '\n'
 
             if annotations['styles']:
-                notice+= _(u'Map styles:') # TODO singular/plural
+                notice+= ngettext(u'Map style:',u'Map styles:', len(annotations['styles'])) 
                 notice+= ' ' + '; '.join(annotations['styles']) + '\n'
 
             if annotations['sources']:
-                notice+= _(u'Data sources:') # TODO singular/plural
+                notice+= ngettext(u'Data source:',u'Data sources:', len(annotations['sources'])) 
                 notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
 
         # do the actual output drawing

@@ -42,6 +42,7 @@ import sys
 from colour import Color
 import datetime
 from urllib.parse import urlparse
+from babel.dates import format_date
 
 from . import commons
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -480,12 +481,12 @@ class Renderer:
         today = datetime.date.today()
 
         dates = { 'year' : today.year,
-                  'date' : today.strftime("%d %B %Y"), # TODO: localise
+                  'date' : format_date(today, format='long', locale=self.rc.language)
                   }
 
         if osm_date and osm_date.date() != today:
             dates['osmyear'] = osm_date.year
-            dates['osmdate'] = osm_date.strftime("%d %B %Y")
+            dates['osmdate'] = format_date(osm_date, format='long', locale=self.rc.language)
         else:
             dates['osmyear'] = today.year
             
@@ -501,6 +502,10 @@ class Renderer:
         # base style
         if self.rc.stylesheet.annotation != '':
             annotations['styles'].append(self.rc.stylesheet.annotation)
+        elif self.rc.stylesheet.description != '':
+            annotations['styles'].append(self.rc.stylesheet.description)
+        elif self.rc.stylesheet.name != '':
+            annotations['styles'].append(self.rc.stylesheet.name)
         if self.rc.stylesheet.datasource != '':
             annotations['sources'].append(self.rc.stylesheet.datasource)
 
@@ -508,10 +513,14 @@ class Renderer:
         for overlay in self._overlays:
             if overlay.annotation != '':
                 annotations['styles'].append(overlay.annotation)
+            elif overlay.description != '':
+                annotations['styles'].append(overlay.description)
+            elif overlay.name != '':
+                annotations['styles'].append(overlay.dname)
             if overlay.datasource != '':
-                annotations['sources'].append(overlay.datasource)
+                if overlay.datasource not in annotations['sources']:
+                    annotations['sources'].append(overlay.datasource)
 
-        # TODO: remove duplicate data source
 
         return annotations
 
