@@ -315,44 +315,47 @@ class SinglePageRenderer(Renderer):
                                         self.paper_height_pt)
 
         # calculate the area required for the index, depending on its position
-        if index_position == 'side':
-            index_max_width_pt \
-                = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_width_pt
+        try:
+            if index_position == 'side':
+                index_max_width_pt \
+                    = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_width_pt
 
-            if not self.rc.i18n.isrtl():
-                # non-RTL: Index is on the right
-                index_area = index_renderer.precompute_occupation_area(
-                    fake_surface,
-                    ( self.paper_width_pt - Renderer.PRINT_SAFE_MARGIN_PT
-                      - index_max_width_pt ),
-                    ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
-                    index_max_width_pt,
-                    self._usable_area_height_pt,
-                    'width', 'right')
-            else:
-                # RTL: Index is on the left
+                if not self.rc.i18n.isrtl():
+                    # non-RTL: Index is on the right
+                    index_area = index_renderer.precompute_occupation_area(
+                        fake_surface,
+                        ( self.paper_width_pt - Renderer.PRINT_SAFE_MARGIN_PT
+                          - index_max_width_pt ),
+                        ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
+                        index_max_width_pt,
+                        self._usable_area_height_pt,
+                        'width', 'right')
+                else:
+                    # RTL: Index is on the left
+                    index_area = index_renderer.precompute_occupation_area(
+                        fake_surface,
+                        Renderer.PRINT_SAFE_MARGIN_PT,
+                        ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
+                        index_max_width_pt,
+                        self._usable_area_height_pt,
+                        'width', 'left')
+            elif index_position == 'bottom':
+                # Index at the bottom of the page
+                index_max_height_pt \
+                    = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_height_pt
+
                 index_area = index_renderer.precompute_occupation_area(
                     fake_surface,
                     Renderer.PRINT_SAFE_MARGIN_PT,
-                    ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
-                    index_max_width_pt,
-                    self._usable_area_height_pt,
-                    'width', 'left')
-        elif index_position == 'bottom':
-            # Index at the bottom of the page
-            index_max_height_pt \
-                = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_height_pt
-
-            index_area = index_renderer.precompute_occupation_area(
-                fake_surface,
-                Renderer.PRINT_SAFE_MARGIN_PT,
-                ( self.paper_height_pt
-                  - Renderer.PRINT_SAFE_MARGIN_PT
-                  - self._copyright_margin_pt
-                  - index_max_height_pt ),
-                self._usable_area_width_pt,
-                index_max_height_pt,
-                'height', 'bottom')
+                    ( self.paper_height_pt
+                      - Renderer.PRINT_SAFE_MARGIN_PT
+                      - self._copyright_margin_pt
+                      - index_max_height_pt ),
+                    self._usable_area_width_pt,
+                    index_max_height_pt,
+                    'height', 'bottom')
+        except IndexDoesNotFitError:
+            index_area = None
 
         return index_renderer, index_area
 
@@ -471,11 +474,11 @@ class SinglePageRenderer(Renderer):
             notice = annotations['maposmatic'] + '\n'
 
             if annotations['styles']:
-                notice+= ngettext(u'Map style:',u'Map styles:', len(annotations['styles'])) 
+                notice+= ngettext(u'Map style:',u'Map styles:', len(annotations['styles']))
                 notice+= ' ' + '; '.join(annotations['styles']) + '\n'
 
             if annotations['sources']:
-                notice+= ngettext(u'Data source:',u'Data sources:', len(annotations['sources'])) 
+                notice+= ngettext(u'Data source:',u'Data sources:', len(annotations['sources']))
                 notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
 
         # do the actual output drawing
@@ -674,47 +677,50 @@ class SinglePageRenderer(Renderer):
         ctx.restore()
 
         # render index on 2nd page if requested, and output format supports it
-        if self.index_position == 'extra_page' and self._has_multipage_format() and self._index_renderer is not None:
-            cairo_surface.show_page()
+        try:
+            if self.index_position == 'extra_page' and self._has_multipage_format() and self._index_renderer is not None:
+                # We use a fake vector device to determine the actual
+                # rendering characteristics
+                fake_surface = cairo.PDFSurface(None,
+                                                self.paper_width_pt,
+                                                self.paper_height_pt)
 
-            # We use a fake vector device to determine the actual
-            # rendering characteristics
-            fake_surface = cairo.PDFSurface(None,
-                                            self.paper_width_pt,
-                                            self.paper_height_pt)
+                usable_area_width_pt = (self.paper_width_pt -
+                                        2 * Renderer.PRINT_SAFE_MARGIN_PT)
+                usable_area_height_pt = (self.paper_height_pt -
+                                         2 * Renderer.PRINT_SAFE_MARGIN_PT)
 
-            usable_area_width_pt = (self.paper_width_pt -
-                                          2 * Renderer.PRINT_SAFE_MARGIN_PT)
-            usable_area_height_pt = (self.paper_height_pt -
-                                           2 * Renderer.PRINT_SAFE_MARGIN_PT)
+                index_area = self._index_renderer.precompute_occupation_area(
+                    fake_surface,
+                    Renderer.PRINT_SAFE_MARGIN_PT,
+                    ( self.paper_height_pt
+                      - Renderer.PRINT_SAFE_MARGIN_PT
+                      - usable_area_height_pt
+                    ),
+                    usable_area_width_pt,
+                    usable_area_height_pt,
+                    'width', 'left')
 
-            index_area = self._index_renderer.precompute_occupation_area(
-                fake_surface,
-                Renderer.PRINT_SAFE_MARGIN_PT,
-                ( self.paper_height_pt
-                  - Renderer.PRINT_SAFE_MARGIN_PT
-                  - usable_area_height_pt
-                ),
-                usable_area_width_pt,
-                usable_area_height_pt,
-                'width', 'left')
+                cairo_surface.show_page()
 
-            # Set a white background (so that generated bitmaps are not transparent)
-            ctx.save()
-            ctx.set_source_rgb(1, 1, 1)
-            ctx.rectangle(0, 0,
-                          commons.convert_pt_to_dots(self.paper_width_pt, dpi),
-                          commons.convert_pt_to_dots(self.paper_height_pt, dpi))
-            ctx.fill()
-            ctx.restore()
+                # Set a white background (so that generated bitmaps are not transparent)
+                ctx.save()
+                ctx.set_source_rgb(1, 1, 1)
+                ctx.rectangle(0, 0,
+                              commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                              commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+                ctx.fill()
+                ctx.restore()
 
-            # render the actual index
-            ctx.save()
-            self._index_renderer.render(ctx, index_area, dpi)
-            ctx.restore()
+                # render the actual index
+                ctx.save()
+                self._index_renderer.render(ctx, index_area, dpi)
+                ctx.restore()
 
-            cairo_surface.show_page()
-        else:
+                cairo_surface.show_page()
+            else:
+                cairo_surface.flush()
+        except IndexDoesNotFitError:
             cairo_surface.flush()
 
     @staticmethod
