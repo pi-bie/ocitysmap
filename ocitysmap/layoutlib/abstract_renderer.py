@@ -518,9 +518,9 @@ class Renderer:
             elif overlay.name != '':
                 annotations['styles'].append(overlay.dname)
             if overlay.datasource != '':
-                annotations['sources'].append(overlay.datasource)
+                if overlay.datasource not in annotations['sources']:
+                    annotations['sources'].append(overlay.datasource)
 
-        # TODO: remove duplicate data source
 
         return annotations
 
