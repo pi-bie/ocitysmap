@@ -475,18 +475,24 @@ class Renderer:
 
         ctx.restore()
 
+    def _format_date(self, date):
+        try:
+            return format_date(date, format='long', locale=self.rc.language)
+        except:
+            return format_date(date, format='long', locale='en_US.UTF-8')
+
     def _annotations(self, osm_date = None):
         annotations = {'styles': [], 'sources': [], }
 
         today = datetime.date.today()
 
         dates = { 'year' : today.year,
-                  'date' : format_date(today, format='long', locale=self.rc.language)
+                  'date' : self._format_date(today)
                   }
 
         if osm_date and osm_date.date() != today:
             dates['osmyear'] = osm_date.year
-            dates['osmdate'] = format_date(osm_date, format='long', locale=self.rc.language)
+            dates['osmdate'] = self._format_date(osm_date)
         else:
             dates['osmyear'] = today.year
             
