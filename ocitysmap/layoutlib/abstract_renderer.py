@@ -522,7 +522,7 @@ class Renderer:
             elif overlay.description != '':
                 annotations['styles'].append(overlay.description)
             elif overlay.name != '':
-                annotations['styles'].append(overlay.dname)
+                annotations['styles'].append(overlay.name)
             if overlay.datasource != '':
                 if overlay.datasource not in annotations['sources']:
                     annotations['sources'].append(overlay.datasource)
