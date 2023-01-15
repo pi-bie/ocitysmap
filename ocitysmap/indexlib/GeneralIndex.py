@@ -853,9 +853,12 @@ class GeneralIndexRenderer:
                                                                      font_desc)
         #print "PREPARE", layout, fascent, fheight, em
 
-        width = max(map(lambda x: self._label_width(layout, x), text_lines))
-        # Save some extra space horizontally
-        width += n_em_padding * em
+        if len(text_lines):
+            width = max(map(lambda x: self._label_width(layout, x), text_lines))
+            # Save some extra space horizontally
+            width += n_em_padding * em
+        else:
+            width = 0
 
         height = fheight * len(text_lines)
 
