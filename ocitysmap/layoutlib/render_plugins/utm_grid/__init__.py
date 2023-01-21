@@ -120,6 +120,8 @@ def render(renderer, ctx):
 
         if (lat1 > 0 and lat2 < 0):
             # split into two grids when bbox crosses the equator
+            # TODO: should be handled by vertical zone boundary detection
+            #       see also other TODO below
             show_grid(lat1, lon1, 0.000001, lon2)
             show_grid(-0.000001, lon1, lat2, lon2)
             return
@@ -127,6 +129,13 @@ def render(renderer, ctx):
         # determine default UTM coordinates for bounding box corners
         (west, north, zone1_number, zone1_letter) = utm.from_latlon(lat1, lon1)
         (east, south, zone2_number, zone2_letter) = utm.from_latlon(lat2, lon2)
+        (east2, north2, zone3_number, zone3_letter) = utm.from_latlon(lat1, lon2)
+        (west2, south2, zone4_number, zone4_letter) = utm.from_latlon(lat2, lon1)
+
+        west  = min(west, west2)
+        east  = max(east, east2)
+        north = max(north, north2)
+        south = min(south, south2)
 
         # exclude the polar zones for now
         # TODO: add support for polar zones
@@ -141,8 +150,8 @@ def render(renderer, ctx):
             #       zone fileds 32N-V, 32N-X to 37N-X
             split_lon = int(math.floor(lon2/6)) * 6
 
-            show_grid(lat1, lon1, lat2, split_lon - 0.000001)
-            show_grid(lat1, split_lon+0.000001, lat2, lon2)
+            show_grid(lat1, lon1,               lat2, split_lon - 0.000001)
+            show_grid(lat1, split_lon+0.000001, lat2, lon2                )
             return
 
         # determine grid bounding box pixel coordinates
