@@ -27,7 +27,7 @@ from shapely.geometry import Point
 from shapely.ops import transform
 from functools import partial
 
-from ocitysmap.draw_utils import draw_simpletext_center
+from ocitysmap.draw_utils import draw_simpletext_center, draw_halotext_center
 from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 
@@ -114,7 +114,7 @@ def render(renderer, ctx):
         ctx.line_to(x2, y2)
         ctx.stroke()
         ctx.restore()
-
+        
     def show_grid(lat1, lon1, lat2, lon2):
         # draw grid over given bounding box
 
@@ -178,12 +178,13 @@ def render(renderer, ctx):
             (lat1, lon1) = utm.to_latlon(v * 1000, n_km * 1000, zone1_number, zone1_letter)
             (lat2, lon2) = utm.to_latlon(v * 1000, s_km * 1000, zone1_number, zone1_letter)
             grid_line(lat1, lon1, lat2, lon2)
-
+            
             # draw easting value right next to upper visible end of the grid line
             (x1, y1) = renderer._latlon2xy(lat1, lon1)
             ctx.save()
+            ctx.set_font_size(pt2px(8))
             ctx.set_source_rgba(0, 0, 0.5, 0.5)
-            draw_simpletext_center(ctx, beautify_km(v), x1 + 12, 62.5)
+            draw_halotext_center(ctx, beautify_km(v), x1 + 18, pt2px(8 + renderer.PRINT_SAFE_MARGIN_PT)) 
             ctx.restore()
 
         # draw the horizontal grid lines
@@ -192,21 +193,23 @@ def render(renderer, ctx):
             (lat1, lon1) = utm.to_latlon(w_km * 1000, h * 1000, zone1_number, zone1_letter)
             (lat2, lon2) = utm.to_latlon(e_km * 1000, h * 1000, zone1_number, zone1_letter)
             grid_line(lat1, lon1, lat2, lon2)
-
+            
             # draw northing value right below left visible end of the line
             (x1, y1) = renderer._latlon2xy(lat1, lon1)
             ctx.save()
+            ctx.set_font_size(pt2px(8))
             ctx.set_source_rgba(0, 0, 0.5, 0.5)
-            draw_simpletext_center(ctx, beautify_km(h), 27, y1 + 5)
+            draw_halotext_center(ctx, beautify_km(h), pt2px(12 + renderer.PRINT_SAFE_MARGIN_PT), y1 + 25)
             ctx.restore()
 
         # draw zone field info in upper left map corner
         # TODO avoid overlap with northing/easting values
         ctx.set_source_rgba(0, 0, 0.5, 0.5)
-        draw_simpletext_center(ctx, ("%d%s" % (zone1_number, zone1_letter)), 27, 20)
+        ctx.set_font_size(pt2px(12))
+        draw_halotext_center(ctx, ("%d%s" % (zone1_number, zone1_letter)), pt2px(12 + renderer.PRINT_SAFE_MARGIN_PT), pt2px(5 + renderer.PRINT_SAFE_MARGIN_PT))
 
         ctx.restore()
-
+        
     # determine drawing area bounding box coordinates
     bbox = renderer._map_canvas.get_actual_bounding_box()
     (lat1, lon1) = bbox.get_top_left()
