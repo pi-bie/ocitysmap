@@ -66,7 +66,7 @@ def render(renderer, ctx):
             return i
 
     def beautify_km(km):
-        # show a kilometer value in 'beatified' form with the last two digits
+        # show a kilometer value in 'beautified' form with the last two digits
         # in larger size, as these change value more often
         txt = ''
 
@@ -145,6 +145,8 @@ def render(renderer, ctx):
             return
 
         # split into two grids when bbox crosses a zone border
+        # TODO this need to be four zones, not just two
+        #      zones are changing by latitude, too
         if zone1_number != zone2_number:
             # TODO: handle special cases for Sweden/Norway and Spitzbergen
             #       zone fileds 32N-V, 32N-X to 37N-X
