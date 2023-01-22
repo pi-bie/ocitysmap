@@ -160,7 +160,7 @@ def render(renderer, ctx):
 
         # clip to grid bounding box
         ctx.save()
-        ctx.rectangle(x1, y1, x2, y2)
+        ctx.rectangle(x1, y1, x2-x1, y2-y1)
         ctx.clip()
 
         # we only need one line every kilometer, so we can round things up or down
