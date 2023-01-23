@@ -159,10 +159,12 @@ def render(renderer, ctx):
         # determine grid bounding box pixel coordinates
         (x1, y1) = renderer._latlon2xy(lat1, lon1)
         (x2, y2) = renderer._latlon2xy(lat2, lon2)
+        width  = abs(x2 - x1)
+        height = abs(y2 - y1)
 
         # clip to grid bounding box
         ctx.save()
-        ctx.rectangle(x1, y1, x2-x1, y2-y1)
+        ctx.rectangle(x1, y1, width, height)
         ctx.clip()
 
         # we only need one line every kilometer, so we can round things up or down
@@ -171,12 +173,33 @@ def render(renderer, ctx):
         n_km = math.ceil(north/1000)
         s_km = math.floor(south/1000)
 
+        dv_km = abs(n_km - s_km)
+        dh_km = abs(e_km - w_km)
+
+        # even one line per kilometer can be too much for large maps
+        # so when things get too tight we only do every 10th line,
+        # or every 100th etc.
+        # TODO: this is hacky, as originally this was written for
+        #       single kilometer resolution only, it should actually
+        #       calculate a good grid line distance up front instead
+        #       of doing it iteratively ... which would also have
+        #       the advantage of allowing for sub-kilometer grid sizes
+        factor = 1000
+        while (height / dv_km) < 100:
+            w_km = math.floor(w_km / 10)
+            e_km = math.ceil(e_km / 10)
+            n_km = math.ceil(n_km / 10)
+            s_km = math.floor(s_km / 10)
+            dv_km = abs(n_km - s_km)
+            dh_km = abs(e_km - w_km)
+            factor = factor * 10
+
         # draw the vertical grid lines
         for v in range(w_km, e_km):
             # calc line endings and draw line
-            # TODO: the vertical lines are not really straight
-            (lat1, lon1) = utm.to_latlon(v * 1000, n_km * 1000, zone1_number, zone1_letter)
-            (lat2, lon2) = utm.to_latlon(v * 1000, s_km * 1000, zone1_number, zone1_letter)
+            # TODO: the vertical lines are not really straight?
+            (lat1, lon1) = utm.to_latlon(v * factor, n_km * factor, zone1_number, zone1_letter)
+            (lat2, lon2) = utm.to_latlon(v * factor, s_km * factor, zone1_number, zone1_letter)
             grid_line(lat1, lon1, lat2, lon2)
             
             # draw easting value right next to upper visible end of the grid line
@@ -184,14 +207,15 @@ def render(renderer, ctx):
             ctx.save()
             ctx.set_font_size(pt2px(8))
             ctx.set_source_rgba(0, 0, 0.5, 0.5)
-            draw_halotext_center(ctx, beautify_km(v), x1 + 18, pt2px(8 + renderer.PRINT_SAFE_MARGIN_PT)) 
+            draw_halotext_center(ctx, beautify_km(v*factor/1000), x1 + 18, pt2px(8 + renderer.PRINT_SAFE_MARGIN_PT)) 
             ctx.restore()
 
         # draw the horizontal grid lines
         for h in range(s_km, n_km):
             # calc line endings and draw line
-            (lat1, lon1) = utm.to_latlon(w_km * 1000, h * 1000, zone1_number, zone1_letter)
-            (lat2, lon2) = utm.to_latlon(e_km * 1000, h * 1000, zone1_number, zone1_letter)
+            # TODO: the horizontal lines are not really straight?
+            (lat1, lon1) = utm.to_latlon(w_km * factor, h * factor, zone1_number, zone1_letter)
+            (lat2, lon2) = utm.to_latlon(e_km * factor, h * factor, zone1_number, zone1_letter)
             grid_line(lat1, lon1, lat2, lon2)
             
             # draw northing value right below left visible end of the line
@@ -199,7 +223,7 @@ def render(renderer, ctx):
             ctx.save()
             ctx.set_font_size(pt2px(8))
             ctx.set_source_rgba(0, 0, 0.5, 0.5)
-            draw_halotext_center(ctx, beautify_km(h), pt2px(12 + renderer.PRINT_SAFE_MARGIN_PT), y1 + 25)
+            draw_halotext_center(ctx, beautify_km(h*factor/1000), pt2px(12 + renderer.PRINT_SAFE_MARGIN_PT), y1 + 25)
             ctx.restore()
 
         # draw zone field info in upper left map corner
