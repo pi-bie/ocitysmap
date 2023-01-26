@@ -34,7 +34,7 @@ from string import Template
 import codecs
 import copy
 from colour import Color
-
+from jsonpath_ng import parse
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -46,6 +46,21 @@ def color2hex(name):
         LOG.warning("Can't resolve color: %s" % name)
         return name
 
+def first(json, path, default=None):
+  try:
+    expr = parse(path)
+    list = expr.find(json)
+    return list[0].value
+  except:
+    return default
+
+def has(json, path):
+  expr = parse(path)
+  list = expr.find(json)
+  return ( len(list) > 0)
+
+def find(json, path):
+  return parse(path).find(json)
 
 class UmapStylesheet(Stylesheet):
     def __init__(self, umap_file, tmpdir):
@@ -112,19 +127,16 @@ class UmapStylesheet(Stylesheet):
 
         umap = json.load(fp)
 
-        if 'properties' in umap:
-            if 'licence' in umap['properties'] or 'shortCredit' in umap['properties']:
-                licence = ''
-                try:
-                  licence = umap['properties']['licence']['name']
-                except:
-                  pass
-                credit = umap['properties']['shortCredit'] if 'shortCredit' in umap['properties'] else ''
+        if has(umap, "$.properties"):
+            licence = first(umap, "$.properties.licence.name", "")
+            credit  = first(umap, "$.properties.shortCredit" , "")
+            if licence or credit:
                 self.annotation = "Umap overlay © %s %s" % (licence, credit)
 
             for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
-                if prop in umap['properties']:
-                    val = umap['properties'][prop]
+                path = "$.properties.%s" % prop
+                val = first(umap, path)
+                if val:
                     if prop in ['color', 'fillColor']:
                         val = color2hex(val)
                     umap_defaults[prop] = val
