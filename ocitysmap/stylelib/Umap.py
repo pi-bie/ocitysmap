@@ -35,6 +35,7 @@ import codecs
 import copy
 from colour import Color
 from jsonpath_ng import parse
+from pprint import pformat
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -43,9 +44,9 @@ def color2hex(name):
         c = Color(name)
         return c.hex_l
     except:
-        LOG.warning("Can't resolve color: %s" % name)
         return name
 
+# get first match for a JSONpath search only
 def first(json, path, default=None):
   try:
     expr = parse(path)
@@ -54,13 +55,38 @@ def first(json, path, default=None):
   except:
     return default
 
-def has(json, path):
-  expr = parse(path)
-  list = expr.find(json)
-  return ( len(list) > 0)
-
+# confinence wrapper for JSONpath parse->find
 def find(json, path):
   return parse(path).find(json)
+
+# return JSONpath find() results as flattened array
+# where the dict key is converted to a plain string
+# for easy lookups by key
+def flattened(json, path):
+  result = {}
+  for match in find(json, path):
+    result[str(match.path)] = match.value
+  return result
+
+# UMAP files store style properties in different places
+# depending on where in the UMAP file we are, so we
+# iterate over all the different possible paths for a
+# one-size-fits-all lookup
+def get_default_properties(json, umap_defaults, create_copy=True):
+    if create_copy:
+        umap_defaults = copy.deepcopy(umap_defaults)
+
+    for path in ['$.properties.*', '$.properties._storage.*', '$.properties._storage_options.*', '$.properties._umap_options.*']:
+        for key,value in flattened(json, path).items():
+            if key in ['opacity', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
+                if value == True:
+                    value = 'yes'
+                umap_defaults[key] = value
+            elif key in ['color', 'fillColor']:
+                umap_defaults[key] = color2hex(value)
+
+    if create_copy:
+        return umap_defaults
 
 class UmapStylesheet(Stylesheet):
     def __init__(self, umap_file, tmpdir):
@@ -127,88 +153,58 @@ class UmapStylesheet(Stylesheet):
 
         umap = json.load(fp)
 
-        if has(umap, "$.properties"):
-            licence = first(umap, "$.properties.licence.name", "")
-            credit  = first(umap, "$.properties.shortCredit" , "")
-            if licence or credit:
-                self.annotation = "Umap overlay © %s %s" % (licence, credit)
+        # extract license & credit annotation information
+        licence = first(umap, "$.properties.licence.name", "")
+        credit  = first(umap, "$.properties.shortCredit" , "")
+        if licence or credit:
+          self.annotation = "Umap overlay © %s %s" % (licence, credit)
 
-            for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
-                path = "$.properties.%s" % prop
-                val = first(umap, path)
-                if val:
-                    if prop in ['color', 'fillColor']:
-                        val = color2hex(val)
-                    umap_defaults[prop] = val
+        # override default properties with global defaults from the file
+        get_default_properties(umap, umap_defaults, create_copy=False)
 
+        # UMAP files have one or more layers with extended GeoJSON within
+        # general GeoJson files do not have that, but by treating the whole
+        # file as a layer we can render both general GeoJSON and UMAP files
         if 'layers' in umap:
             layers = umap['layers']
         else:
             layers = [ umap ]
 
         new_features = []
-
         icon_cache = {}
 
+        # go over all layers now
         for layer in layers:
-            layer_defaults = copy.deepcopy(umap_defaults)
+            # layers can have default properties for all their features
+            # overriding the global defaults
+            layer_defaults = get_default_properties(layer, umap_defaults)
 
-            for name in ['_storage', '_storage_options', '_umap_options']:
-                if name in layer:
-                    for prop in ['color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
-                        if prop in layer[name]:
-                            val = layer[name][prop]
-                            if val is True:
-                                val = 'yes'
-                            if prop in ['color', 'fillColor']:
-                                val = color2hex(val)
-                            layer_defaults[prop] = val
-
+            # now go over the actual geometry features in that layer
             for feature in layer['features']:
-                new_props = copy.deepcopy(layer_defaults)
-                if 'properties' in feature:
-                    if name in feature['properties']:
-                        for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
-                            if prop in feature['properties']:
-                                val = feature['properties'][prop]
-                                if val is True:
-                                    val = 'yes'
-                                if prop in ['color', 'fillColor']:
-                                    val = color2hex(val)
-                                new_props[prop] = val
-                    for name in ['_storage', '_storage_options', '_umap_options']:
-                        if name in feature['properties']:
-                            for prop in ['name', 'color', 'opacity', 'fillColor', 'fillOpacity', 'weight', 'dashArray', 'fill', 'stroke']:
-                                if prop in feature['properties'][name]:
-                                    val = feature['properties'][name][prop]
-                                    if val is True:
-                                        val = 'yes'
-                                    if prop in ['color', 'fillColor']:
-                                        val = color2hex(val)
-                                    new_props[prop] = val
+                # feature properties override previous defaults
+                new_props = get_default_properties(feature, layer_defaults)
+
+                # POINT features require special handling as they actually
+                # usually represent a marker
                 if feature['geometry']['type'] == 'Point':
                     iconClass = layer_defaults['iconClass']
                     iconUrl = layer_defaults['iconUrl']
 
-                    if 'properties' in feature:
-                        for name in ['_storage', '_storage_options', '_umap_options']:
-                            if name in feature['properties']:
-                                if 'iconClass' in feature['properties'][name]:
-                                    iconClass = feature['properties'][name]['iconClass']
-                                if 'iconUrl' in feature['properties'][name]:
-                                    iconUrl = feature['properties'][name]['iconUrl']
-
-                    new_props['iconClass'] = iconClass
-
-                    if iconClass == 'Square' or iconClass == 'Drop' or iconClass == 'Default':
+                    # if icon class is one of those used by Umap:
+                    if iconClass in ['Square', 'Drop', 'Default']:
+                        # check whether one of the default UMAP icons is used
+                        # by known URL pattern, or external
                         m = re.match(r'/uploads/pictogram/(.*)-24(.*)\.png', iconUrl)
                         if m:
+                            # known UMAP icon URL -> replace with local files on our server
                             new_props['iconUrl']  = icon_dir + '/' +  m.group(1) + "-15.svg"
                             if m.group(2) == '':
                                 new_props['iconFill'] = 'black'
                             else:
                                 new_props['iconFill'] = 'white'
                         else:
+                            # external URL: use cached if present already,
+                            # otherwise download it and cache for later re-use
                             if iconUrl in icon_cache:
                                 new_props['iconUrl'] = icon_cache[iconUrl]
                             else:
@@ -234,13 +230,13 @@ class UmapStylesheet(Stylesheet):
                 new_props['weight'] = float(new_props['weight']) / 4
 
                 new_features.append({
-                    'type'       : 'Feature', 
-                    'properties' : new_props, 
+                    'type'       : 'Feature',
+                    'properties' : new_props,
                     'geometry'   : feature['geometry']
                 })
 
         new_umap = {
-            'type'     : 'FeatureCollection', 
+            'type'     : 'FeatureCollection',
             'features' : new_features
         }
 
