@@ -23,6 +23,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import Stylesheet
+from coords import BoundingBox
 
 import os
 import tempfile
@@ -34,6 +35,15 @@ import logging
 from shapely.geometry import LineString
 
 LOG = logging.getLogger('ocitysmap')
+
+def GpxBounds(gpx_file):
+        gpx_fp = codecs.open(gpx_file, 'r', 'utf-8-sig')
+        gpx = gpxpy.parse(gpx_fp)
+        gpx_fp.close()
+
+        b = gpx.get_bounds()
+
+        return BoundingBox(b.min_latitude, b.min_longitude, b.max_latitude, b.max_longitude)
 
 class GpxStylesheet(Stylesheet):
     def __init__(self, gpx_file, tmpdir, track_color = '#7f7f7f'):

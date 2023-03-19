@@ -121,7 +121,7 @@ def guess_filetype(import_file):
         if type(import_file) == str:
             file_name = import_file
             import_file = open(import_file, 'rb')
-            need_close = true
+            need_close = True
         else: # UploadedFile
             file_name = import_file.name
             import_file.open()

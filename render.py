@@ -33,6 +33,9 @@ import re
 import ocitysmap
 import ocitysmap.layoutlib.renderers
 from coords import BoundingBox
+from stylelib.Gpx import GpxBounds
+
+from pprint import pprint
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -63,6 +66,10 @@ def main():
     # Known paper orientations
     KNOWN_PAPER_ORIENTATIONS = ['portrait', 'landscape']
 
+    # Track bounding box
+    bbox = None
+
+    # Command line parsing
     usage = '%prog [options] [-b <lat1,long1 lat2,long2>|--osmid <osmid>]'
     parser = optparse.OptionParser(usage=usage,
                                    version='%%prog %s' % __version__)
@@ -187,35 +194,6 @@ def main():
         # no match so far?
         parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts' and 'paper-formats'" % options.list)
 
-    # Make sure either -b or -c is given
-    optcnt = 0
-    for var in options.bbox, options.osmid:
-        if var:
-            optcnt += 1
-
-    if optcnt == 0:
-        parser.error("One of --bounding-box "
-                     "or --osmid is mandatory")
-
-    if optcnt > 1:
-        parser.error("Options --bounding-box "
-                     "or --osmid are exclusive")
-
-    # Parse bounding box arguments when given
-    bbox = None
-    if options.bbox:
-        try:
-            bbox = BoundingBox.parse_latlon_strtuple(options.bbox)
-        except ValueError:
-            parser.error('Invalid bounding box!')
-        # Check that latitude and langitude are different
-        lat1, lon1 = bbox.get_top_left()
-        lat2, lon2 = bbox.get_bottom_right()
-        if lat1 == lat2:
-            parser.error('Same latitude in bounding box corners')
-        if lon1 == lon2:
-            parser.error('Same longitude in bounding box corners')
-
     # Parse OSM id when given
     if options.osmid:
         try:
@@ -302,6 +280,40 @@ def main():
                              % ( options.paper_format,
                                  ', '.join(paper_format_names)))
 
+    # add actual import files
+    if options.import_file:
+        for import_file in options.import_file:
+            import_file = os.path.realpath(import_file)
+            file_type = ocitysmap.guess_filetype(import_file)
+            print("%s - %s" % (import_file, file_type))
+            if file_type == 'gpx':
+                gpx_bbox = GpxBounds(import_file)
+                print(gpx_bbox)
+                if bbox:
+                    bbox.merge(gpx_bbox)
+                else:
+                    bbox = gpx_bbox
+
+
+    # Parse bounding box arguments when given
+    # This overrides any implicit bounding box settings
+    # derived from --osmid or --import-file options
+    if options.bbox:
+        try:
+            bbox = BoundingBox.parse_latlon_strtuple(options.bbox)
+        except ValueError:
+            parser.error('Invalid bounding box!')
+        # Check that latitude and langitude are different
+        lat1, lon1 = bbox.get_top_left()
+        lat2, lon2 = bbox.get_bottom_right()
+        if lat1 == lat2:
+            parser.error('Same latitude in bounding box corners')
+        if lon1 == lon2:
+            parser.error('Same longitude in bounding box corners')
+
+    if bbox == None:
+        parser.error('No bounding box found, add --bbox=... option')
+
     # Determine actual paper size
 
     if paper_width and paper_height:
@@ -314,11 +326,12 @@ def main():
         if not compat_papers:
             parser.error("No paper size compatible with this rendering.")
 
+        pprint(compat_papers)
         paper_descr = None
         if options.paper_format == 'default':
             for paper in compat_papers:
-                if paper['default']:
-                    paper_descr = p
+                if paper['landscape_ok'] and paper['portrait_ok']:
+                    paper_descr = paper
                     break
         else:
             # Make sure the requested paper size is in list
