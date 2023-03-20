@@ -287,8 +287,7 @@ def main():
             file_type = ocitysmap.guess_filetype(import_file)
             print("%s - %s" % (import_file, file_type))
             if file_type == 'gpx':
-                gpx_bbox = GpxBounds(import_file)
-                print(gpx_bbox)
+                gpx_bbox = GpxBounds(import_file).create_padded(0.1)
                 if bbox:
                     bbox.merge(gpx_bbox)
                 else:

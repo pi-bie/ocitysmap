@@ -148,6 +148,12 @@ class BoundingBox:
         return BoundingBox(self._lat1 + dlat, self._long1 - dlong,
                            self._lat2 - dlat, self._long2 + dlong)
 
+    def create_padded(self, factor):
+        delta_lat  = factor * abs(self._lat1  - self._lat2)
+        delta_long = factor * abs(self._long1 - self._long2)
+
+        return self.create_expanded(delta_lat, delta_long)
+
     def merge(self, bbox):
         """Merge with other bounding box
 
