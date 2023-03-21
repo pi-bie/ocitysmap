@@ -23,10 +23,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from . import Stylesheet
+from coords import BoundingBox
+
+import codecs
+import json
 
 import logging
 
 LOG = logging.getLogger('ocitysmap')
+
+def PoiBounds(poi_file):
+    fp = codecs.open(poi_file, "r", "utf-8-sig")
+    poi = json.load(fp)
+    fp.close()
+
+    min_lat = float(poi['center_lat'])
+    max_lat = float(poi['center_lat'])
+    min_lon = float(poi['center_lon'])
+    max_lon = float(poi['center_lon'])
+
+    for group in poi['nodes']:
+        for node in group['nodes']:
+            min_lat = min(min_lat, node['lat'])
+            min_lon = min(min_lon, node['lon'])
+            max_lat = max(max_lat, node['lat'])
+            max_lon = max(max_lon, node['lon'])
+
+    return BoundingBox(min_lat, min_lon, max_lat, max_lon)
 
 
 class PoiStylesheet(Stylesheet):

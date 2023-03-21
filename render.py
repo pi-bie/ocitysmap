@@ -33,7 +33,10 @@ import re
 import ocitysmap
 import ocitysmap.layoutlib.renderers
 from coords import BoundingBox
-from stylelib.Gpx import GpxBounds
+
+from stylelib.Gpx  import GpxBounds
+from stylelib.Umap import UmapBounds
+from stylelib.Poi  import PoiBounds
 
 from pprint import pprint
 
@@ -280,19 +283,28 @@ def main():
                              % ( options.paper_format,
                                  ', '.join(paper_format_names)))
 
-    # add actual import files
+    # get bounding box information from import files
+    # TODO: support legacy options?
+    # TODO: also extract title information
     if options.import_file:
         for import_file in options.import_file:
             import_file = os.path.realpath(import_file)
             file_type = ocitysmap.guess_filetype(import_file)
-            print("%s - %s" % (import_file, file_type))
-            if file_type == 'gpx':
-                gpx_bbox = GpxBounds(import_file).create_padded(0.1)
-                if bbox:
-                    bbox.merge(gpx_bbox)
-                else:
-                    bbox = gpx_bbox
 
+            file_bbox = None
+            if file_type == 'gpx':
+                file_bbox = GpxBounds(import_file)
+            if file_type == 'umap':
+                file_bbox = UmapBounds(import_file)
+            if file_type == 'poi':
+                file_bbox = PoiBounds(import_file)
+
+            if file_bbox:
+                file_bbox = file_bbox.create_padded(0.1)
+                if bbox:
+                    bbox.merge(file_bbox)
+                else:
+                    bbox = file_bbox
 
     # Parse bounding box arguments when given
     # This overrides any implicit bounding box settings
