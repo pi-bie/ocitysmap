@@ -36,7 +36,7 @@ from coords import BoundingBox
 
 from stylelib.Gpx  import GpxProcessor
 from stylelib.Umap import UmapProcessor
-from stylelib.Poi  import PoiBounds
+from stylelib.Poi  import PoiProcessor
 
 from pprint import pprint
 
@@ -302,7 +302,9 @@ def main():
                 file_bbox  = umap.getBoundingBox()
                 file_title = umap.getTitle()
             if file_type == 'poi':
-                file_bbox = PoiBounds(import_file)
+                poi = PoiProcessor(import_file)
+                file_bbox  = poi.getBoundingBox()
+                file_title = poi.getTitle()
 
             if file_bbox:
                 file_bbox = file_bbox.create_padded(0.1)

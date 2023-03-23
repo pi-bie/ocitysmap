@@ -32,25 +32,32 @@ import logging
 
 LOG = logging.getLogger('ocitysmap')
 
-def PoiBounds(poi_file):
-    fp = codecs.open(poi_file, "r", "utf-8-sig")
-    poi = json.load(fp)
-    fp.close()
+class PoiProcessor:
+    def __init__(self, poi_file):
+        fp = codecs.open(poi_file, "r", "utf-8-sig")
+        self.poi = json.load(fp)
+        fp.close()
 
-    min_lat = float(poi['center_lat'])
-    max_lat = float(poi['center_lat'])
-    min_lon = float(poi['center_lon'])
-    max_lon = float(poi['center_lon'])
+    def getBoundingBox(self):
+        min_lat = float(self.poi['center_lat'])
+        max_lat = float(self.poi['center_lat'])
+        min_lon = float(self.poi['center_lon'])
+        max_lon = float(self.poi['center_lon'])
 
-    for group in poi['nodes']:
-        for node in group['nodes']:
-            min_lat = min(min_lat, node['lat'])
-            min_lon = min(min_lon, node['lon'])
-            max_lat = max(max_lat, node['lat'])
-            max_lon = max(max_lon, node['lon'])
+        for group in self.poi['nodes']:
+            for node in group['nodes']:
+                min_lat = min(min_lat, node['lat'])
+                min_lon = min(min_lon, node['lon'])
+                max_lat = max(max_lat, node['lat'])
+                max_lon = max(max_lon, node['lon'])
 
-    return BoundingBox(min_lat, min_lon, max_lat, max_lon)
+        return BoundingBox(min_lat, min_lon, max_lat, max_lon)
 
+    def getTitle(self):
+        try:
+            return self.poi['title']
+        except:
+            return None
 
 class PoiStylesheet(Stylesheet):
     def __init__(self, poi_file, tmpdir):
