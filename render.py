@@ -143,11 +143,11 @@ def main():
     parser.add_option('--extra-logo', metavar='NAME', help="SVG logo image URL, defaults to None")
     
     # deprecated legacy options
-    parser.add_option('--poi-file', metavar='FILE',
+    parser.add_option('--poi-file', metavar='FILE', dest='import_file', action='append',
                       help=optparse.SUPPRESS_HELP)
-    parser.add_option('--gpx-file', metavar='FILE',
+    parser.add_option('--gpx-file', metavar='FILE', dest='import_file', action='append',
                       help=optparse.SUPPRESS_HELP)
-    parser.add_option('--umap-file', metavar='FILE',
+    parser.add_option('--umap-file', metavar='FILE', dest='import_file', action='append',
                       help=optparse.SUPPRESS_HELP)
 
     # parse command line arguments
@@ -286,7 +286,6 @@ def main():
 
     # get bounding box information from import files
     # TODO: support legacy options?
-    # TODO: also extract title information
     if options.import_file:
         for import_file in options.import_file:
             import_file = os.path.realpath(import_file)
@@ -396,14 +395,6 @@ def main():
     if options.extra_logo:
         rc.extra_logo = options.extra_logo
                 
-    # handle deprecated legacy file options
-    if (options.poi_file):
-        rc.import_files.append(('poi', options.poi_file))
-    if (options.gpx_file):
-        rc.import_files.append(('gpx', options.gpx_file))
-    if (options.umap_file):
-        rc.import_files.append(('umap', options.umap_file))
-
     # add actual import files
     if options.import_file:
         for import_file in options.import_file:
