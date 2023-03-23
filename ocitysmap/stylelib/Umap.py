@@ -89,39 +89,48 @@ def get_default_properties(json, umap_defaults, create_copy=True):
     if create_copy:
         return umap_defaults
 
-def UmapBounds(umap_file):
-    fp = codecs.open(umap_file, 'r', 'utf-8-sig')
-    umap = json.load(fp)
-    fp.close()
+class UmapProcessor:
+    def __init__(self, umap_file):
+        fp = codecs.open(umap_file, 'r', 'utf-8-sig')
+        self.umap = json.load(fp)
+        fp.close()
 
-    lon_vals = []
-    lat_vals = []
+    def getBoundingBox(self):
+        lon_vals = []
+        lat_vals = []
 
-    # UMAP files have one or more layers with extended GeoJSON within
-    # general GeoJson files do not have that, but by treating the whole
-    # file as a layer we can render both general GeoJSON and UMAP files
-    if 'layers' in umap:
-        layers = umap['layers']
-    else:
-        layers = [ umap ]
+        # UMAP files have one or more layers with extended GeoJSON within
+        # general GeoJson files do not have that, but by treating the whole
+        # file as a layer we can render both general GeoJSON and UMAP files
+        if 'layers' in self.umap:
+            layers = self.umap['layers']
+        else:
+            layers = [ self.umap ]
 
-    for layer in layers:
-        for feature in layer['features']:
-            geom = feature['geometry']
-            for coord in geom['coordinates']:
-                if type(coord) == float:  # then its a point feature
-                    lon_vals.append(geom['coordinates'][0])
-                    lat_vals.append(geom['coordinates'][1])
-                elif type(coord) == list:
-                    for c in coord:
-                        if type(c) == float:  # then its a linestring feature
-                            lon_vals.append(coord[0])
-                            lat_vals.append(coord[1])
-                        elif type(c) == list:  # then its a polygon feature
-                            lon_vals.append(c[0])
-                            lat_vals.append(c[1])
+        for layer in layers:
+            for feature in layer['features']:
+                geom = feature['geometry']
+                for coord in geom['coordinates']:
+                    if type(coord) == float:  # then its a point feature
+                        lon_vals.append(geom['coordinates'][0])
+                        lat_vals.append(geom['coordinates'][1])
+                    elif type(coord) == list:
+                        for c in coord:
+                            if type(c) == float:  # then its a linestring feature
+                                lon_vals.append(coord[0])
+                                lat_vals.append(coord[1])
+                            elif type(c) == list:  # then its a polygon feature
+                                lon_vals.append(c[0])
+                                lat_vals.append(c[1])
 
-    return BoundingBox(min(lat_vals), min(lon_vals), max(lat_vals), max(lon_vals))
+        return BoundingBox(min(lat_vals), min(lon_vals), max(lat_vals), max(lon_vals))
+
+    def getTitle(self):
+        try:
+            return self.umap['properties']['name']
+        except:
+            return None
+
 
 class UmapStylesheet(Stylesheet):
     def __init__(self, umap_file, tmpdir):

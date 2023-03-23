@@ -35,7 +35,7 @@ import ocitysmap.layoutlib.renderers
 from coords import BoundingBox
 
 from stylelib.Gpx  import GpxProcessor
-from stylelib.Umap import UmapBounds
+from stylelib.Umap import UmapProcessor
 from stylelib.Poi  import PoiBounds
 
 from pprint import pprint
@@ -297,9 +297,10 @@ def main():
                 gpx = GpxProcessor(import_file)
                 file_bbox  = gpx.getBoundingBox()
                 file_title = gpx.getTitle()
-                print("title: %s" % file_title)
             if file_type == 'umap':
-                file_bbox = UmapBounds(import_file)
+                umap = UmapProcessor(import_file)
+                file_bbox  = umap.getBoundingBox()
+                file_title = umap.getTitle()
             if file_type == 'poi':
                 file_bbox = PoiBounds(import_file)
 
