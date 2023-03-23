@@ -254,13 +254,13 @@ class OCitySMap:
         self.__dbs = {}
 
         # Read stylesheet configuration
-        self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser)
+        self.STYLESHEET_REGISTRY = Stylesheet.create_all_from_config(self._parser, locale = language)
         if not self.STYLESHEET_REGISTRY:
             raise ValueError( \
                     'OCitySMap configuration does not contain any stylesheet!')
         LOG.debug('Found %d Mapnik stylesheets.' % len(self.STYLESHEET_REGISTRY))
 
-        self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays")
+        self.OVERLAY_REGISTRY = Stylesheet.create_all_from_config(self._parser, "overlays", locale=language)
         LOG.debug('Found %d Mapnik overlay styles.' % len(self.OVERLAY_REGISTRY))
 
         # register additional font path directories if set

@@ -23,8 +23,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
+import sys
 import logging
 import configparser
+import traceback
 
 
 LOG = logging.getLogger('ocitysmap')
@@ -76,7 +78,7 @@ class Stylesheet:
         self.bbox        = None
 
     @staticmethod
-    def create_from_config_section(parser, section_name):
+    def create_from_config_section(parser, section_name, locale = None):
         """Creates a Stylesheet object from the OCitySMap configuration.
 
         Args:
@@ -86,9 +88,12 @@ class Stylesheet:
                 configuration.
         """
         s = Stylesheet()
+        _locale = locale
 
         def assign_if_present(key, cast_fn=str, default=None):
-            if parser.has_option(section_name, key):
+            if locale and parser.has_option(section_name, key + '.' + _locale):
+                setattr(s, key, cast_fn(parser.get(section_name, key + '.' + _locale)))
+            elif parser.has_option(section_name, key):
                 setattr(s, key, cast_fn(parser.get(section_name, key)))
             elif default is not None:
                 setattr(s, key, cast_fn(default))
@@ -128,7 +133,7 @@ class Stylesheet:
         return s
 
     @staticmethod
-    def create_all_from_config(parser, type='stylesheets'):
+    def create_all_from_config(parser, type='stylesheets', locale = None):
         try:
             styles = parser.get('rendering', 'available_'+type)
         except (configparser.NoOptionError, ValueError):
@@ -138,9 +143,9 @@ class Stylesheet:
 
         for name in styles.split(','):
             try:
-                results.append(Stylesheet.create_from_config_section(parser, name.strip()))
+                results.append(Stylesheet.create_from_config_section(parser, name.strip(), locale))
             except Exception:
-                LOG.warning("%s overlay '%s' not found or incomplete" % (type, name.strip()))
+                LOG.warning("%s style/overlay '%s' not found or incomplete" % (type, name.strip()))
 
         return results
 

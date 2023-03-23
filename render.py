@@ -160,7 +160,8 @@ def main():
 
     # Parse config file and instanciate main object
     mapper = ocitysmap.OCitySMap(
-        [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')])
+        [options.config_file or os.path.join(os.environ["HOME"], '.ocitysmap.conf')],
+        options.language)
 
     # process the --list option if present
     # just generate output and exit then
