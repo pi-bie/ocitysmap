@@ -34,7 +34,7 @@ import ocitysmap
 import ocitysmap.layoutlib.renderers
 from coords import BoundingBox
 
-from stylelib.Gpx  import GpxBounds
+from stylelib.Gpx  import GpxProcessor
 from stylelib.Umap import UmapBounds
 from stylelib.Poi  import PoiBounds
 
@@ -69,8 +69,9 @@ def main():
     # Known paper orientations
     KNOWN_PAPER_ORIENTATIONS = ['portrait', 'landscape']
 
-    # Track bounding box
+    # Import file data
     bbox = None
+    title = None
 
     # Command line parsing
     usage = '%prog [options] [-b <lat1,long1 lat2,long2>|--osmid <osmid>]'
@@ -293,7 +294,10 @@ def main():
 
             file_bbox = None
             if file_type == 'gpx':
-                file_bbox = GpxBounds(import_file)
+                gpx = GpxProcessor(import_file)
+                file_bbox  = gpx.getBoundingBox()
+                file_title = gpx.getTitle()
+                print("title: %s" % file_title)
             if file_type == 'umap':
                 file_bbox = UmapBounds(import_file)
             if file_type == 'poi':
@@ -305,6 +309,10 @@ def main():
                     bbox.merge(file_bbox)
                 else:
                     bbox = file_bbox
+                if title:
+                    title = title + "; " + file_title
+                else:
+                    title = file_title
 
     # Parse bounding box arguments when given
     # This overrides any implicit bounding box settings
@@ -325,6 +333,9 @@ def main():
     if bbox == None:
         parser.error('No bounding box found, add --bbox=... option')
 
+    if options.output_title:
+        title = options.output_title
+
     # Determine actual paper size
 
     if paper_width and paper_height:
@@ -337,7 +348,6 @@ def main():
         if not compat_papers:
             parser.error("No paper size compatible with this rendering.")
 
-        pprint(compat_papers)
         paper_descr = None
         if options.paper_format == 'default':
             for paper in compat_papers:
@@ -368,7 +378,7 @@ def main():
 
     # Prepare the rendering config
     rc              = ocitysmap.RenderingConfiguration()
-    rc.title        = options.output_title
+    rc.title        = title
     rc.osmid        = options.osmid or None # Force to None if absent
     rc.bounding_box = bbox
     rc.indexer      = indexer
