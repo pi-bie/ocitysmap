@@ -198,14 +198,6 @@ def main():
         # no match so far?
         parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts' and 'paper-formats'" % options.list)
 
-    # Parse OSM id when given
-    if options.osmid:
-        try:
-            bbox  = BoundingBox.parse_wkt(
-                mapper.get_geographic_info(options.osmid)[0])
-        except LookupError:
-            parser.error('No such OSM id: %d' % options.osmid)
-
     # Parse stylesheet (defaults to 1st one in config file)
     if options.stylesheet is None:
         stylesheet = mapper.get_all_style_configurations()[0]
@@ -331,6 +323,15 @@ def main():
             parser.error('Same latitude in bounding box corners')
         if lon1 == lon2:
             parser.error('Same longitude in bounding box corners')
+
+    if options.osmid:
+        try:
+            osmid_bbox  = BoundingBox.parse_wkt(
+                mapper.get_geographic_info(options.osmid)[0])
+        except LookupError:
+            parser.error('No such OSM id: %d' % options.osmid)
+        if not options.bbox:
+            bbox = osmid_bbox
 
     if bbox == None:
         parser.error('No bounding box found, add --bbox=... option')
