@@ -163,7 +163,7 @@ class StreetIndex(GeneralIndex):
             except (ValueError, TypeError):
                 LOG.exception("Error parsing %s for %s" % (repr(linestring),
                                                          repr(street_name)))
-                raise
+                continue
             endpoint1 = ocitysmap.coords.Point(s_endpoint1[1], s_endpoint1[0])
             endpoint2 = ocitysmap.coords.Point(s_endpoint2[1], s_endpoint2[0])
             current_category.items.append(GeneralIndexItem(street_name,
@@ -188,7 +188,7 @@ class StreetIndex(GeneralIndex):
         cursor = db.cursor()
         LOG.debug("Getting streets...")
 
-        query = self._build_query(["line"], ["name"], "TRIM(name) != '' AND highway IS NOT NULL", True)
+        query = self._build_query(["line"], ["name"], "TRIM(name) != '' AND highway IN ('primary','secondary','tertiary','unclassified','road','motorway','trunk','residential','living_street','pedestrian','track','construction')", True)
         self._run_query(cursor, query)
 
         sl = cursor.fetchall()
