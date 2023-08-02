@@ -887,7 +887,7 @@ class OCitySMap:
                                      config.title)
 
                 surface.set_metadata(cairo.PDFMetadata.AUTHOR,
-                                     "Copyright © 2018 MapOSMatic/OCitySMap developers. \n" +
+                                     "Created using MapOSMatic/OCitySMap\n" +
                                      "Map data © 2018 OpenStreetMap contributors (see http://osm.org/copyright)")
 
                 surface.set_metadata(cairo.PDFMetadata.SUBJECT,

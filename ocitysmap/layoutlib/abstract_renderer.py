@@ -496,12 +496,12 @@ class Renderer:
         else:
             dates['osmyear'] = today.year
             
-        ### our own annotation string
-        annotations['maposmatic'] = _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
-
         ### OSM data
         # TODO add exact OSM snapshot date?
         annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/copyright)') % dates)
+
+        ### our own annotation string
+        annotations['maposmatic'] = _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
 
         ### process styles and overlays
 
