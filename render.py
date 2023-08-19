@@ -141,6 +141,7 @@ def main():
     parser.add_option('--list', metavar='NAME', help="List avaibable choices for 'stylesheets', 'overlays', 'layouts', 'indexers' or 'paper-formats' option.")
     parser.add_option('--logo', metavar='NAME', help="SVG logo image URL, defaults to 'builtin:osm-logo.svg'")
     parser.add_option('--extra-logo', metavar='NAME', help="SVG logo image URL, defaults to None")
+    parser.add_option('--extra-text', metavar='NAME', help="Extra annotation text")
     
     # deprecated legacy options
     parser.add_option('--poi-file', metavar='FILE', dest='import_file', action='append',
@@ -396,6 +397,8 @@ def main():
         rc.logo = options.logo
     if options.extra_logo:
         rc.extra_logo = options.extra_logo
+    if options.extra_text:
+        rc.extra_text = options.extra_text
                 
     # add actual import files
     if options.import_file:

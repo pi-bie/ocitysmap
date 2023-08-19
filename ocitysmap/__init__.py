@@ -192,6 +192,7 @@ class RenderingConfiguration:
         # Logos
         self.logo            = "bundled:osm-logo.svg"
         self.extra_logo      = None
+        self.extra_text      = None
 
         # custom QRcode text
         self.qrcode_text     = None

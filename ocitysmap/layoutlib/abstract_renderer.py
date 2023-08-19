@@ -501,7 +501,11 @@ class Renderer:
         annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/copyright)') % dates)
 
         ### our own annotation string
-        annotations['maposmatic'] = _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
+        created =  _(u'Created using MapOSMatic/OCitySMap on %(date)s.') % dates
+        if self.rc.extra_text is not None:
+            created = created + " " + self.rc.extra_text
+
+        annotations['maposmatic'] = created
 
         ### process styles and overlays
 
@@ -526,7 +530,6 @@ class Renderer:
             if overlay.datasource != '':
                 if overlay.datasource not in annotations['sources']:
                     annotations['sources'].append(overlay.datasource)
-
 
         return annotations
 
