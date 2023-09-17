@@ -77,7 +77,7 @@ def get_default_properties(json, umap_defaults, create_copy=True):
     if create_copy:
         umap_defaults = copy.deepcopy(umap_defaults)
 
-    for path in ['$.properties.*', '$.properties._storage.*', '$.properties._storage_options.*', '$.properties._umap_options.*']:
+    for path in ['$.properties.*', '$.properties._storage.*', '$._storage.*', '$.properties._storage_options.*', '$._storage_options.*', '$.properties._umap_options.*', '$._umap_options.*']:
         for key,value in flattened(json, path).items():
             if key in ['opacity', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                 if value == True:
@@ -260,7 +260,8 @@ class UmapStylesheet(Stylesheet):
                                     iconFile.close()
 
                                     iconPath = os.path.realpath(iconFile.name)
-                                except:
+                                except Exception as Argument:
+                                    LOG.exception("Could not get icon from URL %s" % iconUrl)
                                     iconPath = icon_dir + '/circle-15.svg'
 
                                 new_props['iconUrl'] = iconPath
