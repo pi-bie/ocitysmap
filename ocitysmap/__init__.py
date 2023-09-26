@@ -197,6 +197,9 @@ class RenderingConfiguration:
         # custom QRcode text
         self.qrcode_text     = None
 
+        # progress / status message callback
+        self.status_update   = lambda msg: None
+
 class OCitySMap:
     """
     This is the main entry point of the OCitySMap map rendering engine. Read
@@ -804,6 +807,7 @@ class OCitySMap:
 
                 output_count = output_count + 1
         finally:
+            config.status_update("")
             self._cleanup_tempdir(tmpdir)
 
         return output_count
@@ -828,11 +832,11 @@ class OCitySMap:
         -------
         void
         """
-        LOG.debug('Rendering to %s format...' % output_format.upper())
+        config.output_format = output_format.upper()
+        LOG.debug('Rendering to %s format...' % config.output_format)
+        config.status_update("Rendering %s" % config.output_format)
 
         dpi = layoutlib.commons.PT_PER_INCH
-
-        config.output_format = output_format
 
         renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
 
