@@ -254,7 +254,7 @@ class MultiPageRenderer(Renderer):
                         gpx_color_index += 1
                         if gpx_color_index == len(gpx_colors):
                             gpx_color_index = 0
-                        gpx_style = GpxStylesheet(import_file, self.tmpdir)
+                        gpx_style = GpxStylesheet(import_file, self.tmpdir, color)
                     except Exception as e:
                         LOG.warning("GPX stylesheet error: %s" % e)
                     else:
