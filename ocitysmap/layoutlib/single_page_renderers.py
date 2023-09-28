@@ -165,6 +165,7 @@ class SinglePageRenderer(Renderer):
         try:
             if ( index_position and self.street_index
                  and self.street_index.categories ):
+                self.rc.status_update("%s: fetching index data" % self.rc.output_format)
                 self._index_renderer, self._index_area \
                     = self._create_index_rendering(index_position)
             else:

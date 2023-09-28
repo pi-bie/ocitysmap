@@ -121,6 +121,8 @@ class MultiPageRenderer(Renderer):
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
+        self.rc.status_update("MultiPage: initializing ...")
+
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
@@ -320,6 +322,8 @@ class MultiPageRenderer(Renderer):
 
         # Create an overview map
 
+        self.rc.status_update("MultiPage: prepare overview page ...")
+
         overview_bb = self._geo_bbox.create_expanded(0.001, 0.001)
         # Create the overview grid
         self.overview_grid = OverviewGrid(overview_bb,
@@ -374,11 +378,12 @@ class MultiPageRenderer(Renderer):
                                       dpi,
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
-                self.overview_overlay_canvases.append(ov_canvas)
+                self.overview_overlay_canvases[overlay.name] = ov_canvas
 
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
+            self.rc.status_update("MultiPage: prepare map page %d of %d ..." % (i + 1, len(bboxes)))
 
             # Create the gray shape around the map
             exterior = shapely.wkt.loads(bb.as_wkt())
@@ -1096,6 +1101,8 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
+            self.rc.status_update("MultiPage: rendering map page %d of %d base map" % (map_number + 1, len(self.pages)))
+
             ctx.save()
             self._prepare_page(ctx)
 
