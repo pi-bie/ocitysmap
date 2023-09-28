@@ -121,7 +121,7 @@ class MultiPageRenderer(Renderer):
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
-        self.rc.status_update("MultiPage: initializing ...")
+        self.rc.status_update("Initializing ...")
 
         self._grid_legend_margin_pt = \
             min(Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_width_pt,
@@ -322,7 +322,7 @@ class MultiPageRenderer(Renderer):
 
         # Create an overview map
 
-        self.rc.status_update("MultiPage: prepare overview page ...")
+        self.rc.status_update("Preparing overview page")
 
         overview_bb = self._geo_bbox.create_expanded(0.001, 0.001)
         # Create the overview grid
@@ -334,9 +334,10 @@ class MultiPageRenderer(Renderer):
 
         # Create a canvas for the overview page
         self.overview_canvas = MapCanvas(self.rc.stylesheet,
-                               overview_bb, self._usable_area_width_pt,
-                               self._usable_area_height_pt, dpi,
-                               extend_bbox_to_ratio=True)
+                                         overview_bb, self._usable_area_width_pt,
+                                         self._usable_area_height_pt, dpi,
+                                         extend_bbox_to_ratio=True,
+                                         )
 
         # Create the gray shape around the overview map
         exterior = shapely.wkt.loads(self.overview_canvas.get_actual_bounding_box()\
@@ -354,12 +355,15 @@ class MultiPageRenderer(Renderer):
                                   self.rc.stylesheet.grid_line_color, 1,
                                   self.rc.stylesheet.grid_line_width)
 
+        self.rc.status_update("Preparing overview page: base map")
         self.overview_canvas.render()
 
         self.overview_overlay_canvases = []
         self.overview_overlay_effects  = {}
 
         for overlay in self._overlays:
+            self.rc.status_update("Preparing overview page: %s" % overlay.name)
+
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 plugin_name = path.lstrip('internal:')
@@ -378,12 +382,12 @@ class MultiPageRenderer(Renderer):
                                       dpi,
                                       extend_bbox_to_ratio=True)
                 ov_canvas.render()
-                self.overview_overlay_canvases[overlay.name] = ov_canvas
+                self.overview_overlay_canvases.append(ov_canvas)
 
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
-            self.rc.status_update("MultiPage: prepare map page %d of %d ..." % (i + 1, len(bboxes)))
+            self.rc.status_update("Preparing map page %d of %d: base map" % (i + 1, len(bboxes)))
 
             # Create the gray shape around the map
             exterior = shapely.wkt.loads(bb.as_wkt())
@@ -447,6 +451,7 @@ class MultiPageRenderer(Renderer):
             map_canvas.render()
 
             for overlay_canvas in overlay_canvases:
+                self.rc.status_update("Preparing map page %d of %d: %s" % (i + 1, len(bboxes), overlay_canvas._style_name))
                 overlay_canvas.render()
 
             self.pages.append((map_canvas, map_grid, overlay_canvases, overlay_effects))
@@ -454,6 +459,7 @@ class MultiPageRenderer(Renderer):
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             # TODO: other index types
+            self.rc.status_update("Preparing map page %d of %d: collecting index data" % (i + 1, len(bboxes)))
             try:
                 indexer_class = globals()[self.rc.indexer+"Index"]
                 # TODO: check that it actually implements a working indexer class
@@ -599,6 +605,7 @@ class MultiPageRenderer(Renderer):
         ctx.clip()
 
     def _prepare_front_page_map(self, dpi):
+        self.rc.status_update("Preparing front page")
         front_page_map_w = \
             self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         front_page_map_h = \
@@ -623,6 +630,7 @@ class MultiPageRenderer(Renderer):
                              'shade-overview-cover')
         shade.add_shade_from_wkt(shade_wkt)
         front_page_map.add_shape_file(shade)
+        self.rc.status_update("Preparing front page: base map")
         front_page_map.render()
         self._front_page_map = front_page_map
 
@@ -641,6 +649,7 @@ class MultiPageRenderer(Renderer):
                                       front_page_map_h,
                                       dpi,
                                       extend_bbox_to_ratio=True)
+                self.rc.status_update("Preparing front page: %s" % ov_canvas._style_name)
                 ov_canvas.render()
                 self._frontpage_overlay_canvases.append(ov_canvas)
 
@@ -667,9 +676,11 @@ class MultiPageRenderer(Renderer):
         ctx.clip()
 
         # Render the map !
+        self.rc.status_update("Render front page: base map")
         mapnik.render(self._front_page_map.get_rendered_map(), ctx)
 
         for ov_canvas in self._frontpage_overlay_canvases:
+            self.rc.status_update("Render front page: %s" % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
 
@@ -770,6 +781,7 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
 
     def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
+        self.rc.status_update("Rendering front page")
         ctx.save()
         self._prepare_page(ctx)
 
@@ -795,6 +807,8 @@ class MultiPageRenderer(Renderer):
         """
         Render table of contents and map setting details
         """
+
+        self.rc.status_update("Render table of contents page")
 
         ctx.save()
         self._prepare_page(ctx)
@@ -871,13 +885,17 @@ class MultiPageRenderer(Renderer):
         cairo_surface.show_page()
 
     def _render_overview_page(self, ctx, cairo_surface, dpi):
+        self.rc.status_update("Render overview page")
+
         ctx.save()
         self._prepare_page(ctx)
 
         rendered_map = self.overview_canvas.get_rendered_map()
+        self.rc.status_update("Render overview page: base map")
         mapnik.render(rendered_map, ctx)
 
         for ov_canvas in self.overview_overlay_canvases:
+            self.rc.status_update("Render overview page: %s" % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
 
@@ -1101,7 +1119,7 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            self.rc.status_update("MultiPage: rendering map page %d of %d base map" % (map_number + 1, len(self.pages)))
+            self.rc.status_update("Rendering map page %d of %d: base map" % (map_number + 1, len(self.pages)))
 
             ctx.save()
             self._prepare_page(ctx)
@@ -1119,6 +1137,8 @@ class MultiPageRenderer(Renderer):
             mapnik.render(rendered_map, ctx)
 
             for overlay_canvas in overlay_canvases:
+                self.rc.status_update("Rendering map page %d of %d: %s" % (map_number + 1, len(self.pages), overlay_canvas._style_name))
+
                 rendered_overlay = overlay_canvas.get_rendered_map()
                 mapnik.render(rendered_overlay, ctx)
 
@@ -1168,6 +1188,7 @@ class MultiPageRenderer(Renderer):
             cairo_surface.show_page()
             ctx.restore()
 
+        self.rc.status_update("Rendering index pages")
         mpsir = MultiPageIndexRenderer(self.rc.i18n,
                                        ctx, cairo_surface,
                                        self.index_categories,
