@@ -834,7 +834,7 @@ class OCitySMap:
         """
         config.output_format = output_format.upper()
         LOG.debug('Rendering to %s format...' % config.output_format)
-        config.status_update("Rendering %s" % config.output_format)
+        config.status_update(_("Rendering %s") % config.output_format)
 
         dpi = layoutlib.commons.PT_PER_INCH
 

@@ -165,7 +165,7 @@ class SinglePageRenderer(Renderer):
         try:
             if ( index_position and self.street_index
                  and self.street_index.categories ):
-                self.rc.status_update("%s: fetching index data" % self.rc.output_format)
+                self.rc.status_update(_("%s: fetching index data") % self.rc.output_format)
                 self._index_renderer, self._index_area \
                     = self._create_index_rendering(index_position)
             else:
@@ -570,7 +570,7 @@ class SinglePageRenderer(Renderer):
         LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
 
         # now perform the actual map drawing
-        self.rc.status_update("%s: rendering base map" % self.rc.output_format)
+        self.rc.status_update(_("%s: rendering base map") % self.rc.output_format)
         mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
         ctx.restore()
 
@@ -579,7 +579,7 @@ class SinglePageRenderer(Renderer):
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
             LOG.info('Overlay: %s' % overlay_canvas.get_style_name())
-            self.rc.status_update("%s: rendering '%s' overlay" % (self.rc.output_format, overlay_canvas.get_style_name()))
+            self.rc.status_update(_("%s: rendering '%s' overlay") % (self.rc.output_format, overlay_canvas.get_style_name()))
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
@@ -606,7 +606,7 @@ class SinglePageRenderer(Renderer):
 
         # apply effect plugin overlays
         for plugin_name, effect in self._overlay_effects.items():
-            self.rc.status_update("%s: rendering '%s' overlay" % (self.rc.output_format, plugin_name))
+            self.rc.status_update(_("%s: rendering '%s' overlay") % (self.rc.output_format, plugin_name))
             try:
                 effect.render(self, ctx)
             except Exception as e:
@@ -630,7 +630,7 @@ class SinglePageRenderer(Renderer):
 
         # Update the street_index to reflect the grid's actual position
         if self.grid and self.street_index and self.index_position is not None:
-            self.rc.status_update("%s: writing CSV index file" % self.rc.output_format)
+            self.rc.status_update(_("%s: writing CSV index file") % self.rc.output_format)
             self.street_index.apply_grid(self.grid)
 
             # Dump the CSV street index
@@ -650,7 +650,7 @@ class SinglePageRenderer(Renderer):
             # index::render::StreetIndexRenederer::render() and
             # comments within.
 
-            self.rc.status_update("%s: rendering index" % self.rc.output_format)
+            self.rc.status_update(_("%s: rendering index") % self.rc.output_format)
             self._index_renderer.render(ctx, self._index_area, dpi)
 
             ctx.restore()
@@ -685,7 +685,7 @@ class SinglePageRenderer(Renderer):
         # render index on 2nd page if requested, and output format supports it
         try:
             if self.index_position == 'extra_page' and self._has_multipage_format() and self._index_renderer is not None:
-                self.rc.status_update("%s: rendering extra index page" % self.rc.output_format)
+                self.rc.status_update(_("%s: rendering extra index page") % self.rc.output_format)
 
                 # We use a fake vector device to determine the actual
                 # rendering characteristics
