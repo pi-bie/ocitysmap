@@ -579,7 +579,10 @@ class SinglePageRenderer(Renderer):
             ctx.save()
             rendered_overlay = overlay_canvas.get_rendered_map()
             LOG.info('Overlay: %s' % overlay_canvas.get_style_name())
-            self.rc.status_update(_("%s: rendering '%s' overlay") % (self.rc.output_format, overlay_canvas.get_style_name()))
+            self.rc.status_update(_("%(format)s: rendering '%(style)s' overlay")
+                                  % { 'format': self.rc.output_format,
+                                      'style': overlay_canvas.get_style_name(),
+                                     })
             mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
             ctx.restore()
 
@@ -606,7 +609,10 @@ class SinglePageRenderer(Renderer):
 
         # apply effect plugin overlays
         for plugin_name, effect in self._overlay_effects.items():
-            self.rc.status_update(_("%s: rendering '%s' overlay") % (self.rc.output_format, plugin_name))
+            self.rc.status_update(_("%(format)s: rendering '%(style)s' overlay")
+                                  % { 'format': self.rc.output_format,
+                                      'style':  plugin_name,
+                                     })
             try:
                 effect.render(self, ctx)
             except Exception as e:

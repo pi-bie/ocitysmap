@@ -387,7 +387,10 @@ class MultiPageRenderer(Renderer):
         # Create the map canvas for each page
         indexes = []
         for i, (bb, bb_inner) in enumerate(bboxes):
-            self.rc.status_update(_("Preparing map page %d of %d: base map") % (i + 1, len(bboxes)))
+            self.rc.status_update(_("Preparing map page %(page)d of %(total)d: base map")
+                                  % {'page':  i + 1,
+                                     'total': len(bboxes),
+                                     })
 
             # Create the gray shape around the map
             exterior = shapely.wkt.loads(bb.as_wkt())
@@ -451,7 +454,11 @@ class MultiPageRenderer(Renderer):
             map_canvas.render()
 
             for overlay_canvas in overlay_canvases:
-                self.rc.status_update(_("Preparing map page %d of %d: %s") % (i + 1, len(bboxes), overlay_canvas._style_name))
+                self.rc.status_update(_("Preparing map page %(page)d of %(total)d: %(style)s")
+                                      % { 'page':  i + 1,
+                                          'total': len(bboxes),
+                                          'style': overlay_canvas._style_name,
+                                         })
                 overlay_canvas.render()
 
             self.pages.append((map_canvas, map_grid, overlay_canvases, overlay_effects))
@@ -459,7 +466,10 @@ class MultiPageRenderer(Renderer):
             # Create the index for the current page
             inside_contour_wkt = interior_contour.intersection(interior).wkt
             # TODO: other index types
-            self.rc.status_update(_("Preparing map page %d of %d: collecting index data") % (i + 1, len(bboxes)))
+            self.rc.status_update(_("Preparing map page %(page)d of %(total)d: collecting index data")
+                                  % { 'page':  i + 1,
+                                      'total': len(bboxes),
+                                     })
             try:
                 indexer_class = globals()[self.rc.indexer+"Index"]
                 # TODO: check that it actually implements a working indexer class
@@ -1119,7 +1129,10 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            self.rc.status_update(_("Rendering map page %d of %d: base map") % (map_number + 1, len(self.pages)))
+            self.rc.status_update(_("Rendering map page %(page)d of %(total)d: base map")
+                                  % { 'page':  map_number + 1,
+                                      'total': len(self.pages),
+                                     })
 
             ctx.save()
             self._prepare_page(ctx)
@@ -1137,7 +1150,11 @@ class MultiPageRenderer(Renderer):
             mapnik.render(rendered_map, ctx)
 
             for overlay_canvas in overlay_canvases:
-                self.rc.status_update(_("Rendering map page %d of %d: %s") % (map_number + 1, len(self.pages), overlay_canvas._style_name))
+                self.rc.status_update(_("Rendering map page %(page)d of %(total)d: %(style)s") %
+                                      { 'page':  map_number + 1,
+                                        'total': len(self.pages),
+                                        'style': overlay_canvas._style_name,
+                                       })
 
                 rendered_overlay = overlay_canvas.get_rendered_map()
                 mapnik.render(rendered_overlay, ctx)
