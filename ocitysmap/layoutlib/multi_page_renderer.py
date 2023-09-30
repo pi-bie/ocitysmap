@@ -362,8 +362,6 @@ class MultiPageRenderer(Renderer):
         self.overview_overlay_effects  = {}
 
         for overlay in self._overlays:
-            self.rc.status_update(_("Preparing overview page: %s") % overlay.name)
-
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 plugin_name = path.lstrip('internal:')
@@ -375,6 +373,7 @@ class MultiPageRenderer(Renderer):
                 else:
                     self.overview_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
+                self.rc.status_update(_("Preparing overview page: %s") % overlay.name)
                 ov_canvas = MapCanvas(overlay,
                                       overview_bb,
                                       self._usable_area_width_pt,
@@ -1129,7 +1128,7 @@ class MultiPageRenderer(Renderer):
         self._render_overview_page(ctx, cairo_surface, dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
-            self.rc.status_update(_("Rendering map page %(page)d of %(total)d: base map")
+            self.rc.status_update(_("Rendering map page %(page)d of %(total)d")
                                   % { 'page':  map_number + 1,
                                       'total': len(self.pages),
                                      })
@@ -1146,6 +1145,11 @@ class MultiPageRenderer(Renderer):
 
             dest_tag = "mypage%d" % (map_number + self._first_map_page_number)
             draw_utils.anchor(ctx, dest_tag)
+
+            self.rc.status_update(_("Rendering map page %(page)d of %(total)d: base map")
+                                  % { 'page':  map_number + 1,
+                                      'total': len(self.pages),
+                                     })
 
             mapnik.render(rendered_map, ctx)
 
