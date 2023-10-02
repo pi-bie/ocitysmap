@@ -921,6 +921,8 @@ class OCitySMap:
 
         LOG.debug('Writing %s...' % output_filename)
 
+        config.status_update(_("%s: writing output file") % output_format.upper())
+
         if output_format == 'png':
             surface.write_to_png(tmp_output_filename)
 
