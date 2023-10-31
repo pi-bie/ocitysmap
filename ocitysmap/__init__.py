@@ -185,10 +185,6 @@ class RenderingConfiguration:
 
         # Extra upload files
         self.import_files    = []
-        # TODO: eventually remove these legacy files
-        self.gpx_file        = None
-        self.umap_file       = None
-        self.poi_file        = None
 
         # Logos
         self.logo            = "bundled:osm-logo.svg"
