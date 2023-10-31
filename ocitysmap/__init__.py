@@ -8,6 +8,7 @@
 # Copyright (C) 2010  Maxime Petazzoni
 # Copyright (C) 2010  Thomas Petazzoni
 # Copyright (C) 2010  Gaël Utard
+# Copyright (C) 2023  Hartmut Holzgraefe
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -426,7 +427,6 @@ class OCitySMap:
             Openstreetmap in osm2pgsql table (may be negative)
         table : str
             Table to search in, either 'polygon' or 'line'
-            (TODO: what about 'roads'?)
 
         Returns
         -------
@@ -511,7 +511,6 @@ class OCitySMap:
         datetime.datetime
             Time the last successful update of the osm2pgsql database has happened
         """
-        # TODO this also exists on context_processors.py on maposmatic side
         cursor = self._db.cursor()
         query = "select last_update from maposmatic_admin;"
         try:
@@ -685,11 +684,12 @@ class OCitySMap:
         return result
 
     def get_all_paper_sizes(self, section = None):
-        if section is None:
+        if section in ['single', 'single_page', 'singlepage']:
             return self.PAPER_SIZES
-        else:
-            # TODO allow for more than two sections
+        elif section in ['multi', 'multi_page', 'multipage']:
             return self.MULTIPAGE_PAPER_SIZES
+        else:
+            return self.PAPER_SIZES
 
     def get_all_paper_size_names(self, section = None):
         paper_names = []
@@ -703,8 +703,8 @@ class OCitySMap:
                 return [p[1], p[2]]
         raise LookupError( 'The requested paper size %s was not found!' % name)
 
-    def get_paper_size_name_by_size(self, width, height):
-        for p in self.get_all_paper_sizes(): # TODO: section
+    def get_paper_size_name_by_size(self, width, height, section = None):
+        for p in self.get_all_paper_sizes(section):
             if (p[1] == width and p[2] == height) or (p[1] == height and p[2] == width):
                 if width > height:
                     return "%s (landsacape)" % p[0]
