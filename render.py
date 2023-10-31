@@ -124,7 +124,8 @@ def main():
     parser.add_option('-i', '--indexer', dest='indexer',
                       metavar='NAME',
                       default='Street',
-                      help="specify which indexer to use.") # TODO list choices
+                      help="specify which indexer to use."
+                           "Use '--list=indexers' to show available choices")
     parser.add_option('--paper-format', metavar='FMT',
                       help='set the output paper format. Either "default", '
                            '"Best fit", one of the paper size names '
@@ -198,7 +199,7 @@ def main():
                 print(name)
             return 0
         # no match so far?
-        parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts' and 'paper-formats'" % options.list)
+        parser.error("Unknown list option '%s'. Available options are 'stylesheets', 'overlays', 'layouts', 'indexers' and 'paper-formats'" % options.list)
 
     # Parse stylesheet (defaults to 1st one in config file)
     if options.stylesheet is None:
