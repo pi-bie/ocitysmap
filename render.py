@@ -280,7 +280,6 @@ def main():
                                  ', '.join(paper_format_names)))
 
     # get bounding box information from import files
-    # TODO: support legacy options?
     if options.import_file:
         for import_file in options.import_file:
             import_file = os.path.realpath(import_file)
