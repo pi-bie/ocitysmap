@@ -137,11 +137,10 @@ def guess_filetype(import_file):
                 pass
         elif first_line.startswith('{'):
             second_line = import_file.readline(100).decode('utf-8-sig')
-            # TODO - support generic GeoJSON, too
             if second_line.strip().startswith('"title":'):
                 result = "poi"
             else:
-                result = "umap"
+                result = "umap" # also supports generic GeoJSON
 
         if result is None:
             raise RuntimeError("Can't determine import file type for %s" % file_name)
