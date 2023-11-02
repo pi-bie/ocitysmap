@@ -9,6 +9,7 @@
 # Copyright (C) 2012  Thomas Petazzoni
 # Copyright (C) 2012  Gaël Utard
 # Copyright (C) 2012  Étienne Loks
+# Copyright (C) 2023  Hartmut Holzgraefe
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -49,9 +50,9 @@ def create_layout_with_font(ctx, font_desc):
     list of (PangoCairo.Layout, float, float, em)
         A list containing:
         * the actual Pango Layout created
-        * the font ascent (TODO: what unit?)
-        * the font height (TODO: what unit?)
-        * the font character width ('em') (TODO: what unit?)
+        * the font ascent
+        * the font height
+        * the font character width ('em')
     """
 
 
@@ -87,9 +88,9 @@ def draw_text(ctx, layout, fascent,
         fascent : float
             Current font ascent (TODO: get from layout?)
         baseline_x : float
-            Horizontal position of baseline start point (TODO: Unit?)
+            Horizontal position of baseline start point
         baseline_y : float
-            Vertical position of baseline start point (TODO: Unit?)
+            Vertical position of baseline start point
         pango_alignment : enum
             A pango.ALIGN_* constant value specifying the alignment to use
 
@@ -128,14 +129,14 @@ def draw_text_left(ctx, layout, fascent,
         fascent : float
             Current font ascent (TODO: get from layout?)
         baseline_x : float
-            Horizontal position of baseline start point (TODO: Unit?)
+            Horizontal position of baseline start point
         baseline_y : float
-            Vertical position of baseline start point (TODO: Unit?)
+            Vertical position of baseline start point
 
     Results
     -------
     list of float
-        Horizontal start and end position of drawn text (TODO: Unit?)
+        Horizontal start and end position of drawn text
     """
     text_width,text_height = draw_text(ctx, layout, fascent,
                     baseline_x, baseline_y, text, Pango.Alignment.LEFT)
@@ -159,14 +160,14 @@ def draw_text_center(ctx, layout, fascent,
         fascent : float
             Current font ascent (TODO: get from layout?)
         baseline_x : float
-            Horizontal position of baseline start point (TODO: Unit?)
+            Horizontal position of baseline start point
         baseline_y : float
-            Vertical position of baseline start point (TODO: Unit?)
+            Vertical position of baseline start point
 
     Results
     -------
     list of float
-        Horizontal start and end position of drawn text (TODO: Unit?)
+        Horizontal start and end position of drawn text
     """
     text_width,text_height = draw_text(ctx, layout, fascent,
                                       baseline_x, baseline_y, text,
@@ -193,14 +194,14 @@ def draw_text_right(ctx, layout, fascent,
         fascent : float
             Current font ascent (TODO: get from layout?)
         baseline_x : float
-            Horizontal position of baseline start point (TODO: Unit?)
+            Horizontal position of baseline start point
         baseline_y : float
-            Vertical position of baseline start point (TODO: Unit?)
+            Vertical position of baseline start point
 
     Results
     -------
     list of float
-        Horizontal start and end position of drawn text (TODO: Unit?)
+        Horizontal start and end position of drawn text
     """
     text_width,text_height = draw_text(ctx, layout, fascent,
                                      baseline_x, baseline_y,
