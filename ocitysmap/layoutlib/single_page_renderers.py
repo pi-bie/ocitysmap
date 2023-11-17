@@ -8,6 +8,7 @@
 # Copyright (C) 2010  Maxime Petazzoni
 # Copyright (C) 2010  Thomas Petazzoni
 # Copyright (C) 2010  Gaël Utard
+# Copyright (c) 2023  Hartmut Holzgraefe
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -754,7 +755,6 @@ class SinglePageRenderer(Renderer):
         list of int
             Minimal necessary widht and height
         """
-        # TODO describe parameters
 
         # the mapnik scale depends on the latitude
         lat = bounding_box.get_top_left()[0]
