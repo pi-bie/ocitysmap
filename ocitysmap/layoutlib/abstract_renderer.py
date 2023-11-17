@@ -166,7 +166,7 @@ class Renderer:
         elif parts.scheme == 'file' or parts.scheme == '':
             logo_path = parts.path
         else:
-            # TODO allow for external http/https logos
+            # TODO allow for external http/https logos (part of issue #63)
             raise ValueError("Unknown URL scheme '%s' for logo image '%s'" % (parts.scheme, logo_url))
 
         if not os.path.exists(logo_path):
@@ -497,7 +497,6 @@ class Renderer:
             dates['osmyear'] = today.year
             
         ### OSM data
-        # TODO add exact OSM snapshot date?
         annotations['sources'].append(_(u'Map data © %(osmyear)d OpenStreetMap contributors (see https://osm.org/copyright)') % dates)
 
         ### our own annotation string
