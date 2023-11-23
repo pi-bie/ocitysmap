@@ -1,6 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Map xmlns:xi='http://www.w3.org/2001/XInclude' background-color='transparent'>
   <FileSource name="root">/</FileSource>
+
+  <FontSet name="my-fonts">
+    <Font face-name="DejaVu Sans Book"/>
+    <Font face-name="Noto Emoji Regular"/>
+  </FontSet>
+
   <Style name="polygon">
     <Rule>
       <Filter>[mapnik::geometry_type]=polygon and [fill]='yes'</Filter>
@@ -12,7 +18,7 @@
     </Rule>
     <Rule>
       <Filter>[mapnik::geometry_type]=polygon and (not ([name] = null or [name] = ''))</Filter>
-      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
+      <TextSymbolizer fontset-name="my-fonts" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
     </Rule>
   </Style>
   
@@ -26,7 +32,7 @@
   <Style name="point">
     <Rule>
       <!-- the marker outline -->
-      <Filter>[mapnik::geometry_type]=point</Filter> 
+      <Filter>[mapnik::geometry_type]=point</Filter>
       <MarkersSymbolizer file="${basedir}/markers/[iconClass].svg" allow-overlap="true" transform='translate(0,[offset])' fill='[color]'/>
     </Rule>
     <Rule>
@@ -37,12 +43,12 @@
     <Rule>
       <!-- the in-marker text instead of an icon if given -->
       <Filter>(not ([iconLabel] = null or [iconLabel] = '')) and ([mapnik::geometry_type]=point)</Filter>
-      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="[offset]" fill="white" horizontal_alignment='middle' vertical_alignement='middle'>[iconLabel]</TextSymbolizer>
+      <TextSymbolizer fontset-name="my-fonts" size="10" placement="point" allow-overlap="true" dy="[offset]" fill="white" horizontal_alignment='middle' vertical_alignement='middle'>[iconLabel]</TextSymbolizer>
     </Rule>
     <Rule>
       <!-- marker label under the actual marker -->
       <Filter>(not ([name] = null or [name] = '')) and ([mapnik::geometry_type]=point)</Filter> 
-      <TextSymbolizer face-name="DejaVu Sans Book" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
+      <TextSymbolizer fontset-name="my-fonts" size="10" placement="point" allow-overlap="true" dy="10"  halo-fill="white" halo-radius="1" fill="[color]">[name]</TextSymbolizer>
     </Rule>
   </Style>
   
