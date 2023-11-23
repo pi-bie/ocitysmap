@@ -10,3 +10,6 @@
 [submodule "submodules/robinson"]
 	path = submodules/robinson
 	url = https://github.com/gooofy/robinson.git
+[submodule "templates/umap/osmic"]
+	path = templates/umap/osmic
+	url = https://github.com/gmgeo/osmic.git
