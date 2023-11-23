@@ -291,8 +291,10 @@ class UmapStylesheet(Stylesheet):
                                         icon_path =  maki_icon_dir + '/circle-15.svg'
                                     new_props['iconUrl']  = icon_path
                                     new_props['iconFill'] = 'black'
-                            elif len(iconUrl) < 10:
+                            elif iconUrl[0] != '/' or len(iconUrl) < 10:
+                                # short text or not a file path: use as verbatim text label
                                 new_props['iconLabel'] = iconUrl
+                                new_props['iconUrl']   = ''
 
                         try:
                             new_props['offset'] = marker_offsets[iconClass]
