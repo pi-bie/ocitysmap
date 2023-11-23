@@ -37,6 +37,8 @@ import copy
 from colour import Color
 from jsonpath_ng import parse
 from pprint import pformat
+import validators
+import glob
 
 LOG = logging.getLogger('ocitysmap')
 
@@ -79,7 +81,7 @@ def get_default_properties(json, umap_defaults, create_copy=True):
 
     for path in ['$.properties.*', '$.properties._storage.*', '$._storage.*', '$.properties._storage_options.*', '$._storage_options.*', '$.properties._umap_options.*', '$._umap_options.*']:
         for key,value in flattened(json, path).items():
-            if key in ['opacity', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
+            if key in ['name', 'opacity', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                 if value == True:
                     value = 'yes'
                 umap_defaults[key] = value
@@ -88,6 +90,13 @@ def get_default_properties(json, umap_defaults, create_copy=True):
 
     if create_copy:
         return umap_defaults
+
+def _find_icon(basedir, basename):
+    for match in glob.glob("%s/%s*" % (basedir, basename)):
+        if os.path.isfile(match):
+            return match
+    return None
+
 
 class UmapProcessor:
     def __init__(self, umap_file):
@@ -131,7 +140,6 @@ class UmapProcessor:
         except:
             return None
 
-
 class UmapStylesheet(Stylesheet):
     def __init__(self, umap_file, tmpdir):
         super().__init__()
@@ -164,10 +172,15 @@ class UmapStylesheet(Stylesheet):
         self.path = style_filename
 
     def umap_preprocess(self, umap_file, tmpdir):
-        icon_dir = os.path.realpath(
+        maki_icon_dir = os.path.realpath(
             os.path.join(
                 os.path.dirname(__file__),
                 '../../templates/umap/maki/icons'))
+
+        osmic_icon_dir = os.path.realpath(
+            os.path.join(
+                os.path.dirname(__file__),
+                '../../templates/umap/osmic'))
 
         umap_defaults = {
             'color'      :'#0000ff',
@@ -180,7 +193,8 @@ class UmapStylesheet(Stylesheet):
             'stroke'     :    'yes',
             'name'       :       '',
             'iconClass'  : 'Square',
-            'iconUrl'    : icon_dir + '/circle-15.svg',
+            'iconUrl'    : maki_icon_dir + '/circle-15.svg',
+            'iconFill'   : "white",
         }
 
         marker_offsets = {
@@ -225,60 +239,75 @@ class UmapStylesheet(Stylesheet):
 
             # now go over the actual geometry features in that layer
             for feature in layer['features']:
-                # feature properties override previous defaults
-                new_props = get_default_properties(feature, layer_defaults)
+                try:
+                    # feature properties override previous defaults
+                    new_props = get_default_properties(feature, layer_defaults)
 
-                # POINT features require special handling as they actually
-                # usually represent a marker
-                if feature['geometry']['type'] == 'Point':
-                    iconClass = layer_defaults['iconClass']
-                    iconUrl = layer_defaults['iconUrl']
+                    # POINT features require special handling as they actually
+                    # usually represent a marker
+                    if feature['geometry']['type'] == 'Point':
+                        iconClass = new_props['iconClass']
+                        iconUrl   = new_props['iconUrl']
 
-                    # if icon class is one of those used by Umap:
-                    if iconClass in ['Square', 'Drop', 'Default']:
-                        # check whether one of the default UMAP icons is used
-                        # by known URL pattern, or external
-                        m = re.match(r'/uploads/pictogram/(.*)-24(.*)\.png', iconUrl)
-                        if m:
-                            # known UMAP icon URL -> replace with local files on our server
-                            new_props['iconUrl']  = icon_dir + '/' +  m.group(1) + "-15.svg"
-                            if m.group(2) == '':
-                                new_props['iconFill'] = 'black'
-                            else:
-                                new_props['iconFill'] = 'white'
-                        else:
-                            # external URL: use cached if present already,
-                            # otherwise download it and cache for later re-use
-                            if iconUrl in icon_cache:
-                                new_props['iconUrl'] = icon_cache[iconUrl]
-                            else:
-                                try:
-                                    filename, file_extension = os.path.splitext(iconUrl)
-                                    response = http.request('GET', iconUrl)
-                                    iconFile = tempfile.NamedTemporaryFile(suffix=file_extension, delete=False, mode='wb', dir=tmpdir)
-                                    iconFile.write(response.data)
-                                    iconFile.close()
+                        # if icon class is one of those used by Umap:
+                        if iconClass in ['Square', 'Drop', 'Default']:
+                            # check whether one of the default UMAP icons is used
+                            # by known URL pattern, or external
+                            if validators.url(iconUrl):
+                                # external URL: use cached if present already,
+                                # otherwise download it and cache for later re-use
+                                if iconUrl in icon_cache:
+                                    new_props['iconUrl'] = icon_cache[iconUrl]
+                                else:
+                                    try:
+                                        filename, file_extension = os.path.splitext(iconUrl)
+                                        response = http.request('GET', iconUrl)
+                                        iconFile = tempfile.NamedTemporaryFile(suffix=file_extension, delete=False, mode='wb', dir=tmpdir)
+                                        iconFile.write(response.data)
+                                        iconFile.close()
 
-                                    iconPath = os.path.realpath(iconFile.name)
-                                except Exception as Argument:
-                                    LOG.exception("Could not get icon from URL %s" % iconUrl)
-                                    iconPath = icon_dir + '/circle-15.svg'
+                                        iconPath = os.path.realpath(iconFile.name)
+                                    except Exception as Argument:
+                                        LOG.exception("Could not get icon from URL %s" % iconUrl)
+                                        iconPath = maki_icon_dir + '/circle-15.svg'
 
-                                new_props['iconUrl'] = iconPath
-                                icon_cache[iconUrl] = iconPath
+                                    new_props['iconUrl'] = iconPath
+                                    icon_cache[iconUrl] = iconPath
+                            elif m := re.match(r'/uploads/pictogram/(.*)-24(.*)\.png', iconUrl):
+                                # known UMAP icon URL -> replace with local files on our server
+                                # there are different naming conventions
+                                # the .fr server has basename-24.png for black maki icons
+                                #         and basename-24_1.png for white ones
+                                # the .de server has basename-24_???????.png for black osmic icons
+                                if m.group(2) == '':
+                                    new_props['iconUrl']  = maki_icon_dir + '/' +  m.group(1) + "-15.svg"
+                                    new_props['iconFill'] = 'white'
+                                elif m.group(2) == '_1':
+                                    new_props['iconUrl']  = maki_icon_dir + '/' +  m.group(1) + "-15.svg"
+                                    new_props['iconFill'] = 'white'
+                                else:
+                                    icon_path = _find_icon(osmic_icon_dir + "/*", m.group(1))
+                                    if icon_path is None:
+                                        icon_path =  maki_icon_dir + '/circle-15.svg'
+                                    new_props['iconUrl']  = icon_path
+                                    new_props['iconFill'] = 'black'
+                            elif len(iconUrl) < 10:
+                                new_props['iconLabel'] = iconUrl
 
-                    try:
-                        new_props['offset'] = marker_offsets[iconClass]
-                    except:
-                        pass
+                        try:
+                            new_props['offset'] = marker_offsets[iconClass]
+                        except:
+                            pass
 
-                new_props['weight'] = float(new_props['weight']) / 4
+                    new_props['weight'] = float(new_props['weight']) / 4
 
-                new_features.append({
-                    'type'       : 'Feature',
-                    'properties' : new_props,
-                    'geometry'   : feature['geometry']
-                })
+                    new_features.append({
+                        'type'       : 'Feature',
+                        'properties' : new_props,
+                        'geometry'   : feature['geometry']
+                    })
+                except Exception as Argument:
+                    LOG.warning("Exception: %s" % Argument)
 
         new_umap = {
             'type'     : 'FeatureCollection',
