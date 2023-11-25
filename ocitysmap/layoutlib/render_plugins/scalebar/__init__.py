@@ -9,6 +9,8 @@ from ocitysmap.layoutlib.commons import convert_pt_to_dots
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from math import floor, log10
 
+LOG = logging.getLogger('ocitysmap')
+
 def render(renderer, ctx):
     def pt2px(dot):
         return dot * renderer.dpi / 72.0
@@ -29,7 +31,7 @@ def render(renderer, ctx):
     dots = map_coords_dots[2]
 
     if type(renderer).__name__ == "MultiPageRenderer":
-        dots = dots - 2 * renderer.PRINT_SAFE_MARGIN_PT
+        dots = dots - 2 * renderer.grayed_margin_pt
 
     step_horiz = dots / renderer.grid.horiz_count
 
@@ -46,12 +48,11 @@ def render(renderer, ctx):
     tickHeight = pt2px(15)	# height of the tick marks
 
     x = barBuffer
-    x+= map_coords_dots[0]
     if type(renderer).__name__ == "MultiPageRenderer":
-        x += renderer.PRINT_SAFE_MARGIN_PT
+        # TODO more perfectly align actual scale bar with grid here?
+        x += renderer.grayed_margin_pt
 
     y = m.height
-    y+= map_coords_dots[1]
     y-= barBuffer+lBuffer+lBuffer+tickHeight
 
     w = pxScaleBar + 2*lBuffer

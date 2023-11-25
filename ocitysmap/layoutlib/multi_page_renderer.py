@@ -367,7 +367,6 @@ class MultiPageRenderer(Renderer):
                 plugin_name = path.lstrip('internal:')
                 LOG.warning("plugin: %s - %s" % (path, plugin_name))
                 if plugin_name == 'qrcode':
-                    # QRcode should not be rendered on actual map pages here
                     if not self.rc.qrcode_text:
                         self.rc.qrcode_text = self.rc.origin_url
                 else:
@@ -425,10 +424,8 @@ class MultiPageRenderer(Renderer):
             for overlay in self._overlays:
                 path = overlay.path.strip()
                 if path.startswith('internal:'):
-                    if plugin_name != 'qrcode':
-                        # ignore QRcode plugin
-                        plugin_name = path.lstrip('internal:')
-                        overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                    plugin_name = path.lstrip('internal:')
+                    overlay_effects[plugin_name] = self.get_plugin(plugin_name)
                 else:
                     overlay_canvases.append(MapCanvas(overlay,
                                                bb, self._usable_area_width_pt,
@@ -649,8 +646,7 @@ class MultiPageRenderer(Renderer):
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 plugin_name = path.lstrip('internal:')
-                if plugin_name != "qrcode":
-                    self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       self.rc.bounding_box,
@@ -693,18 +689,19 @@ class MultiPageRenderer(Renderer):
             rendered_map = ov_canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx)
 
+        # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
-        ctx.save()
+        # ctx.save()
         # we have to undo border adjustments here
-        ctx.translate(0, -(0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT))
-        self._map_canvas = self._front_page_map;
-        for plugin_name, effect in self._frontpage_overlay_effects.items():
-            try:
-                effect.render(self, ctx)
-            except Exception as e:
-                # TODO better logging
-                LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
-        ctx.restore()
+        # ctx.translate(0, -(0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT))
+        # self._map_canvas = self._front_page_map;
+        # for plugin_name, effect in self._frontpage_overlay_effects.items():
+        #    try:
+        #        effect.render(self, ctx)
+        #    except Exception as e:
+        #        # TODO better logging
+        #        LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
+        # ctx.restore()
 
 
 
@@ -910,10 +907,6 @@ class MultiPageRenderer(Renderer):
 
         # apply effect overlays
         ctx.save()
-        # we have to undo border adjustments here
-        ctx.translate(
-                -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                -commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
         self._map_canvas = self.overview_canvas;
         for plugin_name, effect in self.overview_overlay_effects.items():
             try:
@@ -1178,18 +1171,14 @@ class MultiPageRenderer(Renderer):
 
             # apply effect overlays
             ctx.save()
-            # we have to undo border adjustments here
-            ctx.translate(-commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
-                      -commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
-            self._map_canvas = canvas;
             for plugin_name, effect in overlay_effects.items():
                 self.grid = grid
+                self._map_canvas = canvas
                 try:
                     effect.render(self, ctx)
                 except Exception as e:
                     # TODO better logging
                     LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
-                    effect.render(self, ctx)
             ctx.restore()
 
 

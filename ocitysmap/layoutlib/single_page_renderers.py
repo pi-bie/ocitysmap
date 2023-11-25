@@ -605,7 +605,8 @@ class SinglePageRenderer(Renderer):
 
         # make sure that plugins do not render outside the actual map area
         ctx.save()
-        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.translate(map_coords_dots[0], map_coords_dots[1])
+        ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
         ctx.clip()
 
         # apply effect plugin overlays

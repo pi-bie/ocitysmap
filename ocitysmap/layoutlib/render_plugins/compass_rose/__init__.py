@@ -42,19 +42,14 @@ def render(renderer, ctx):
     # load and scale the SVG image
     rose_grp, rose_width = Renderer._get_svg(ctx, svg_path, h)
 
-    # determine image position depending on renderer used
-    if type(renderer).__name__ == "MultiPageRenderer":
-        x = 0
-        y = 0
-    else:
-        x = convert_pt_to_dots(renderer._map_coords[0], renderer.dpi)
-        y = convert_pt_to_dots(renderer._map_coords[1], renderer.dpi)
-
     # output image on top of the current cairo context
+
     ctx.save()
-    ctx.translate(x + h/2, y + h/2)
+
+    ctx.translate(h/10, h/10) # leave a bit of space to the map border
     ctx.set_source(rose_grp)
     ctx.paint_with_alpha(0.75)
     ctx.stroke()
+
     ctx.restore()
 

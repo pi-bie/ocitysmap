@@ -422,11 +422,9 @@ class Renderer:
 
         y = bbox.get_top_left()[0] - lat
         y*= (dpi/72.0) * self._map_coords[3] / horiz_angle_span
-        y+= (dpi/72.0) * self._map_coords[1]
 
         x = lon - bbox.get_top_left()[1]
         x*= (dpi/72.0) * self._map_coords[2] / vert_angle_span
-        x+= (dpi/72.0) * self._map_coords[0]
 
         return x,y
 
