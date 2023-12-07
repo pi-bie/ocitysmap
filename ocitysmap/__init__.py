@@ -702,7 +702,7 @@ class OCitySMap:
         for p in self.get_all_paper_sizes(section):
             if (p[1] == width and p[2] == height) or (p[1] == height and p[2] == width):
                 if width > height:
-                    return "%s (landsacape)" % p[0]
+                    return "%s (landscape)" % p[0]
                 else:
                     return "%s (portrait)" % p[0]
 
