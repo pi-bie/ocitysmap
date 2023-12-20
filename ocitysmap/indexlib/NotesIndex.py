@@ -89,10 +89,12 @@ class NotesIndex(GeneralIndex):
             lon = note['geometry']['coordinates'][0]
 
             point = Point(lat, lon)
-            
-            index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
 
-            index_category.items.append(GeneralIndexItem(index_text[0:50], point, point, None))
+            try:
+                index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
+                index_category.items.append(GeneralIndexItem(index_text[0:50], point, point, None))
+            except IndexError as e:
+                pass
 
             # renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
 

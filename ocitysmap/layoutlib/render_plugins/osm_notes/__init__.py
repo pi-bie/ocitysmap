@@ -60,10 +60,11 @@ def render(renderer, ctx):
 
         point = Point(lat, lon)
 
-        index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
-
-        index_items.append(GeneralIndexItem(index_text[0:50], point, point, None))
-
-        renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
+        try:
+            index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
+            index_items.append(GeneralIndexItem(index_text[0:50], point, point, None))
+            renderer._marker('red', str(n), lat, lon, ctx, renderer.dpi)
+        except IndexError as e:
+            pass
 
 #    renderer.street_index.add_category("OSM Notes", index_items)
