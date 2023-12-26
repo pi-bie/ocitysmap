@@ -90,9 +90,13 @@ class PoiIndexItem(IndexItem):
 class PoiIndex:
 
     def __init__(self, db, renderer, bbox, polygon_wkt, i18n, page_number=None):
-        f = codecs.open(renderer.rc.poi_file, "r", "utf-8-sig")
-        self._read_json(f)
-        f.close()
+        # import the first POI file only (there should never be more than one)
+        for (file_type, import_file) in renderer.rc.import_files:
+            if file_type == 'poi':
+                f = codecs.open(import_file, "r", "utf-8-sig")
+                self._read_json(f)
+                f.close()
+                break
 
     @property
     def categories(self):
