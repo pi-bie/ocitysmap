@@ -91,7 +91,7 @@ class NotesIndex(GeneralIndex):
             point = Point(lat, lon)
 
             try:
-                index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'])
+                index_text = "Note %d - %s" % (n, note['properties']['comments'][0]['text'].replace('\n', ' '))
                 index_category.items.append(GeneralIndexItem(index_text[0:50], point, point, None))
             except IndexError as e:
                 pass
