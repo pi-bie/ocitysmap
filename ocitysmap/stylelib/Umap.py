@@ -207,10 +207,10 @@ class UmapStylesheet(Stylesheet):
 
         marker_offsets = {
             'Default': -18,
-            'Square': -18,
-            'Drop'  : -18,
-            'Circle': 0,
-            'Ball'  : -16
+            'Square' : -18,
+            'Drop'   : -18,
+            'Circle' :   0,
+            'Ball'   : -16,
         }
 
         http = urllib3.PoolManager()
@@ -258,7 +258,7 @@ class UmapStylesheet(Stylesheet):
                         iconUrl   = new_props['iconUrl']
 
                         # if icon class is one of those used by Umap:
-                        if iconClass in ['Square', 'Drop', 'Default']:
+                        if iconClass in ['Circle', 'Square', 'Drop', 'Default']:
                             # check whether one of the default UMAP icons is used
                             # by known URL pattern, or external
                             if validators.url(iconUrl):

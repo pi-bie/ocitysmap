@@ -37,12 +37,12 @@
     </Rule>
     <Rule>
       <!-- the marker symbol if given -->
-      <Filter>(not ([iconUrl] = null or [iconUrl] = '')) and ([mapnik::geometry_type]=point)</Filter>
+      <Filter>(not ([iconClass] = 'Circle')) and (not ([iconUrl] = null or [iconUrl] = '')) and ([mapnik::geometry_type]=point)</Filter>
       <MarkersSymbolizer base="root" file="[iconUrl]" allow-overlap="true" transform='translate(0,-23)' fill='[iconFill]' width='20'/>
     </Rule>
     <Rule>
       <!-- the in-marker text instead of an icon if given -->
-      <Filter>(not ([iconLabel] = null or [iconLabel] = '')) and ([mapnik::geometry_type]=point)</Filter>
+      <Filter>(not ([iconClass] = 'Circle')) and (not ([iconLabel] = null or [iconLabel] = '')) and ([mapnik::geometry_type]=point)</Filter>
       <TextSymbolizer fontset-name="my-fonts" size="10" placement="point" allow-overlap="true" dy="[offset]" fill="white" horizontal_alignment='middle' vertical_alignement='middle'>[iconLabel]</TextSymbolizer>
     </Rule>
     <Rule>
