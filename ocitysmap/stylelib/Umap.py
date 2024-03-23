@@ -79,14 +79,22 @@ def get_default_properties(json, umap_defaults, create_copy=True):
     if create_copy:
         umap_defaults = copy.deepcopy(umap_defaults)
 
+    values = {}
     for path in ['$.properties.*', '$.properties._storage.*', '$._storage.*', '$.properties._storage_options.*', '$._storage_options.*', '$.properties._umap_options.*', '$._umap_options.*']:
         for key,value in flattened(json, path).items():
             if key in ['name', 'opacity', 'fillOpacity', 'weight', 'dashArray', 'iconClass', 'iconUrl']:
                 if value == True:
                     value = 'yes'
-                umap_defaults[key] = value
+                values[key] = value
             elif key in ['color', 'fillColor']:
-                umap_defaults[key] = color2hex(value)
+                values[key] = color2hex(value)
+
+    # fillColor defaults to color if not set
+    if 'color' in values and 'fillColor' not in values:
+        values['fillColor'] = values['color']
+
+    for key, value in values.items():
+        umap_defaults[key] = value
 
     if create_copy:
         return umap_defaults
