@@ -65,7 +65,7 @@ class MapCanvas:
         """
 
         self._style_name = stylesheet.name
-        self._proj = mapnik.Projection(_MAPNIK_PROJECTION)
+        self._proj = ocitysmap.coords.get_proj_transformation()
         self._dpi  = dpi
 
         # This is where the magic of the map canvas happens. Given an original
@@ -211,8 +211,8 @@ class MapCanvas:
     def _inverse_envelope(self, envelope):
         """Inverse the given cartesian envelope (in 3587) back to a 4326
         bounding box."""
-        c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
-        c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
+        c0 = self._proj.backward(mapnik.Coord(envelope.minx, envelope.miny))
+        c1 = self._proj.backward(mapnik.Coord(envelope.maxx, envelope.maxy))
         return ocitysmap.coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
 if __name__ == '__main__':

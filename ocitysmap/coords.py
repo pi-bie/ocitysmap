@@ -33,11 +33,6 @@ assert mapnik.mapnik_version() >= 300000, \
     "Mapnik module version %s is too old, see ocitysmap's INSTALL " \
     "for more details." % mapnik.mapnik_version_string()
 
-_MAPNIK_PROJECTION = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
-                     "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
-                     "+nadgrids=@null +no_defs +over"
-
-
 EARTH_RADIUS = 6370986 # meters
 
 def dd2dms(value):
@@ -49,6 +44,20 @@ def dd2dms(value):
 
     return (degrees, minutes, seconds)
 
+def get_proj_transformation():
+    try:
+        # new Proj library versions (e.g. v9 on Debian 12)
+        proj_wgs84  = mapnik.Projection("epsg:4326") 
+        proj_google = mapnik.Projection("epsg:3857")
+    except:
+        # old Proj libraray versions (e.g. v7 on Debian 11)
+        proj_wgs84  = mapnik.Projection("+init=epsg:4326")
+        proj_google = mapnik.Projection( "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 " \
+                                         "+lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m   " \
+                                         "+nadgrids=@null +no_defs +over")
+                                         
+    return mapnik.ProjTransform(proj_wgs84, proj_google)
+                                         
 class Point:
     def __init__(self, lat, long_):
         self._lat, self._long = float(lat), float(long_)
@@ -299,7 +308,7 @@ class BoundingBox:
                                 self.get_top_left()[0],
                                 self.get_bottom_right()[1],
                                 self.get_bottom_right()[0])
-        _proj = mapnik.Projection(_MAPNIK_PROJECTION)
+        _proj = get_proj_transformation()
         bottom_left = _proj.forward(mapnik.Coord(envelope.minx, envelope.miny))
         top_right = _proj.forward(mapnik.Coord(envelope.maxx, envelope.maxy))
         top_left = mapnik.Coord(bottom_left.x, top_right.y)

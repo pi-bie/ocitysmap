@@ -157,9 +157,8 @@ class MultiPageRenderer(Renderer):
         OVERLAP_MARGIN_MM = 20
 
         # Convert the original Bounding box into Mercator meters
-        self._proj = mapnik.Projection(coords._MAPNIK_PROJECTION)
+        self._proj = coords.get_proj_transformation()
         orig_envelope = self._project_envelope(self.rc.bounding_box)
-
 
         while True:
             # Extend the bounding box to take into account the lost outer
@@ -593,8 +592,8 @@ class MultiPageRenderer(Renderer):
         Inverse the given cartesian envelope (in 3587) back to a 4326
         bounding box.
         """
-        c0 = self._proj.inverse(mapnik.Coord(envelope.minx, envelope.miny))
-        c1 = self._proj.inverse(mapnik.Coord(envelope.maxx, envelope.maxy))
+        c0 = self._proj.backward(mapnik.Coord(envelope.minx, envelope.miny))
+        c1 = self._proj.backward(mapnik.Coord(envelope.maxx, envelope.maxy))
         return coords.BoundingBox(c0.y, c0.x, c1.y, c1.x)
 
     def _prepare_page(self, ctx):
