@@ -56,6 +56,7 @@ from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.HealthIndex import HealthIndex
 from ocitysmap.indexlib.NotesIndex import NotesIndex
 from ocitysmap.indexlib.TreeIndex import TreeIndex
+from ocitysmap.indexlib.TownIndex import TownIndex
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
 from ocitysmap.maplib.grid import Grid

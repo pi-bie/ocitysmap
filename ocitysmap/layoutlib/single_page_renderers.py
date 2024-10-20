@@ -50,6 +50,7 @@ from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.HealthIndex import HealthIndex
 from ocitysmap.indexlib.NotesIndex import NotesIndex
 from ocitysmap.indexlib.TreeIndex import TreeIndex
+from ocitysmap.indexlib.TownIndex import TownIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from ocitysmap.indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import draw_utils

@@ -37,6 +37,7 @@ if __name__ == '__main__':
     from StreetIndex import StreetIndex, StreetIndexRenderer, StreetIndexCategory
     from HealthIndex import HealthIndex
     from TreeIndex import TreeIndex
+    from TownIndex import TownIndex
 
     logging.basicConfig(level=logging.DEBUG)
     random.seed(42)

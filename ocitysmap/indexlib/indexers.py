@@ -4,12 +4,14 @@ from ocitysmap.indexlib.StreetIndex import StreetIndex
 from ocitysmap.indexlib.HealthIndex import HealthIndex
 from ocitysmap.indexlib.NotesIndex import NotesIndex
 from ocitysmap.indexlib.TreeIndex import TreeIndex
+from ocitysmap.indexlib.TownIndex import TownIndex
 
 _INDEXERS = [
     StreetIndex,
     HealthIndex,
     NotesIndex,
     TreeIndex,
+    TownIndex,
     # do not include special PoiIndex or generic GeneralIndex here!
     ]
 
