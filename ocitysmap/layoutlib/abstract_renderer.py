@@ -208,7 +208,7 @@ class Renderer:
         for i, label in enumerate(map_grid.horizontal_labels):
             x = i * step_horiz
 
-            if i < len(map_grid.horizontal_labels) - 1:
+            if i < len(map_grid.horizontal_labels) - 1 or last_horiz_portion == 0.0:
                 x += step_horiz/2.0
             elif last_horiz_portion >= 0.3:
                 x += step_horiz * last_horiz_portion/2.0
@@ -232,7 +232,7 @@ class Renderer:
         for i, label in enumerate(map_grid.vertical_labels):
             y = i * step_vert
 
-            if i < len(map_grid.vertical_labels) - 1:
+            if i < len(map_grid.vertical_labels) - 1 or last_vert_portion == 0.0:
                 y += step_vert/2.0
             elif last_vert_portion >= 0.3:
                 y += step_vert * last_vert_portion/2.0
