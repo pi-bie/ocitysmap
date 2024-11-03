@@ -2,6 +2,8 @@
 
 # ocitysmap, city map and street index generator from OpenStreetMap data
 # Copyright (C) 2022 Hartmut Holzgraefe
+# Copyright (C) 2024 pi-bie
+# 
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
