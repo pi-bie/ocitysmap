@@ -34,6 +34,7 @@ import layoutlib.commons as commons
 
 LEFT_SIDE = 1
 RIGHT_SIDE = 2
+START_ON_LEFT_SIDE = 10
 
 def create_layout_with_font(ctx, font_desc):
     """ Create a Pango layout from given font destription
@@ -433,6 +434,11 @@ def render_page_number(ctx, page_number,
             side = RIGHT_SIDE
         else:
             side = LEFT_SIDE
+    elif side == START_ON_LEFT_SIDE:
+        if page_number % 2:
+            side = LEFT_SIDE
+        else:
+            side = RIGHT_SIDE
 
     x_offset = 0
     if side == RIGHT_SIDE:
