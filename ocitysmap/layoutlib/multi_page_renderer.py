@@ -724,7 +724,7 @@ class MultiPageRenderer(Renderer):
         # Draw the OpenStreetMap logo to the right of the footer
         if self.rc.logo:
             logo_height = footer_h / 2
-            grp, logo_width = self._get_logo(ctx, self.rc.logo, logo_height)
+            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, height = logo_height)
             if grp:
                 ctx.save()
                 ctx.translate(w - logo_width - Renderer.PRINT_SAFE_MARGIN_PT,

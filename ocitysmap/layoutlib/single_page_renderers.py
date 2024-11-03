@@ -396,7 +396,7 @@ class SinglePageRenderer(Renderer):
         logo_width = 0
         if self.rc.logo:
             ctx.save()
-            grp, logo_width = self._get_logo(ctx, self.rc.logo, 0.8*h_dots)
+            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, height = 0.8*h_dots)
             # TODO catch exceptions and just print warning instead?
             ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
             ctx.set_source(grp)
@@ -407,7 +407,7 @@ class SinglePageRenderer(Renderer):
         logo_width2 = 0
         if self.rc.extra_logo:
             ctx.save()
-            grp, logo_width2 = self._get_logo(ctx, self.rc.extra_logo, 0.8*h_dots)
+            grp, logo_width2, logo_height2 = self._get_logo(ctx, self.rc.extra_logo, height = 0.8*h_dots)
             # TODO catch exceptions and just print warning instead?
             ctx.translate(0.4*h_dots, 0.1*h_dots)
             ctx.set_source(grp)

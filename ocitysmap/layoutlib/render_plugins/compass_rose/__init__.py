@@ -40,7 +40,7 @@ def render(renderer, ctx):
     h = convert_pt_to_dots(0.05 * renderer.paper_height_pt, renderer.dpi)
 
     # load and scale the SVG image
-    rose_grp, rose_width = Renderer._get_svg(ctx, svg_path, h)
+    rose_grp, rose_width, rose_height = Renderer._get_svg(ctx, svg_path, height = h)
 
     # output image on top of the current cairo context
 

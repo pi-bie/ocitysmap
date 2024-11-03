@@ -109,17 +109,18 @@ class Renderer:
 
 
     @staticmethod
-    def _get_svg(ctx, path, height):
+    def _get_svg(ctx, path, width=float('inf'), height=float('inf')):
         """
-        Read SVG file and rescale it to fit within height.
+        Read SVG file and rescale it to fit within width and height.
 
         Args:
            ctx (cairo.Context): The cairo context to use to draw.
            path (string): the SVG file path.
-           height (number): final height of the SVG (cairo units).
+           width (number): final max width of the SVG (cairo units).
+           height (number): final max height of the SVG (cairo units).
 
-        Return a tuple (cairo group object for the SVG, SVG width in
-                        cairo units).
+        Return a triple (cairo group object for the SVG, SVG width in
+                        cairo units, SVG height in cairo units).
         """
         handle = Rsvg.Handle();
         try:
@@ -128,29 +129,32 @@ class Renderer:
             LOG.warning("Cannot read SVG from '%s'." % path)
             return None, None
 
-        scale_factor = height / svg.props.height
+        scale_factor = min(height / svg.props.height, width / svg.props.width)
 
         ctx.push_group()
         ctx.save()
         ctx.move_to(0, 0)
-        factor = height / svg.props.height
+        factor = min(height / svg.props.height, width / svg.props.width)
+        if width == float('inf') and height == float('inf'):
+            factor = 1.0
         ctx.scale(factor, factor)
         svg.render_cairo(ctx)
         ctx.restore()
-        return ctx.pop_group(), svg.props.width * factor
+        return ctx.pop_group(), svg.props.width * factor, svg.props.height * factor
 
     @staticmethod
-    def _get_logo(ctx, logo_url, height):
+    def _get_logo(ctx, logo_url, width=float('inf'), height=float('inf')):
         """
-        Read a SVG logo file URL and rescale it to fit within height.
+        Read a SVG logo file URL and rescale it to fit within width and height.
 
         Args:
            ctx (cairo.Context): The cairo context to use to draw.
            logo_url (string): where to find the logo
-           height (number): final height of the logo (cairo units).
+           width (number): final max width of the logo (cairo units).
+           height (number): final max height of the logo (cairo units).
 
-        Return a tuple (cairo group object for the logo, logo width in
-                        cairo units).
+        Return a triple (cairo group object for the logo, logo width in
+                        cairo units, logo height in cairo units).
         """
         parts = urlparse(logo_url)
 
@@ -172,7 +176,7 @@ class Renderer:
         if not os.path.exists(logo_path):
             raise FileNotFoundError("Logo file '%s' not found (%s)" % (logo_url, logo_path))
 
-        return Renderer._get_svg(ctx, logo_path, height)
+        return Renderer._get_svg(ctx, logo_path, width, height)
 
 
 
