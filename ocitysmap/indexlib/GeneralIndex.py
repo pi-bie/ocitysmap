@@ -980,7 +980,7 @@ class MultiPageIndexRenderer:
     # ctx: Cairo context
     # surface: Cairo surface
     def __init__(self, i18n, ctx, surface, index_categories, paper_size, rendering_area,
-                 page_offset):
+                 page_offset, page_no_opposite = False):
         self._i18n           = i18n
         self.ctx            = ctx
         self.surface        = surface
@@ -992,6 +992,7 @@ class MultiPageIndexRenderer:
         self.rendering_area_w = rendering_area[2]
         self.rendering_area_h = rendering_area[3]
         self.page_offset      = page_offset
+        self.page_no_opposite = page_no_opposite
         self.index_page_num   = 0
 
     def _draw_page_number(self):
@@ -1003,7 +1004,8 @@ class MultiPageIndexRenderer:
                                       self.rendering_area_w,
                                       self.rendering_area_h,
                                       PAGE_NUMBER_MARGIN_PT,
-                                      transparent_background = False)
+                                      transparent_background = False,
+                                      side = commons.START_ON_LEFT_SIDE if self.page_no_opposite else None)
         self.ctx.restore()
         try:
             self.surface.set_page_label(_(u'Index page %d') % (self.index_page_num + 1))
