@@ -454,6 +454,8 @@ def render_page_number(ctx, page_number,
                   commons.convert_pt_to_dots(margin_pt))
     ctx.fill()
 
+    ctx.set_font_size(0.75*commons.convert_pt_to_dots(margin_pt))
+
     ctx.set_source_rgba(0, 0, 0, 1)
     x_offset = commons.convert_pt_to_dots(margin_pt)/2
     y_offset = commons.convert_pt_to_dots(margin_pt)/2
