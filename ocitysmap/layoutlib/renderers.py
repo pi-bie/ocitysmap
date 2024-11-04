@@ -4,6 +4,7 @@ from ocitysmap.layoutlib.single_page_renderer.no_index import SinglePageRenderer
 from ocitysmap.layoutlib.single_page_renderer.side_index import SinglePageRendererIndexOnSide
 from ocitysmap.layoutlib.single_page_renderer.bottom_index import SinglePageRendererIndexBottom
 from ocitysmap.layoutlib.single_page_renderer.extra_page import SinglePageRendererIndexExtraPage
+from ocitysmap.layoutlib.single_page_renderer.foldable import SinglePageRendererIndexFoldable
 from ocitysmap.layoutlib.multi_page_renderer import MultiPageRenderer
 # from ocitysmap.layoutlib.tk25 import TK25Renderer
 
@@ -13,6 +14,7 @@ _RENDERERS = [
     SinglePageRendererIndexOnSide,
     SinglePageRendererIndexBottom,
     SinglePageRendererIndexExtraPage,
+    SinglePageRendererIndexFoldable,
 #    TK25Renderer,
     MultiPageRenderer,
     ]

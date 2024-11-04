@@ -9,6 +9,7 @@
 # Copyright (C) 2010  Thomas Petazzoni
 # Copyright (C) 2010  Gaël Utard
 # Copyright (c) 2023  Hartmut Holzgraefe
+# Copyright (c) 2024  pi-bie
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -76,9 +77,10 @@ class SinglePageRenderer(Renderer):
 
     # TODO make configurable
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
+    COVER_OCCUPATION_RATIO = 1/4.
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix,
-                 index_position = 'side'):
+                 index_position = 'side', foldable = False):
         """
         Create the renderer.
 
@@ -97,11 +99,15 @@ class SinglePageRenderer(Renderer):
            index_position : str, optional
                None or 'side' (index on side), 'bottom' (index at bottom),
                or 'extra_page' (index on 2nd page for PDF output only).
+           foldable : Boolean, optional
+               Whether a foldable style should be used, ie putting a cover
+               in the top left corner
         """
 
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
         self.file_prefix = file_prefix
+        self.foldable = foldable
 
         # Prepare the index
         self.index_position = index_position
@@ -162,6 +168,17 @@ class SinglePageRenderer(Renderer):
                                        2 * Renderer.PRINT_SAFE_MARGIN_PT -
                                        self._title_margin_pt -
                                        self._copyright_margin_pt)
+
+        # change some space in case of foldable map
+        if self.foldable:
+            self._cover_width_pt = self.COVER_OCCUPATION_RATIO * (self.paper_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT)
+            self._usable_area_width_pt = (self.paper_width_pt -
+                                          self._cover_width_pt -
+                                          2 * Renderer.PRINT_SAFE_MARGIN_PT)
+            self._usable_area_height_pt = (self.paper_height_pt -
+                                           2 * Renderer.PRINT_SAFE_MARGIN_PT -
+                                           self._copyright_margin_pt)
+            self._cover_height_pt = self.COVER_OCCUPATION_RATIO * self._usable_area_height_pt
 
         # Prepare the Index (may raise a IndexDoesNotFitError)
         try:
