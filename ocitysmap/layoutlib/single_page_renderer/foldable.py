@@ -19,7 +19,7 @@ import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.GeneralIndex import GeneralIndexRenderer
 from ocitysmap.layoutlib.single_page_renderers import SinglePageRenderer
-# ~ from ocitysmap.indexlib.commons import IndexDoesNotFitError, IndexEmptyError
+from ocitysmap.indexlib.commons import IndexDoesNotFitError
 import draw_utils
 from ocitysmap import draw_utils, maplib
 from ocitysmap.maplib.map_canvas import MapCanvas
@@ -99,9 +99,9 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         ctx : cairo.Context
             The context to draw into
         w_dots : float
-            unused
+            ignored
         h_dots : float
-            unused
+            ignored
         font_face : str
             Pango font name
 
@@ -330,7 +330,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
                     Renderer.PRINT_SAFE_MARGIN_PT,
                     tmp_y,
                     index_max_width_pt,
-                    0.75 * self._usable_area_height_pt,
+                    self._usable_area_height_pt - self._cover_height_pt,
                     'width', 'left')
             elif index_position == 'bottom':
                 # Index at the bottom of the page
@@ -344,7 +344,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
                       - Renderer.PRINT_SAFE_MARGIN_PT
                       - self._copyright_margin_pt
                       - index_max_height_pt ),
-                    self._usable_area_width_pt,
+                    self._cover_width_pt + self._usable_area_width_pt,
                     index_max_height_pt,
                     'height', 'bottom')
         except IndexDoesNotFitError:

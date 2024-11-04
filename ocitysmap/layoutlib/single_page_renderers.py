@@ -152,7 +152,7 @@ class SinglePageRenderer(Renderer):
                 Renderer.GRID_LEGEND_MARGIN_RATIO * self.paper_height_pt)
 
         # reserve space for the page title if given
-        if self.rc.title:
+        if self.rc.title and not self.foldable:
             self._title_margin_pt = Renderer.TITLE_MARGIN_RATIO * self.paper_height_pt
         else:
             self._title_margin_pt = 0
