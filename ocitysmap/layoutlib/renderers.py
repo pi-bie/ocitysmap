@@ -6,6 +6,7 @@ from ocitysmap.layoutlib.single_page_renderer.bottom_index import SinglePageRend
 from ocitysmap.layoutlib.single_page_renderer.extra_page import SinglePageRendererIndexExtraPage
 from ocitysmap.layoutlib.single_page_renderer.foldable import SinglePageRendererIndexFoldable
 from ocitysmap.layoutlib.multi_page_renderer import MultiPageRenderer
+from ocitysmap.layoutlib.atlas_renderer import AtlasRenderer
 # from ocitysmap.layoutlib.tk25 import TK25Renderer
 
 # The renderers registry
@@ -17,6 +18,7 @@ _RENDERERS = [
     SinglePageRendererIndexFoldable,
 #    TK25Renderer,
     MultiPageRenderer,
+    AtlasRenderer,
     ]
 
 def get_renderer_class_by_name(name):
