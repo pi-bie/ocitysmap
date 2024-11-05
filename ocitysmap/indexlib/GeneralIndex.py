@@ -1005,7 +1005,7 @@ class MultiPageIndexRenderer:
                                       self.rendering_area_h,
                                       PAGE_NUMBER_MARGIN_PT,
                                       transparent_background = False,
-                                      side = commons.START_ON_LEFT_SIDE if self.page_no_opposite else None)
+                                      side = draw_utils.START_ON_LEFT_SIDE if self.page_no_opposite else None)
         self.ctx.restore()
         try:
             self.surface.set_page_label(_(u'Index page %d') % (self.index_page_num + 1))
