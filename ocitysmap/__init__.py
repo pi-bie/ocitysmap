@@ -62,8 +62,8 @@ The layout name is the renderer's key name. You can get the list of all
 supported renderers with renderer.get_all_renderers(). The output_formats is a
 list of output formats. For now, the following formats are supported:
 
-    * PNG at 72dpi
-    * PDF
+    * PNG at 300dpi
+    * PDF at 300dpi
     * SVG
     * SVGZ (gzipped-SVG)
     * PS
@@ -205,6 +205,8 @@ class OCitySMap:
     DEFAULT_REQUEST_TIMEOUT_MIN = 15 # TODO make this a config file setting
 
     DEFAULT_RENDERING_PNG_DPI = 300 # TODO make this a config file setting
+
+    DEFAULT_RENDERING_PDF_DPI = 300 # TODO make this a config file setting
 
     STYLESHEET_REGISTRY = []
 
@@ -857,8 +859,19 @@ class OCitySMap:
                 if w_px > 25000 or h_px > 25000:
                     LOG.warning("Paper size too large for PNG output, skipping")
                     return
-                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
+                LOG.warning("%d PPI to high for this paper size, using 72ppi instead" % dpi)
 
+            # probably a rather hacky way to ensure the ppi is respected also for png files
+            # while still allowing dpi for pdf to work as expected
+            # ie for png we change the actual size of the canvas in pt to the dots value
+            LOG.debug("For PNG rendering, use dots instead of points")
+            LOG.debug("ie %dx%d at %d ppi now becomes %dx%d at %d ppi"
+                      % (renderer.paper_width_pt, renderer.paper_height_pt, dpi, w_px, h_px, 72.0))
+            dpi = 72.0
+            config.paper_width_mm = layoutlib.commons.convert_pt_to_mm(w_px)
+            renderer.paper_width_pt = w_px
+            config.paper_height_mm = layoutlib.commons.convert_pt_to_mm(h_px)
+            renderer.paper_height_pt = h_px
             # as the dpi value may have changed we need to re-create the renderer
             renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
 
@@ -868,7 +881,7 @@ class OCitySMap:
             # ImageSurface, the font metrics would NOT match those
             # pre-computed by renderer_cls.__init__() and used to
             # layout the whole page
-            LOG.debug("Rendering PNG into %dpx x %dpx area at %ddpi ..."
+            LOG.debug("Rendering PNG into %dpx x %dpx area at %d ppi ..."
                       % (w_px, h_px, dpi))
             surface = cairo.PDFSurface(None, w_px, h_px)
 
@@ -881,8 +894,30 @@ class OCitySMap:
                                        renderer.paper_width_pt, renderer.paper_height_pt)
             surface.restrict_to_version(cairo.SVGVersion.VERSION_1_2);
         elif output_format == 'pdf':
+            try:
+                dpi = int(self._parser.get('rendering', 'pdf_dpi'))
+            except configparser.NoOptionError:
+                dpi = OCitySMap.DEFAULT_RENDERING_PDF_DPI
+
+            w_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_width_mm, dpi))
+            h_px = int(layoutlib.commons.convert_mm_to_dots(config.paper_height_mm, dpi))
+
+            if w_px > 25000 or h_px > 25000:
+                dpi = layoutlib.commons.PT_PER_INCH
+                w_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_width_pt, dpi))
+                h_px = int(layoutlib.commons.convert_pt_to_dots(renderer.paper_height_pt, dpi))
+                if w_px > 25000 or h_px > 25000:
+                    LOG.warning("Paper size too large for PDF output, skipping")
+                    return
+                LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
+
+            # as the dpi value may have changed we need to re-create the renderer
+            renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
+            LOG.debug("Rendering PDF into %dpt x %dpt area at %ddpi ..."
+                      % (renderer.paper_width_pt, renderer.paper_height_pt, dpi))
             surface = cairo.PDFSurface(tmp_output_filename,
                                        renderer.paper_width_pt, renderer.paper_height_pt)
+            surface.set_fallback_resolution(dpi, dpi)
             surface.restrict_to_version(cairo.PDFVersion.VERSION_1_5);
 
             try:

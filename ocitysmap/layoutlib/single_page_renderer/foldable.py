@@ -88,7 +88,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
 
         return (x, y, w, h)
 
-    def _draw_title(self, ctx, w_dots, h_dots, font_face):
+    def _draw_title(self, ctx, w_pt, h_pt, font_face):
         """ Draw map title
 
         Draw the title as a cover in the top left corner, in a 
@@ -110,16 +110,16 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         void
         """
 
-        w_dots = commons.convert_pt_to_dots(self._cover_width_pt, self.dpi)
-        h_dots = commons.convert_pt_to_dots(self._cover_height_pt, self.dpi)
-        margin_dots = 0.0625 * min(w_dots, h_dots)
-        cover_usable_height_dots = h_dots - 2 * margin_dots
-        cover_usable_width_dots = w_dots - 2 * margin_dots
+        w_pt = self._cover_width_pt
+        h_pt = self._cover_height_pt
+        margin_pt = 0.0625 * min(w_pt, h_pt)
+        cover_usable_height_pt = h_pt - 2 * margin_pt
+        cover_usable_width_pt = w_pt - 2 * margin_pt
 
         # Title background bar
         ctx.save()
         ctx.set_source_rgb(0.8, 0.9, 0.96) # TODO: make title bar color configurable?
-        ctx.rectangle(0, 0, w_dots, h_dots)
+        ctx.rectangle(0, 0, w_pt, h_pt)
         ctx.fill()
         ctx.restore()
 
@@ -127,9 +127,9 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         logo_width = 0
         if self.rc.logo:
             ctx.save()
-            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, 0.45 * cover_usable_width_dots, cover_usable_height_dots * 0.2)
+            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, 0.45 * cover_usable_width_pt, cover_usable_height_pt * 0.2)
             # TODO catch exceptions and just print warning instead?
-            ctx.translate(margin_dots, margin_dots + (0.2 * cover_usable_height_dots - logo_height)/2 )
+            ctx.translate(margin_pt, margin_pt + (0.2 * cover_usable_height_pt - logo_height)/2 )
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
             ctx.restore()
@@ -138,9 +138,9 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         logo_width2 = 0
         if self.rc.extra_logo:
             ctx.save()
-            grp, logo_width2, logo_height2 = self._get_logo(ctx, self.rc.extra_logo, 0.45 * cover_usable_width_dots, cover_usable_height_dots * 0.2)
+            grp, logo_width2, logo_height2 = self._get_logo(ctx, self.rc.extra_logo, 0.45 * cover_usable_width_pt, cover_usable_height_pt * 0.2)
             # TODO catch exceptions and just print warning instead?
-            ctx.translate(margin_dots + cover_usable_width_dots - logo_width2, margin_dots + (0.2 * cover_usable_height_dots - logo_height2)/2)
+            ctx.translate(margin_pt + cover_usable_width_pt - logo_width2, margin_pt + (0.2 * cover_usable_height_pt - logo_height2)/2)
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
             ctx.restore()
@@ -148,7 +148,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         # Prepare the title
         pc = PangoCairo.create_context(ctx)
         layout = PangoCairo.create_layout(ctx)
-        layout.set_width(int(cover_usable_width_dots * Pango.SCALE))
+        layout.set_width(int(cover_usable_width_pt))
         if not self.rc.i18n.isrtl():
             layout.set_alignment(Pango.Alignment.LEFT)
         else:
@@ -157,24 +157,24 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         fd.set_size(Pango.SCALE)
         layout.set_font_description(fd)
         layout.set_text(self.rc.title, -1)
-        draw_utils.adjust_font_size(layout, fd, cover_usable_width_dots, 0.2 * cover_usable_height_dots)
+        draw_utils.adjust_font_size(layout, fd, cover_usable_width_pt, 0.2 * cover_usable_height_pt)
 
         # Draw the title
         ctx.save()
         ctx.set_line_width(1)
-        ctx.rectangle(0, 0, w_dots, h_dots)
+        ctx.rectangle(0, 0, w_pt, h_pt)
         ctx.stroke()
-        ctx.translate((w_dots - layout.get_size()[0] / Pango.SCALE)/2,
-                      margin_dots + 0.2 * cover_usable_height_dots)
+        ctx.translate((w_pt - layout.get_size()[0] / Pango.SCALE)/2,
+                      margin_pt + 0.2 * cover_usable_height_pt)
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
         # Draw the mini map on the cover
         ctx.save()
-        ctx.translate(margin_dots,margin_dots + 0.4 * cover_usable_height_dots)
-        self._prepare_cover_map(cover_usable_width_dots, 0.6 * cover_usable_height_dots)
-        self._render_cover_map(ctx, cover_usable_width_dots, 0.6 * cover_usable_height_dots)
+        ctx.translate(margin_pt,margin_pt + 0.4 * cover_usable_height_pt)
+        self._prepare_cover_map(cover_usable_width_pt, 0.6 * cover_usable_height_pt)
+        self._render_cover_map(ctx, cover_usable_width_pt, 0.6 * cover_usable_height_pt)
         ctx.restore()
 
     def _prepare_cover_map(self, w, h):
@@ -226,7 +226,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
 
     def _render_cover_map(self, ctx, w, h):
 
-        # ~ dpi = self.dpi
+        dpi = self.dpi
 
         # ~ # We will render the map slightly below the title
         # ~ ctx.save()
@@ -243,7 +243,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         for ov_canvas in self._frontpage_overlay_canvases:
             self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
@@ -354,7 +354,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, render_context,
-                                   scale=Renderer.DEFAULT_SCALE):
+                                   scale=Renderer.DEFAULT_SCALE, dpi=commons.PT_PER_INCH):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
@@ -363,6 +363,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
             bounding_box (coords.BoundingBox): the map geographic bounding box.
             paper_sizes (list): the complete list of configured paper sizes
             scale (int): minimum mapnik scale of the map.
+            dpi (int): optional
 
         Returns a list of tuples (paper name, width in mm, height in
         mm, portrait_ok, landscape_ok). Paper sizes are represented in
@@ -371,7 +372,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         # ~ return SinglePageRenderer._generic_get_compatible_paper_sizes(
             # ~ bounding_box, render_context.get_all_paper_sizes(), scale, 'side')
 
-        paper_width_mm, paper_height_mm = SinglePageRendererIndexFoldable.get_minimal_paper_size(bounding_box, scale)
+        paper_width_mm, paper_height_mm = SinglePageRendererIndexFoldable.get_minimal_paper_size(bounding_box, scale, dpi)
         LOG.info('Best fit including decorations is %.0fx%.0fmm.' % (paper_width_mm, paper_height_mm))
 
         paper_sizes = render_context.get_all_paper_sizes()
@@ -432,13 +433,14 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         return valid_sizes
 
     @staticmethod
-    def get_minimal_paper_size(bounding_box, scale=Renderer.DEFAULT_SCALE):
+    def get_minimal_paper_size(bounding_box, scale=Renderer.DEFAULT_SCALE,dpi=commons.PT_PER_INCH):
         """
 
         Parameters
         ----------
         bounding_box : coords.BoundingBox
         scale : float, optional
+        dpi : int, optional
 
         Returns
         -------
@@ -453,7 +455,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         scale *= math.cos(math.radians(lat))
 
         # by convention, mapnik uses 90 ppi whereas cairo uses 72 ppi
-        scale *= float(72) / 90
+        scale *= float(dpi) / 90
 
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
         canvas_width_mm = geo_width_m * 1000 / scale

@@ -314,7 +314,7 @@ class AtlasRenderer(Renderer):
                 start_y = cur_y + grayed_margin_merc_m
                 end_x = cur_x + usable_area_merc_m_width
                 end_y = cur_y + usable_area_merc_m_height - grayed_margin_merc_m
-                
+
                 if len(pages_in_row) == 0 or i-1 not in indices_in_row:
                     start_x += grayed_margin_merc_m
                 if i == self.nb_pages_width - 1:
@@ -635,8 +635,10 @@ class AtlasRenderer(Renderer):
 
         # Prepare to draw the map within the right bounding area
         ctx.translate(
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+                # ~ commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT,self.dpi),
+                # ~ commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT,self.dpi))
+                Renderer.PRINT_SAFE_MARGIN_PT,
+                Renderer.PRINT_SAFE_MARGIN_PT)
         ctx.rectangle(0, 0, self._usable_area_width_pt, self._usable_area_height_pt)
         ctx.clip()
 
@@ -702,6 +704,9 @@ class AtlasRenderer(Renderer):
         ctx.restore()
 
     def _render_front_page_map(self, ctx, dpi, w, h):
+
+        dpi = self.dpi
+
         # We will render the map slightly below the title
         ctx.save()
         ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
@@ -712,12 +717,12 @@ class AtlasRenderer(Renderer):
 
         # Render the map !
         self.rc.status_update(_("Rendering front page: base map"))
-        mapnik.render(self._front_page_map.get_rendered_map(), ctx)
+        mapnik.render(self._front_page_map.get_rendered_map(), ctx, 72.0/dpi, 0, 0)
 
         for ov_canvas in self._frontpage_overlay_canvases:
             self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_overlay, ctx, 72.0/dpi, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
@@ -928,12 +933,12 @@ class AtlasRenderer(Renderer):
 
         rendered_map = self.overview_canvas.get_rendered_map()
         self.rc.status_update(_("Rendering overview page: base map"))
-        mapnik.render(rendered_map, ctx)
+        mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         for ov_canvas in self.overview_overlay_canvases:
             self.rc.status_update(_("Rendering overview page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         # apply effect overlays
         ctx.save()
@@ -949,8 +954,10 @@ class AtlasRenderer(Renderer):
 
         # draw pages numbers
         self._draw_overview_labels(ctx, self.overview_canvas, self.overview_grid,
-              commons.convert_pt_to_dots(self._usable_area_width_pt),
-              commons.convert_pt_to_dots(self._usable_area_height_pt))
+              # ~ commons.convert_pt_to_dots(self._usable_area_width_pt,dpi),
+              # ~ commons.convert_pt_to_dots(self._usable_area_height_pt,dpi))
+              self._usable_area_width_pt,
+              self._usable_area_height_pt)
 
         # Render the page number
         draw_utils.render_page_number(ctx, "iii",
@@ -1019,7 +1026,8 @@ class AtlasRenderer(Renderer):
                 north_arrow = self.page_disposition[line_nb][current_col]
                 ctx.save()
                 ctx.translate(self._usable_area_width_pt/2,
-                    commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                    # ~ commons.convert_pt_to_dots(self.grayed_margin_pt,self.dpi)/2)
+                    self.grayed_margin_pt/2)
                 self._draw_arrow(ctx, cairo_surface,
                               north_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
@@ -1032,7 +1040,8 @@ class AtlasRenderer(Renderer):
                 ctx.save()
                 ctx.translate(self._usable_area_width_pt/2,
                      self._usable_area_height_pt \
-                      - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                      # ~ - commons.convert_pt_to_dots(self.grayed_margin_pt,self.dpi)/2)
+                      - self.grayed_margin_pt/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
                       south_arrow + self._first_map_page_number, max_digit_number,
@@ -1170,14 +1179,21 @@ class AtlasRenderer(Renderer):
 
             # Place the vertical and horizontal square labels
             ctx.save()
-            ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
-                      commons.convert_pt_to_dots(self.grayed_margin_pt))
+            # ~ ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt,dpi),
+                      # ~ commons.convert_pt_to_dots(self.grayed_margin_pt,dpi))
+            ctx.translate(self.grayed_margin_pt,
+                      self.grayed_margin_pt)
             self._draw_labels(ctx, grid,
-                  commons.convert_pt_to_dots(self._usable_area_width_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                  commons.convert_pt_to_dots(self._usable_area_height_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                  commons.convert_pt_to_dots(self._grid_legend_margin_pt))
+                  # ~ commons.convert_pt_to_dots(self._usable_area_width_pt,dpi) \
+                        # ~ - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt,dpi),
+                  # ~ commons.convert_pt_to_dots(self._usable_area_height_pt,dpi) \
+                        # ~ - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt,dpi),
+                  # ~ commons.convert_pt_to_dots(self._grid_legend_margin_pt,dpi))
+                  self._usable_area_width_pt \
+                        - 2 * self.grayed_margin_pt,
+                  self._usable_area_height_pt \
+                        - 2 * self.grayed_margin_pt,
+                  self._grid_legend_margin_pt)
             ctx.restore()
 
 

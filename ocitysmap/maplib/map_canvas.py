@@ -89,8 +89,8 @@ class MapCanvas:
             envelope = orig_envelope
             self._geo_bbox = bounding_box
 
-        g_width  = int(convert_pt_to_dots(_width, dpi))
-        g_height = int(convert_pt_to_dots(_height, dpi))
+        g_width  = int(_width) #int(convert_pt_to_dots(_width, dpi))
+        g_height = int(_height) #int(convert_pt_to_dots(_height, dpi))
 
         # Create the Mapnik map with the corrected width and height and zoom to
         # the corrected bounding box ('envelope' in the Mapnik jargon)

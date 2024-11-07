@@ -719,6 +719,10 @@ class GeneralIndexRenderer:
         rendering_area.w = rendering_area.w - 2
         rendering_area.h = rendering_area.h - 2
 
+        # for reasons to be investigated, we seem to need to use
+        # the standard dpi here, independent of actaul rendering one
+        dpi = UTILS.PT_PER_INCH
+
         if not self._index_categories:
             raise commons.IndexEmptyError
 

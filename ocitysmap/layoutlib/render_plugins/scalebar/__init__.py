@@ -13,7 +13,8 @@ LOG = logging.getLogger('ocitysmap')
 
 def render(renderer, ctx):
     def pt2px(dot):
-        return dot * renderer.dpi / 72.0
+        # ~ return dot * renderer.dpi / 72.0
+        return dot
 
     m = renderer._map_canvas.get_rendered_map()
 

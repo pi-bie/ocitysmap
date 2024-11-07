@@ -37,7 +37,8 @@ def render(renderer, ctx):
         return
 
     # scale output size height to 5% of the paper size height
-    h = convert_pt_to_dots(0.05 * renderer.paper_height_pt, renderer.dpi)
+    # ~ h = convert_pt_to_dots(0.05 * renderer.paper_height_pt, renderer.dpi)
+    h = 0.05 * renderer.paper_height_pt
 
     # load and scale the SVG image
     rose_grp, rose_width, rose_height = Renderer._get_svg(ctx, svg_path, height = h)

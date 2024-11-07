@@ -5,6 +5,7 @@
 # Copyright (C) 2012  Thomas Petazzoni
 # Copyright (C) 2012  Gaël Utard
 # Copyright (C) 2012  Étienne Loks
+# Copyright (C) 2024  pi-bie
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -100,7 +101,7 @@ class MultiPageRenderer(Renderer):
     # see entities.xml.inc file from osm style sheet
     # TODO: make configurable
     DEFAULT_MULTIPAGE_SCALE = 4200
-    MAX_MULTIPAGE_MAPPAGES  = 50
+    MAX_MULTIPAGE_MAPPAGES  = 15
 
     def __init__(self, db, rc, tmpdir, dpi, file_prefix):
         """
@@ -605,8 +606,10 @@ class MultiPageRenderer(Renderer):
 
         # Prepare to draw the map within the right bounding area
         ctx.translate(
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
-                commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+                # ~ commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT),
+                # ~ commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT))
+                Renderer.PRINT_SAFE_MARGIN_PT,
+                Renderer.PRINT_SAFE_MARGIN_PT)
         ctx.rectangle(0, 0, self._usable_area_width_pt, self._usable_area_height_pt)
         ctx.clip()
 
@@ -682,12 +685,12 @@ class MultiPageRenderer(Renderer):
 
         # Render the map !
         self.rc.status_update(_("Rendering front page: base map"))
-        mapnik.render(self._front_page_map.get_rendered_map(), ctx)
+        mapnik.render(self._front_page_map.get_rendered_map(), ctx, 72.0/dpi, 0, 0)
 
         for ov_canvas in self._frontpage_overlay_canvases:
             self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
@@ -898,12 +901,12 @@ class MultiPageRenderer(Renderer):
 
         rendered_map = self.overview_canvas.get_rendered_map()
         self.rc.status_update(_("Rendering overview page: base map"))
-        mapnik.render(rendered_map, ctx)
+        mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         for ov_canvas in self.overview_overlay_canvases:
             self.rc.status_update(_("Rendering overview page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         # apply effect overlays
         ctx.save()
@@ -919,8 +922,10 @@ class MultiPageRenderer(Renderer):
 
         # draw pages numbers
         self._draw_overview_labels(ctx, self.overview_canvas, self.overview_grid,
-              commons.convert_pt_to_dots(self._usable_area_width_pt),
-              commons.convert_pt_to_dots(self._usable_area_height_pt))
+              # ~ commons.convert_pt_to_dots(self._usable_area_width_pt),
+              # ~ commons.convert_pt_to_dots(self._usable_area_height_pt))
+              self._usable_area_width_pt,
+              self._usable_area_height_pt)
 
         # Render the page number
         draw_utils.render_page_number(ctx, "iii",
@@ -989,7 +994,8 @@ class MultiPageRenderer(Renderer):
                 north_arrow = self.page_disposition[line_nb][current_col]
                 ctx.save()
                 ctx.translate(self._usable_area_width_pt/2,
-                    commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                    # ~ commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                    (self.grayed_margin_pt)/2)
                 self._draw_arrow(ctx, cairo_surface,
                               north_arrow + self._first_map_page_number, max_digit_number)
                 ctx.restore()
@@ -1002,7 +1008,8 @@ class MultiPageRenderer(Renderer):
                 ctx.save()
                 ctx.translate(self._usable_area_width_pt/2,
                      self._usable_area_height_pt \
-                      - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                      # ~ - commons.convert_pt_to_dots(self.grayed_margin_pt)/2)
+                      - (self.grayed_margin_pt)/2)
                 ctx.rotate(math.pi)
                 self._draw_arrow(ctx, cairo_surface,
                       south_arrow + self._first_map_page_number, max_digit_number,
@@ -1016,7 +1023,8 @@ class MultiPageRenderer(Renderer):
                 west_arrow = self.page_disposition[current_line][col_nb]
                 ctx.save()
                 ctx.translate(
-                    commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                    # ~ commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                    (self.grayed_margin_pt)/2,
                     self._usable_area_height_pt/2)
                 ctx.rotate(-math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
@@ -1031,7 +1039,8 @@ class MultiPageRenderer(Renderer):
                 ctx.save()
                 ctx.translate(
                     self._usable_area_width_pt \
-                     - commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                     # ~ - commons.convert_pt_to_dots(self.grayed_margin_pt)/2,
+                     - (self.grayed_margin_pt)/2,
                     self._usable_area_height_pt/2)
                 ctx.rotate(math.pi/2)
                 self._draw_arrow(ctx, cairo_surface,
@@ -1144,7 +1153,7 @@ class MultiPageRenderer(Renderer):
                                       'total': len(self.pages),
                                      })
 
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
             for overlay_canvas in overlay_canvases:
                 self.rc.status_update(_("Rendering map page %(page)d of %(total)d: %(style)s") %
@@ -1154,18 +1163,25 @@ class MultiPageRenderer(Renderer):
                                        })
 
                 rendered_overlay = overlay_canvas.get_rendered_map()
-                mapnik.render(rendered_overlay, ctx)
+                mapnik.render(rendered_overlay, ctx, 72.0/dpi, 0, 0)
 
             # Place the vertical and horizontal square labels
             ctx.save()
-            ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
-                      commons.convert_pt_to_dots(self.grayed_margin_pt))
+            # ~ ctx.translate(commons.convert_pt_to_dots(self.grayed_margin_pt),
+                      # ~ commons.convert_pt_to_dots(self.grayed_margin_pt))
+            ctx.translate((self.grayed_margin_pt),
+                      (self.grayed_margin_pt))
             self._draw_labels(ctx, grid,
-                  commons.convert_pt_to_dots(self._usable_area_width_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                  commons.convert_pt_to_dots(self._usable_area_height_pt) \
-                        - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
-                  commons.convert_pt_to_dots(self._grid_legend_margin_pt))
+                  # ~ commons.convert_pt_to_dots(self._usable_area_width_pt) \
+                        # ~ - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                  # ~ commons.convert_pt_to_dots(self._usable_area_height_pt) \
+                        # ~ - 2 * commons.convert_pt_to_dots(self.grayed_margin_pt),
+                  # ~ commons.convert_pt_to_dots(self._grid_legend_margin_pt))
+                  (self._usable_area_width_pt) \
+                        - 2 * (self.grayed_margin_pt),
+                  (self._usable_area_height_pt) \
+                        - 2 * (self.grayed_margin_pt),
+                  (self._grid_legend_margin_pt))
             ctx.restore()
 
 

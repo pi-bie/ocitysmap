@@ -380,8 +380,8 @@ class SinglePageRenderer(Renderer):
         return index_renderer, index_area
 
 
-    def _draw_title(self, ctx, w_dots, h_dots, font_face):
-        """ Draw mao title
+    def _draw_title(self, ctx, w_pt, h_pt, font_face):
+        """ Draw map title
 
         Draw the title at the current position inside a
         w_dots*h_dots rectangle.
@@ -405,7 +405,7 @@ class SinglePageRenderer(Renderer):
         # Title background bar
         ctx.save()
         ctx.set_source_rgb(0.8, 0.9, 0.96) # TODO: make title bar color configurable?
-        ctx.rectangle(0, 0, w_dots, h_dots)
+        ctx.rectangle(0, 0, w_pt, h_pt)
         ctx.fill()
         ctx.restore()
 
@@ -413,9 +413,9 @@ class SinglePageRenderer(Renderer):
         logo_width = 0
         if self.rc.logo:
             ctx.save()
-            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, height = 0.8*h_dots)
+            grp, logo_width, logo_height = self._get_logo(ctx, self.rc.logo, height = 0.8*h_pt)
             # TODO catch exceptions and just print warning instead?
-            ctx.translate(w_dots - logo_width - 0.1*h_dots, 0.1*h_dots)
+            ctx.translate(w_pt - logo_width - 0.1*h_pt, 0.1*h_pt)
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
             ctx.restore()
@@ -424,18 +424,18 @@ class SinglePageRenderer(Renderer):
         logo_width2 = 0
         if self.rc.extra_logo:
             ctx.save()
-            grp, logo_width2, logo_height2 = self._get_logo(ctx, self.rc.extra_logo, height = 0.8*h_dots)
+            grp, logo_width2, logo_height2 = self._get_logo(ctx, self.rc.extra_logo, height = 0.8*h_pt)
             # TODO catch exceptions and just print warning instead?
-            ctx.translate(0.4*h_dots, 0.1*h_dots)
+            ctx.translate(0.4*h_pt, 0.1*h_pt)
             ctx.set_source(grp)
             ctx.paint_with_alpha(0.5)
-            logo_width2 += 0.4*h_dots # TODO: why hardcoding the distance between logo and text?
+            logo_width2 += 0.4*h_pt # TODO: why hardcoding the distance between logo and text?
             ctx.restore()
 
         # Prepare the title
         pc = PangoCairo.create_context(ctx)
         layout = PangoCairo.create_layout(ctx)
-        layout.set_width(int((w_dots - 0.1*w_dots - logo_width - logo_width2) * Pango.SCALE))
+        layout.set_width(int((w_pt - 0.1*w_pt - logo_width - logo_width2) * Pango.SCALE))
         if not self.rc.i18n.isrtl():
             layout.set_alignment(Pango.Alignment.LEFT)
         else:
@@ -444,22 +444,22 @@ class SinglePageRenderer(Renderer):
         fd.set_size(Pango.SCALE)
         layout.set_font_description(fd)
         layout.set_text(self.rc.title, -1)
-        draw_utils.adjust_font_size(layout, fd, layout.get_width(), 0.8*h_dots)
+        draw_utils.adjust_font_size(layout, fd, layout.get_width(), 0.8*h_pt)
 
         # Draw the title
         ctx.save()
         ctx.set_line_width(1)
-        ctx.rectangle(0, 0, w_dots, h_dots)
+        ctx.rectangle(0, 0, w_pt, h_pt)
         ctx.stroke()
-        ctx.translate(0.4*h_dots + logo_width2,
-                      (h_dots -
+        ctx.translate(0.4 * h_pt + logo_width2,
+                      (h_pt -
                        (layout.get_size()[1] / Pango.SCALE)) / 2.0)
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
 
-    def _draw_copyright_notice(self, ctx, w_dots, h_dots, notice=None,
+    def _draw_copyright_notice(self, ctx, w_pt, h_pt, notice=None,
                                osm_date=None):
         """ Draw copyright / annotation notice
 
@@ -509,7 +509,7 @@ class SinglePageRenderer(Renderer):
         layout = PangoCairo.create_layout(ctx)
         layout.set_font_description(fd)
         layout.set_text(notice, -1)
-        draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
+        draw_utils.adjust_font_size(layout, fd, w_pt, h_pt)
         PangoCairo.update_layout(ctx, layout)
         PangoCairo.show_layout(ctx, layout)
         ctx.restore()
@@ -539,21 +539,27 @@ class SinglePageRenderer(Renderer):
         # First determine some useful drawing parameters
         safe_margin_dots \
             = commons.convert_pt_to_dots(Renderer.PRINT_SAFE_MARGIN_PT, dpi)
+        safe_margin_pt = Renderer.PRINT_SAFE_MARGIN_PT
 
         usable_area_width_dots \
             = commons.convert_pt_to_dots(self._usable_area_width_pt, dpi)
+        usable_area_width_pt = self._usable_area_width_pt
 
         usable_area_height_dots \
             = commons.convert_pt_to_dots(self._usable_area_height_pt, dpi)
+        usable_area_height_pt = self._usable_area_height_pt
 
         title_margin_dots \
             = commons.convert_pt_to_dots(self._title_margin_pt, dpi)
+        title_margin_pt = self._title_margin_pt
 
         copyright_margin_dots \
             = commons.convert_pt_to_dots(self._copyright_margin_pt, dpi)
+        copyright_margin_pt = self._copyright_margin_pt
 
         map_coords_dots = list(map(lambda l: commons.convert_pt_to_dots(l, dpi),
                               self._map_coords))
+        map_coords_pt = self._map_coords
 
         # create the cairo context to draw into
         ctx = cairo.Context(cairo_surface)
@@ -562,8 +568,10 @@ class SinglePageRenderer(Renderer):
         ctx.save()
         ctx.set_source_rgb(1, 1, 1)
         ctx.rectangle(0, 0,
-                      commons.convert_pt_to_dots(self.paper_width_pt, dpi),
-                      commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+                      # ~ commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                      self.paper_width_pt,
+                      # ~ commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+                      self.paper_height_pt)
         ctx.fill()
         ctx.restore()
 
@@ -573,15 +581,16 @@ class SinglePageRenderer(Renderer):
         ctx.save()
 
         # prevent map background from filling the full canvas
-        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.rectangle(self._map_coords[0], self._map_coords[1], self._map_coords[2], self._map_coords[3])
         ctx.clip()
 
         # Prepare to draw the map at the right location
-        ctx.translate(map_coords_dots[0], map_coords_dots[1])
+        ctx.translate(self._map_coords[0], self._map_coords[1])
 
         # Draw the rescaled Map
         ctx.save()
-        scale_factor = int(dpi / 72)
+        scale_factor = 72.0 / dpi
+        LOG.info('Try rendering with Scale Factor %f' % scale_factor)
         rendered_map = self._map_canvas.get_rendered_map()
         LOG.info('Map:')
         LOG.info('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
@@ -608,23 +617,22 @@ class SinglePageRenderer(Renderer):
         # Place the vertical and horizontal square labels
         if self.grid and self.index_position:
             self._draw_labels(ctx, self.grid,
-                              map_coords_dots[2],
-                              map_coords_dots[3],
-                              commons.convert_pt_to_dots(self._grid_legend_margin_pt,
-                                                         dpi))
+                              self._map_coords[2],
+                              self._map_coords[3],
+                              self._grid_legend_margin_pt)
         ctx.restore()
 
         # Draw a rectangle frame around the map
         ctx.save()
         ctx.set_line_width(1)
-        ctx.rectangle(map_coords_dots[0], map_coords_dots[1], map_coords_dots[2], map_coords_dots[3])
+        ctx.rectangle(map_coords_pt[0], map_coords_pt[1], map_coords_pt[2], map_coords_pt[3])
         ctx.stroke()
         ctx.restore()
 
         # make sure that plugins do not render outside the actual map area
         ctx.save()
-        ctx.translate(map_coords_dots[0], map_coords_dots[1])
-        ctx.rectangle(0, 0, map_coords_dots[2], map_coords_dots[3])
+        ctx.translate(map_coords_pt[0], map_coords_pt[1])
+        ctx.rectangle(0, 0, map_coords_pt[2], map_coords_pt[3])
         ctx.clip()
 
         # apply effect plugin overlays
@@ -645,9 +653,9 @@ class SinglePageRenderer(Renderer):
         ##
         if self.rc.title:
             ctx.save()
-            ctx.translate(safe_margin_dots, safe_margin_dots)
-            self._draw_title(ctx, usable_area_width_dots,
-                             title_margin_dots, 'Droid Sans Bold')
+            ctx.translate(safe_margin_pt, safe_margin_pt)
+            self._draw_title(ctx, usable_area_width_pt,
+                                 title_margin_pt, 'Droid Sans Bold')
             ctx.restore()
 
         ##
@@ -684,10 +692,11 @@ class SinglePageRenderer(Renderer):
             # Also draw a rectangle frame around the index
             ctx.save()
             ctx.set_line_width(1)
-            ctx.rectangle(commons.convert_pt_to_dots(self._index_area.x, dpi),
-                          commons.convert_pt_to_dots(self._index_area.y, dpi),
-                          commons.convert_pt_to_dots(self._index_area.w, dpi),
-                          commons.convert_pt_to_dots(self._index_area.h, dpi))
+            ctx.rectangle(self._index_area.x, self._index_area.y, self._index_area.w, self._index_area.h)
+            # ~ ctx.rectangle(commons.convert_pt_to_dots(self._index_area.x, dpi),
+                          # ~ commons.convert_pt_to_dots(self._index_area.y, dpi),
+                          # ~ commons.convert_pt_to_dots(self._index_area.w, dpi),
+                          # ~ commons.convert_pt_to_dots(self._index_area.h, dpi))
             ctx.stroke()
             ctx.restore()
 
@@ -697,14 +706,16 @@ class SinglePageRenderer(Renderer):
         ctx.save()
 
         # Move to the right position
-        ctx.translate(safe_margin_dots,
-                      ( safe_margin_dots + title_margin_dots
-                        + usable_area_height_dots
-                        + copyright_margin_dots/4. ) )
+        copyright_position_top = safe_margin_pt + title_margin_pt + usable_area_height_pt
+        if self.foldable:
+            copyright_position_top = safe_margin_pt + usable_area_height_pt
+        ctx.translate(safe_margin_pt,
+                      ( copyright_position_top
+                        + copyright_margin_pt/4. ) )
 
         # Draw the copyright notice
-        self._draw_copyright_notice(ctx, usable_area_width_dots,
-                                    copyright_margin_dots,
+        self._draw_copyright_notice(ctx, usable_area_width_pt,
+                                    copyright_margin_pt,
                                     osm_date=osm_date)
         ctx.restore()
 
@@ -741,8 +752,10 @@ class SinglePageRenderer(Renderer):
                 ctx.save()
                 ctx.set_source_rgb(1, 1, 1)
                 ctx.rectangle(0, 0,
-                              commons.convert_pt_to_dots(self.paper_width_pt, dpi),
-                              commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+                              # ~ commons.convert_pt_to_dots(self.paper_width_pt, dpi),
+                              self.paper_width_pt,
+                              # ~ commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+                              self.paper_height_pt)
                 ctx.fill()
                 ctx.restore()
 
@@ -760,13 +773,15 @@ class SinglePageRenderer(Renderer):
     @staticmethod
     def _generic_get_minimal_paper_size(bounding_box,
                                         scale=Renderer.DEFAULT_SCALE,
-                                        index_position = None):
+                                        index_position = None,
+                                        dpi=commons.PT_PER_INCH):
         """
 
         Parameters
         ----------
         bounding_box : coords.BoundingBox
         scale : float, optional
+        dpi : float, optional
         index_position : str, optional
 
         Returns
@@ -780,7 +795,7 @@ class SinglePageRenderer(Renderer):
         scale *= math.cos(math.radians(lat))
 
         # by convention, mapnik uses 90 ppi whereas cairo uses 72 ppi
-        scale *= float(72) / 90
+        scale *= float(dpi) / 90
 
         geo_height_m, geo_width_m = bounding_box.spheric_sizes()
         canvas_width_mm = geo_width_m * 1000 / scale
@@ -828,8 +843,9 @@ class SinglePageRenderer(Renderer):
     @staticmethod
     def _generic_get_compatible_paper_sizes(bounding_box,
                                             paper_sizes,
-                                            scale=Renderer.DEFAULT_SCALE,
-                                            index_position = None):
+                                            scale = Renderer.DEFAULT_SCALE,
+                                            index_position = None,
+                                            dpi = commons.PT_PER_INCH):
         """Returns a list of the compatible paper sizes for the given bounding
         box. The list is sorted, smaller papers first, and a "custom" paper
         matching the dimensions of the bounding box is added at the end.
@@ -837,6 +853,7 @@ class SinglePageRenderer(Renderer):
         Args:
             bounding_box (coords.BoundingBox): the map geographic bounding box.
             scale (int): minimum mapnik scale of the map.
+            dpi (float): optional
             index_position (str): None or 'side' (index on side),
               'bottom' (index at bottom), 'extra_page' (index on 2nd page for PDF).
 
@@ -925,7 +942,7 @@ if __name__ == '__main__':
     zoom = 16
 
     renderer_cls = renderers.get_renderer_class_by_name('plain')
-    papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom)
+    papers = renderer_cls.get_compatible_paper_sizes(bbox, zoom, dpi)
 
     print('Compatible paper sizes:')
     for p in papers:

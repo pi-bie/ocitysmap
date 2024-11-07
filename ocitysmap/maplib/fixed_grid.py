@@ -58,8 +58,8 @@ class FixedGrid:
         LOG.info('Laying out grid on %.1fx%.1fm area...' %
                (self._width_m, self._height_m))
 
-        self.horiz_count = cols
-        self.vert_count = rows
+        self.horiz_count = self.cols
+        self.vert_count = self.rows
         self.grid_width_m = self._width_m / self.horiz_count
         self.grid_height_m = self._height_m / self.vert_count
 
@@ -73,15 +73,15 @@ class FixedGrid:
 
         self._horizontal_lines = [ ( self._bbox.get_top_left()[0] -
                                      (x+1) * self._vert_unit_angle)
-                                   for x in range(int(math.floor(self.vert_count)))]
+                                   for x in range(int(math.floor(self.vert_count))-1)]
         if rtl:
             self._vertical_lines   = [ (self._bbox.get_bottom_right()[1] -
                                         (x+1) * self._horiz_unit_angle)
-                                       for x in range(int(math.floor(self.horiz_count)))]
+                                       for x in range(int(math.floor(self.horiz_count))-1)]
         else:
             self._vertical_lines   = [ (self._bbox.get_top_left()[1] +
                                         (x+1) * self._horiz_unit_angle)
-                                       for x in range(int(math.floor(self.horiz_count)))]
+                                       for x in range(int(math.floor(self.horiz_count))-1)]
 
         self.horizontal_labels = list(map(self._gen_horizontal_square_label,
                                       range(int(math.ceil(self.horiz_count)))))
