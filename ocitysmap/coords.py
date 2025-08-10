@@ -140,6 +140,9 @@ class BoundingBox:
     def get_bottom_right(self):
         return (self._lat2, self._long2)
 
+    def get_center(self):
+        return ((self._lat1 + self._lat2) / 2.0, (self._long1 + self._long2) / 2.0)
+
     def create_expanded(self, dlat, dlong):
         """ Extend bounding box
 

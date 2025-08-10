@@ -115,7 +115,7 @@ def draw_text(ctx, layout, fascent,
 
 def draw_text_left(ctx, layout, fascent,
                     baseline_x, baseline_y, text):
-    """ Draw center alinged text
+    """ Draw left aligned text
 
     Draws the given text left aligned into the provided Cairo
     context through the Pango layout (get_width() expected to be
@@ -180,7 +180,7 @@ def draw_text_center(ctx, layout, fascent,
 
 def draw_text_right(ctx, layout, fascent,
                     baseline_x, baseline_y, text):
-    """ Draw left alinged text
+    """ Draw right aligned text
 
     Draws the given text left aligned into the provided Cairo
     context through the Pango layout (get_width() expected to be
@@ -233,6 +233,58 @@ def draw_simpletext_center(ctx, text, x, y):
     ctx.save()
     xb, yb, tw, th, xa, ya = ctx.text_extents(text)
     ctx.move_to(x - tw/2.0 - xb, y - yb/2.0)
+    ctx.show_text(text)
+    ctx.stroke()
+    ctx.restore()
+
+def draw_simpletext_left(ctx, text, x, y):
+    """
+    Draw the given text left aligned at position x,y.
+
+    Parameters
+    ----------
+       ctx : cairo.Context)
+         The cairo context to use to draw.
+       text : str
+         The text to draw.
+       x : float
+           Horizontal center position in cairo units
+       y : float
+           Vertical position of the center in cairo units
+
+    Returns
+    -------
+    void
+    """
+    ctx.save()
+    xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+    ctx.move_to(x - xb, y - yb/2.0)
+    ctx.show_text(text)
+    ctx.stroke()
+    ctx.restore()
+
+def draw_simpletext_right(ctx, text, x, y):
+    """
+    Draw the given text right aligned at position x,y.
+
+    Parameters
+    ----------
+       ctx : cairo.Context)
+         The cairo context to use to draw.
+       text : str
+         The text to draw.
+       x : float
+           Horizontal center position in cairo units
+       y : float
+           Vertical position of the center in cairo units
+
+    Returns
+    -------
+    void
+    """
+    ctx.save()
+    xb, yb, tw, th, xa, ya = ctx.text_extents(text)
+    ctx.move_to(x - tw - xb, y - yb/2.0)
     ctx.show_text(text)
     ctx.stroke()
     ctx.restore()
