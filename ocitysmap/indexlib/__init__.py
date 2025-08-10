@@ -38,6 +38,7 @@ if __name__ == '__main__':
     from HealthIndex import HealthIndex
     from TreeIndex import TreeIndex
     from TownIndex import TownIndex
+    from AdminIndex import AdminIndex
 
     logging.basicConfig(level=logging.DEBUG)
     random.seed(42)
