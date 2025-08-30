@@ -7,6 +7,9 @@
 # ignore compiled gettext language files
 *.mo
 
+# ignore diff backup files
+*.orig
+
 # ignore local configuration
 /ocitysmap.conf
 /ocitysmap.overlays
