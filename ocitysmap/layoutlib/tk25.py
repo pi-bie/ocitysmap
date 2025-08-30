@@ -33,13 +33,15 @@ assert mapnik.mapnik_version() >= 300000, \
     "for more details." % mapnik.mapnik_version_string()
 import math
 from copy import copy
-from gettext import gettext
+from gettext import gettext, ngettext
 
 from ocitysmap.layoutlib import commons
 import ocitysmap
 from ocitysmap.layoutlib.abstract_renderer import Renderer
 from ocitysmap.indexlib.GeneralIndex import GeneralIndexRenderer
 from ocitysmap.indexlib.StreetIndex import StreetIndex
+from ocitysmap.indexlib.TownIndex import TownIndex
+from ocitysmap.indexlib.AdminIndex import AdminIndex
 from ocitysmap.indexlib.PoiIndex import PoiIndexRenderer, PoiIndex
 from indexlib.commons import IndexDoesNotFitError, IndexEmptyError
 import ocitysmap.layoutlib.commons as UTILS
@@ -63,11 +65,59 @@ class TK25Renderer(Renderer):
     def __init__(self, db, rc, tmpdir, dpi, file_prefix,
                  index_position = 'side'):
 
+        rc.indexer = 'Admin'
         Renderer.__init__(self, db, rc, tmpdir, dpi)
 
         self.file_prefix = file_prefix
-        
+
         self._map_coords = self._get_map_coords(None)
+
+        # Prepare the index
+        try:
+            indexer_class = globals()[rc.indexer+"Index"]
+            # TODO: check that it actually implements a working indexer class
+        except:
+            LOG.warning("Indexer class '%s' not found" % rc.indexer)
+            self.index = None
+            self.index_position = None
+        else:
+            try:
+                indexer_name = rc.indexer
+                #indexer_class = globals()[rc.indexer]
+                indexer_class = globals()[rc.indexer+"Index"]
+                # TODO : check that it actually implements a working indexer class
+            except:
+                LOG.warning("Indexer class '%s' not found" % rc.indexer)
+                self.index = None
+                self.index_position = None
+            else:
+                self.index = indexer_class(db,
+												  self,
+												  rc.bounding_box,
+												  rc.polygon_wkt,
+												  rc.i18n,
+                    )
+
+        if self.index and not self.index.categories:
+            LOG.warning("Designated area leads to an empty index")
+            self.index = None
+            self.index_position = None
+
+        # Prepare the Index renderer (may raise a IndexDoesNotFitError)
+        try:
+            if ( index_position and self.index
+                 and self.index.categories ):
+                self.rc.status_update(_("%s: fetching index data") % self.rc.output_format)
+                self._index_renderer, self._index_area \
+                    = self._create_index_rendering(index_position)
+            else:
+                self._index_renderer, self._index_area = None, None
+        except IndexDoesNotFitError as e:
+                self._index_renderer, self._index_area = None, None
+
+        # Prepare overlay styles from config
+        self._overlays = copy(self.rc.overlays)
+        self._overlay_effects  = {}
 
         # Prepare the map
         self._map_canvas = self._create_map_canvas(
@@ -76,28 +126,303 @@ class TK25Renderer(Renderer):
             dpi,
             rc.osmid is not None )
 
+        # ~ try:
+            # ~ self._overlays.append(mapper.get_overlay_by_name("3gk_grid"))
+        # ~ except LookupError as ex:
+            # ~ parser.error("%s. Available overlay stylesheets: %s."
+                 # ~ % (ex, ', '.join(map(lambda s: s.name,
+                      # ~ mapper.OVERLAY_REGISTRY))))
+
+        # Prepare map overlays
+        self._overlay_canvases = []
+        for overlay in self._overlays:
+            path = overlay.path.strip()
+            if path.startswith('internal:'):
+                # overlay plugin implemented using Python code
+                plugin_name = path.lstrip('internal:')
+                self._overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+            else:
+                # Mapnix style overlay
+                self._overlay_canvases.append(MapCanvas(overlay,
+                                              self.rc.bounding_box,
+                                              float(self._map_coords[2]),  # W
+                                              float(self._map_coords[3]),  # H
+                                              dpi))
+
         # Commit the internal rendering stack of the map
         self._map_canvas.render()
 
     def _get_map_coords(self, index_position):
         # TODO: 40x40cm
 
-        x = commons.convert_mm_to_pt(10)
-        y = commons.convert_mm_to_pt(10)
-        w = commons.convert_mm_to_pt(400)
-        h = commons.convert_mm_to_pt(400)
+        (h_nature, w_nature) = self.rc.bounding_box.spheric_sizes()
+        LOG.info('Actual width at top lat is %sm.' % w_nature)
+
+        x = commons.convert_mm_to_pt(30)
+        y = commons.convert_mm_to_pt(50)
+        self._w_mm = w_nature / 25.0
+        self._h_mm = h_nature / 25.0
+        w = commons.convert_mm_to_pt(w_nature / 25.0)
+        h = commons.convert_mm_to_pt(h_nature / 25.0)
 
         return (x, y, w, h)
 
     def _create_index_rendering(self, index_position):
-        return None, None
+        """Prepare to render the index.
+
+        Parameters
+        ----------
+           index_position : str, optional
+               None, "side", "bottom" or "extra_page"
+
+        Returns
+        -------
+        List of (IndexRenderer, IndexRenderingArea).
+            The actual index renderer and the area it will cover.
+        """
+
+        index_area = None
+
+        # Now we determine the actual occupation of the index
+        # TODO: index type choice should not be hard coded here
+        index_renderer = GeneralIndexRenderer(self.rc.i18n,
+                                                 self.index.categories)
+
+        # We use a fake vector device to determine the actual
+        # rendering characteristics
+        fake_surface = cairo.PDFSurface(None,
+                                        self.paper_width_pt,
+                                        self.paper_height_pt)
+
+        # calculate the area required for the index, depending on its position
+        try:
+            index_area = index_renderer.precompute_occupation_area(
+                fake_surface,
+                commons.convert_mm_to_pt(85),
+                commons.convert_mm_to_pt(50 + self._h_mm + 22),
+                commons.convert_mm_to_pt(100),
+                commons.convert_mm_to_pt(50),
+                'height', 'top')
+            # ~ if index_position == 'side':
+                # ~ index_max_width_pt \
+                    # ~ = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_width_pt
+
+                # ~ if not self.rc.i18n.isrtl():
+                    # ~ # non-RTL: Index is on the right
+                    # ~ index_area = index_renderer.precompute_occupation_area(
+                        # ~ fake_surface,
+                        # ~ ( self.paper_width_pt - Renderer.PRINT_SAFE_MARGIN_PT
+                          # ~ - index_max_width_pt ),
+                        # ~ ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
+                        # ~ index_max_width_pt,
+                        # ~ self._usable_area_height_pt,
+                        # ~ 'width', 'right')
+                # ~ else:
+                    # ~ # RTL: Index is on the left
+                    # ~ index_area = index_renderer.precompute_occupation_area(
+                        # ~ fake_surface,
+                        # ~ Renderer.PRINT_SAFE_MARGIN_PT,
+                        # ~ ( Renderer.PRINT_SAFE_MARGIN_PT + self._title_margin_pt ),
+                        # ~ index_max_width_pt,
+                        # ~ self._usable_area_height_pt,
+                        # ~ 'width', 'left')
+            # ~ elif index_position == 'bottom':
+                # ~ # Index at the bottom of the page
+                # ~ index_max_height_pt \
+                    # ~ = self.MAX_INDEX_OCCUPATION_RATIO * self._usable_area_height_pt
+
+                # ~ index_area = index_renderer.precompute_occupation_area(
+                    # ~ fake_surface,
+                    # ~ Renderer.PRINT_SAFE_MARGIN_PT,
+                    # ~ ( self.paper_height_pt
+                      # ~ - Renderer.PRINT_SAFE_MARGIN_PT
+                      # ~ - self._copyright_margin_pt
+                      # ~ - index_max_height_pt ),
+                    # ~ self._usable_area_width_pt,
+                    # ~ index_max_height_pt,
+                    # ~ 'height', 'bottom')
+        except IndexDoesNotFitError:
+            index_area = None
+
+        return index_renderer, index_area
 
     def _draw_title(self, ctx, w_dots, h_dots, font_face):
-        return
+        # ~ ctx.save()
+        # ~ ctx.set_source_rgb(0.8, 0.9, 0.96) # TODO: make title bar color configurable?
+        # ~ ctx.rectangle(0, 0, 100, 100)
+        # ~ ctx.fill()
+        # ~ ctx.restore()
+
+        # Prepare the title
+        pc = PangoCairo.create_context(ctx)
+        layout = PangoCairo.create_layout(ctx)
+        layout.set_width(commons.convert_mm_to_pt(30 + self._w_mm - 105) * Pango.SCALE)
+        if not self.rc.i18n.isrtl():
+            layout.set_alignment(Pango.Alignment.LEFT)
+        else:
+            layout.set_alignment(Pango.Alignment.RIGHT)
+        fd = Pango.FontDescription(font_face)
+        # ~ set_font_size(pt*dpi/72)
+        fd.set_size(Pango.SCALE)
+        layout.set_font_description(fd)
+        layout.set_text(self.rc.title+".", -1)
+        draw_utils.adjust_font_size(layout, fd, commons.convert_mm_to_pt(30 + self._w_mm + 30), commons.convert_mm_to_pt(10))
+
+        # Draw the title
+        ctx.save()
+        ctx.set_line_width(0)
+        ctx.rectangle(0, 0, layout.get_size()[0] / Pango.SCALE, layout.get_size()[1] / Pango.SCALE)
+        ctx.stroke()
+        ctx.translate(commons.convert_mm_to_pt(30 + self._w_mm / 2.0) - (layout.get_size()[0] / Pango.SCALE) / 2.0, # + commons.convert_mm_to_pt(10),
+                      commons.convert_mm_to_pt(33) - (layout.get_size()[1] / Pango.SCALE) )
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
+        ctx.restore()
+
+    def _prepare_cover_map(self, w, h):
+        dpi = self.dpi
+        self.rc.status_update(_("Preparing cover"))
+        cover_map_w = w
+        cover_map_h = h
+
+        # Create the nice small map
+        cover_map = \
+            MapCanvas(self.rc.stylesheet,
+                      self.rc.bounding_box,
+                      cover_map_w,
+                      cover_map_h,
+                      dpi,
+                      extend_bbox_to_ratio=True)
+
+        self.rc.status_update(_("Preparing front page: base map"))
+        cover_map.render()
+        self._cover_map = cover_map
+
+        self._frontpage_overlay_canvases = []
+        self._frontpage_overlay_effects  = {}
+        # ~ for overlay in self._overlays:
+            # ~ path = overlay.path.strip()
+            # ~ if path.startswith('internal:'):
+                # ~ plugin_name = path.lstrip('internal:')
+                # ~ self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+            # ~ else:
+                # ~ ov_canvas = MapCanvas(overlay,
+                                      # ~ self.rc.bounding_box,
+                                      # ~ cover_map_w,
+                                      # ~ cover_map_h,
+                                      # ~ dpi,
+                                      # ~ extend_bbox_to_ratio=True)
+                # ~ self.rc.status_update(_("Preparing front page: %s") % ov_canvas._style_name)
+                # ~ ov_canvas.render()
+                # ~ self._frontpage_overlay_canvases.append(ov_canvas)
+
+    def _render_cover_map(self, ctx, w, h):
+
+        dpi = self.dpi
+
+        # ~ # We will render the map slightly below the title
+        ctx.save()
+        # ~ ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
+
+        # prevent map background from filling the full canvas
+        ctx.rectangle(0, 0, w, h)
+        ctx.clip()
+
+        # Render the map !
+        self.rc.status_update(_("Rendering front page: base map"))
+        mapnik.render(self._cover_map.get_rendered_map(), ctx)
+
+        for ov_canvas in self._frontpage_overlay_canvases:
+            self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
+            rendered_map = ov_canvas.get_rendered_map()
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
+
+        # TODO offsets are not correct here, so we skip overlay plugins for now
+        # apply effect overlays
+        # ctx.save()
+        # we have to undo border adjustments here
+        # ctx.translate(0, -(0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT))
+        # self._map_canvas = self._cover_map;
+        # for plugin_name, effect in self._frontpage_overlay_effects.items():
+        #    try:
+        #        effect.render(self, ctx)
+        #    except Exception as e:
+        #        # TODO better logging
+        #        LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
+        # ctx.restore()
+
+        ctx.restore()
 
     def _draw_copyright_notice(self, ctx, w_dots, h_dots, notice=None,
                                osm_date=None):
-        return
+        """ Draw copyright / annotation notice
+
+        Draw a copyright notice at current location and within the
+        given w_dots*h_dots rectangle.
+
+        Parameters
+        ----------
+        ctx : cairo.Context
+            Cairo context to draw into
+        w_dots : float
+            Width of bottom bar in cairo units
+        h_dots : float
+            Height of bottom bar in cairo units
+        notice : str, optional
+            Optional notice text to replace the default.
+        osm_date : datetime, optional
+            Timestamp the OSM data was last updated at.
+
+        Returns
+        -------
+        void
+
+           w_dots,h_dots (number): Rectangle dimension (ciaro units).
+           font_face (str): Pango font specification.
+           notice (str): Optional notice to replace the default.
+        """
+
+        if notice is None:
+            annotations = self._annotations(osm_date)
+
+            notice = annotations['maposmatic'] + '\n'
+
+            if annotations['styles']:
+                notice+= ngettext(u'Map style:',u'Map styles:', len(annotations['styles']))
+                notice+= ' ' + '; '.join(annotations['styles']) + '\n'
+
+            if annotations['sources']:
+                notice+= ngettext(u'Data source:',u'Data sources:', len(annotations['sources']))
+                notice+= ' ' + '; '.join(list(annotations['sources'])) + '\n'
+
+        # do the actual output drawing
+        ctx.save()
+        pc = PangoCairo.create_context(ctx)
+        fd = Pango.FontDescription('DejaVu Serif')
+        fd.set_size(Pango.SCALE)
+        layout = PangoCairo.create_layout(ctx)
+        layout.set_font_description(fd)
+        layout.set_text(notice, -1)
+        draw_utils.adjust_font_size(layout, fd, w_dots, h_dots)
+        ctx.translate(-(layout.get_size()[0] / Pango.SCALE) / 2.0,
+                      0 )
+        PangoCairo.update_layout(ctx, layout)
+        PangoCairo.show_layout(ctx, layout)
+        ctx.restore()
+
+    @staticmethod
+    def _mm_hline(ctx,x,y,width,dpi):
+        ctx.move_to(commons.convert_mm_to_dots(x, dpi),
+                    commons.convert_mm_to_dots(y, dpi))
+        ctx.rel_line_to(commons.convert_mm_to_dots(width, dpi),0)
+        ctx.close_path()
+
+    @staticmethod
+    def _mm_vline(ctx,x,y,width,dpi):
+        ctx.move_to(commons.convert_mm_to_dots(x, dpi),
+                    commons.convert_mm_to_dots(y, dpi))
+        ctx.rel_line_to(0,commons.convert_mm_to_dots(width, dpi))
+        ctx.close_path()
 
     @staticmethod
     def _mm_rect(ctx,x,y,w,h,dpi):
@@ -105,22 +430,27 @@ class TK25Renderer(Renderer):
                       commons.convert_mm_to_dots(y, dpi),
                       commons.convert_mm_to_dots(w, dpi),
                       commons.convert_mm_to_dots(h, dpi))
+        # ~ ctx.rectangle(x, y, w, h)
 
     @staticmethod
     def _mm_mvto(ctx,x,y,dpi):
         ctx.move_to(commons.convert_mm_to_dots(x, dpi),
                     commons.convert_mm_to_dots(y, dpi))
+        # ~ ctx.move_to(x, y)
     @staticmethod
     def _fs(ctx, pt, dpi):
         ctx.set_font_size(pt*dpi/72)
 
     @staticmethod
     def deg2hm(a):
-        (f, d) = math.mpdf(a)
+        (f, d) = math.modf(a)
         m = (int)(f*60)
         return d, m
 
     def render(self, cairo_surface, dpi, osm_date):
+        LOG.info('TK25Renderer rendering -%s- on %dx%dmm paper at %d dpi.' %
+                 (self.rc.output_format, self.rc.paper_width_mm, self.rc.paper_height_mm, dpi))
+
         ctx = cairo.Context(cairo_surface)
         pc = PangoCairo.create_context(ctx)
 
@@ -133,21 +463,52 @@ class TK25Renderer(Renderer):
             draw_utils.create_layout_with_font(ctx, small_fd)
 
         PangoCairo.context_set_resolution(normal_layout.get_context(),
-                                          96.*dpi/UTILS.PT_PER_INCH)
+                                          96.*72/UTILS.PT_PER_INCH)
 
         # Set a white background
         ctx.save()
         ctx.set_source_rgb(1, 1, 1)
-        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.paper_width_pt, dpi),
-                      commons.convert_pt_to_dots(self.paper_height_pt, dpi))
+        ctx.rectangle(0, 0, commons.convert_pt_to_dots(self.paper_width_pt, 72),
+                      commons.convert_pt_to_dots(self.paper_height_pt, 72))
+        # ~ ctx.rectangle(0, 0, self.paper_width_pt,
+                      # ~ self.paper_height_pt)
         ctx.fill()
+        ctx.restore()
+
+        ##
+        ## Draw the map, scaled to fit the designated area
+        ##
+        ctx.save()
+
+        # prevent map background from filling the full canvas
+        ctx.rectangle(self._map_coords[0], self._map_coords[1], self._map_coords[2], self._map_coords[3])
+        ctx.clip()
+
+        # Prepare to draw the map at the right location
+        ctx.translate(self._map_coords[0], self._map_coords[1])
+
+        # Draw the rescaled Map
+        ctx.save()
+        scale_factor = 72.0 / dpi
+        LOG.info('Try rendering with Scale Factor %f' % scale_factor)
+        rendered_map = self._map_canvas.get_rendered_map()
+        LOG.info('Map:')
+        LOG.info('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
+        LOG.info('Actual scale: 1/%f' % self._map_canvas.get_actual_scale())
+        LOG.info('Zoom factor: %d' % self.scaleDenominator2zoom(rendered_map.scale_denominator()))
+
+        # now perform the actual map drawing
+        self.rc.status_update(_("%s: rendering base map") % self.rc.output_format)
+        mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
+        ctx.restore()
+
         ctx.restore()
 
         # Frame around the actual map area
         ctx.save()
         ctx.set_source_rgb(0,0,0)
         ctx.set_line_width(1);
-        self._mm_rect(ctx, 40, 40, 40 +  480, 40 + 450, dpi)
+        self._mm_rect(ctx, 30, 50, self._w_mm, self._h_mm, 72)
         ctx.stroke()
         ctx.restore()
 
@@ -155,11 +516,11 @@ class TK25Renderer(Renderer):
         ctx.save()
         ctx.set_source_rgb(0,0,0)
         ctx.set_line_width(5);
-        self._mm_rect(ctx, 30, 30, 60 +  480, 60 + 450, dpi)
+        self._mm_rect(ctx, 20, 40, 20 + self._w_mm, 20 + self._h_mm, 72)
         ctx.stroke()
         ctx.set_line_width(1);
-        self._mm_rect(ctx, 28, 28, 64 +  480, 64 + 450, dpi)
-        self._mm_rect(ctx, 32, 32, 56 +  480, 56 + 450, dpi)
+        self._mm_rect(ctx, 18, 38, 24 +  self._w_mm, 24 + self._h_mm, 72)
+        self._mm_rect(ctx, 22, 42, 16 +  self._w_mm, 16 + self._h_mm, 72)
         ctx.stroke()
         ctx.restore()
 
@@ -168,30 +529,216 @@ class TK25Renderer(Renderer):
         ctx.set_source_rgb(0,0,0)
         ctx.select_font_face("Droid Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
 
-        self._mm_mvto(ctx, 33, 42, dpi)
-        self._fs(ctx, 7, dpi);
-        ctx.show_text("52°");
-        self._fs(ctx, 4, dpi);
-        ctx.show_text("10'");
-        
-        self._mm_mvto(ctx, 40, 39, dpi)
-        draw_utils.draw_text_left(ctx, normal_layout, normal_fascent,
-                                  commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(39, dpi),
-                                  "18°")
-        draw_utils.draw_text_right(ctx, normal_layout, normal_fascent,
-                                  commons.convert_mm_to_dots(40, dpi), commons.convert_mm_to_dots(41, dpi),
-                                  "30'")
-        
+        self._mm_mvto(ctx, 30 - 7, 50 + 2, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._lat1)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._lat1)[1]);
+
+        self._mm_mvto(ctx, 30 + self._w_mm + 1, 50 + 2, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._lat1)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._lat1)[1]);
+
+        self._mm_mvto(ctx, 30 - 7, 50 + self._h_mm, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._lat2)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._lat2)[1]);
+
+        self._mm_mvto(ctx, 30 + self._w_mm + 1, 50 + self._h_mm, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._lat2)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._lat2)[1]);
+
+        self._mm_mvto(ctx, 30 - 3, 50 - 1, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._long1)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._long1)[1]);
+
+        self._mm_mvto(ctx, 30 + self._w_mm - 4, 50 - 1, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._long2)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._long2)[1]);
+
+        self._mm_mvto(ctx, 30 - 3, 50 + self._h_mm + 3, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._long1)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._long1)[1]);
+
+        self._mm_mvto(ctx, 30 + self._w_mm - 4, 50 + self._h_mm + 3, 72)
+        self._fs(ctx, 7, 72);
+        ctx.show_text("%d°" % self.deg2hm(self.rc.bounding_box._long2)[0]);
+        self._fs(ctx, 4, 72);
+        ctx.show_text("%d'" % self.deg2hm(self.rc.bounding_box._long2)[1]);
+
         ctx.restore()
 
-        cairo_surface.flush()
+        ##
+        ## Draw the overview map in the bottom left
+        ##
+        ctx.save()
+        ctx.translate(commons.convert_mm_to_pt(30), commons.convert_mm_to_pt(50+self._h_mm+22))
+        self._prepare_cover_map(commons.convert_mm_to_pt(50), commons.convert_mm_to_pt(50))
+        # ~ ctx.rectangle(commons.convert_mm_to_pt(30), commons.convert_mm_to_pt(50+460+20), commons.convert_mm_to_pt(50), commons.convert_mm_to_pt(50))
+        # ~ ctx.clip()
+        self._render_cover_map(ctx, commons.convert_mm_to_pt(50), commons.convert_mm_to_pt(50))
+        ctx.restore()
+
+        ## and frame it
+        ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(1);
+        self._mm_rect(ctx, 30, 50 + self._h_mm + 22, 50, 50, 72)
+        ctx.stroke()
+        ctx.restore()
+
+        ##
+        ## Draw the index, when applicable
+        ##
+
+        # Update the street_index to reflect the grid's actual position
+        if self.index is not None:
+        # ~ if self.grid and self.index and self.index_position is not None:
+            self.rc.status_update(_("%s: writing CSV index file") % self.rc.output_format)
+            # ~ self.index.apply_grid(self.grid)
+
+            # Dump the CSV street index
+            self.index.write_to_csv(self.rc.title, '%s.csv' % self.file_prefix)
+
+        if self._index_renderer and self._index_area:
+            ctx.save()
+
+            # NEVER use ctx.scale() here because otherwise pango will
+            # choose different font metrics which may be incompatible
+            # with what has been computed by __init__(), which may
+            # require more columns than expected !  Instead, we have
+            # to trick pangocairo into believing it is rendering to a
+            # device with the same default resolution, but with a
+            # cairo resolution matching the 'dpi' specified
+            # resolution. See
+            # index::render::StreetIndexRenederer::render() and
+            # comments within.
+
+            self.rc.status_update(_("%s: rendering index") % self.rc.output_format)
+            self._index_renderer.render(ctx, self._index_area, dpi)
+
+            ctx.restore()
+
+        ## Draw the MTB number
+        ctx.save()
+        self._mm_mvto(ctx,30 + self._w_mm - 105, 33 - 2, 72)
+        ctx.select_font_face("DejaVu Serif Condensed", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
+        self._fs(ctx, 12, 72);
+        ctx.show_text("( 4cm-Karte )");
+        ctx.select_font_face("DejaVu Serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
+        self._fs(ctx, 16, 72);
+        ctx.show_text(" Retro-Messtischblatt ");
+        ctx.select_font_face("DejaVu Serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD);
+        ctx.show_text("%d." % self._latlng2sheet(self.rc.bounding_box.get_center()[0],self.rc.bounding_box.get_center()[1]));
+        ctx.restore()
+
+        self._mm_mvto(ctx, 0, 0, 72)
+
+        ##
+        ## Draw the title
+        ##
+        if self.rc.title:
+            ctx.save()
+            self._draw_title(ctx, None,
+                                 None, 'DejaVu Serif Bold')
+            ctx.restore()
+
+        # ~ cairo_surface.flush()
+
+        # make sure that plugins do not render outside the actual map area
+        ctx.save()
+        ctx.translate(self._map_coords[0],self._map_coords[1])
+        ctx.rectangle(commons.convert_mm_to_pt(-8), commons.convert_mm_to_pt(-8),self._map_coords[2]+commons.convert_mm_to_pt(16),self._map_coords[3]+commons.convert_mm_to_pt(16))
+        ctx.clip()
+
+        # apply effect plugin overlays
+        for plugin_name, effect in self._overlay_effects.items():
+            self.rc.status_update(_("%(format)s: rendering '%(style)s' overlay")
+                                  % { 'format': self.rc.output_format,
+                                      'style':  plugin_name,
+                                     })
+            try:
+                effect.render(self, ctx)
+            except Exception as e:
+                # TODO better logging
+                LOG.warning("Error while rendering overlay: %s\n%s" % (plugin_name, e))
+        ctx.restore()
+
+        ## draw a scale bar etc
+        ctx.save()
+        ctx.translate(commons.convert_mm_to_pt(30+self._w_mm / 2. - 50),
+                      commons.convert_mm_to_pt(50+self._h_mm+22.5) )
+        ctx.select_font_face("DejaVu Serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD);
+        self._fs(ctx, 12, 72);
+        ctx.show_text("1:25 000");
+        ctx.select_font_face("DejaVu Serif Condensed", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL);
+        ctx.show_text(" (4 cm der Karte = 1 km der Natur)");
+        ctx.restore()
+        # ~ ctx.save()
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(0.5);
+        self._mm_hline(ctx, 30 + self._w_mm / 2. - 60, 50 + self._h_mm + 30 - 1.5, 120, 72)
+        # ~ self._mm_vline(ctx, 30 + self._h_mm / 2. - 20, 50 + self._h_mm + 30, -1.5, 72)
+        self._fs(ctx, 6, 72);
+        for meter in [-1000,-900,-800,-700,-600,-500,-400,-300,-200,-100,0,500,1000,1500,2000]:
+            ctx.save()
+            self._mm_vline(ctx, 30 + self._w_mm / 2. - 20 + meter * 0.04 , 50 + self._h_mm + 30, -1.5, 72)
+            ctx.stroke()
+            # ~ ctx.save()
+            ctx.translate(commons.convert_mm_to_pt(30 + self._w_mm/ 2. - 20 + meter*0.04 - 2/3*len(str(abs(meter)))), commons.convert_mm_to_pt(50 + self._h_mm + 30 - 2.5))
+            if (meter % 500 == 0):
+                ctx.show_text("%d" % abs(meter));
+            if (meter == 2000):
+                ctx.show_text(" ");
+                self._fs(ctx, 7, 72);
+                ctx.show_text("Meter = 2 Kilometer");
+            ctx.restore()
+        # ~ ctx.stroke()
+        # ~ ctx.restore()
+        ctx.save()
+        ctx.set_line_width(1);
+        self._mm_hline(ctx, 30 + self._w_mm / 2. - 60, 50 + self._h_mm + 30, 120, 72)
+        ctx.stroke()
+        # ~ ctx.set_line_width(0.5);
+        # ~ self._mm_hline(ctx, 30 + self._w_mm / 2. - 52, 50 + self._h_mm + 30 + 1, 112, 72)
+        # ~ for schritt in [-1000,-900,-800,-700,-600,-500,-400,-300,-200,-100,500,1000,1500,2000, 2500]:
+            # ~ self._mm_vline(ctx, 30 + self._w_mm / 2. - 20 + schritt * (0.04*0.8) , 50 + self._h_mm + 30, 1, 72)
+        # ~ ctx.stroke()
+        ctx.restore()
+
+        ##
+        ## Draw the copyright notice
+        ##
+        ctx.save()
+
+        # Move to the right position
+        ctx.translate(commons.convert_mm_to_pt(30+self._w_mm / 2.),
+                      commons.convert_mm_to_pt(50+self._h_mm+50) )
+
+        # Draw the copyright notice
+        self._draw_copyright_notice(ctx, commons.convert_mm_to_pt(100),
+                                    commons.convert_mm_to_pt(35),
+                                    osm_date=osm_date)
+        ctx.restore()
+
         return
 
     @staticmethod
     def _generic_get_minimal_paper_size(bounding_box,
                                         scale=Renderer.DEFAULT_SCALE,
                                         index_position = None):
-        return (594, 594) # DinA1 quadratisch
+        return (590, 640) # DinA1 quadratisch
 
     @staticmethod
     def _sheet2latlng(sheetno):
@@ -214,7 +761,7 @@ class TK25Renderer(Renderer):
         sheetno = yy * 100 + xx
         if sheetno not in tk25_names:
             return None
-        
+
         return sheetno
 
     @staticmethod
@@ -226,24 +773,25 @@ class TK25Renderer(Renderer):
     @staticmethod
     def get_compatible_paper_sizes(bounding_box,
                                    renderer_context,
-                                   scale=Renderer.DEFAULT_SCALE):
+                                   scale=Renderer.DEFAULT_SCALE,
+                                   dpi = commons.PT_PER_INCH):
+
+        landscape_scale = scale
 
         return [
             {
                 "name": "Best fit",
-                "width": 841,
-                "height": 594,
+                "width": 590,
+                "height": 640,
                 "portrait_ok": False,
-                "landscake_ok": True,
+                "landscape_ok": True,
                 "default": True,
                 "landscape_preferred": True,
+                "landscape_scale": landscape_scale,
+                "landscape_zoom": Renderer.scaleDenominator2zoom(landscape_scale)
             }
         ]
 
-        
-
-     
-        
 tk25_names = {
     193: "Deutsch Crottingen [Kretingalė]",
     194: "Jakubowo [Jokūbavas]",
