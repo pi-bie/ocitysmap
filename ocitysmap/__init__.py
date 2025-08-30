@@ -131,9 +131,10 @@ def guess_filetype(import_file):
         if first_line.startswith('<?xml'):
             try:
                 import_file.seek(0)
-                gpxpy.parse(import_file)
+                gpxpy.parse(import_file.read().decode('utf-8-sig'))
                 result = "gpx"
-            except:
+            except Exception as e:
+                raise RuntimeError("Error parsing gpx file %s: %s" % (file_name,e))
                 pass
         elif first_line.startswith('{'):
             second_line = import_file.readline(100).decode('utf-8-sig')
