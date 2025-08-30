@@ -38,7 +38,7 @@ import logging
 LOG = logging.getLogger('ocitysmap')
 
 
-EARTH_RADIUS = 6370986 # meters
+EARTH_RADIUS = 6378137 # meters
 
 def dd2dms(value):
     abs_value = abs(value)
