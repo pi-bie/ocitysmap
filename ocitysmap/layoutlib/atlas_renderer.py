@@ -722,7 +722,7 @@ class AtlasRenderer(Renderer):
         for ov_canvas in self._frontpage_overlay_canvases:
             self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_overlay, ctx, 72.0/dpi, 0, 0)
+            mapnik.render(rendered_map, ctx, 72.0/dpi, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
