@@ -253,7 +253,7 @@ def render(renderer, ctx):
         #       of doing it iteratively ... which would also have
         #       the advantage of allowing for sub-kilometer grid sizes
         factor = 1000
-        while (height / dv_km) < 10:
+        while (Height / dv_km) < 10:
             w_km = math.floor(w_km / 10)
             e_km = math.ceil(e_km / 10)
             n_km = math.ceil(n_km / 10)
