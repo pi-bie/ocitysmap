@@ -43,11 +43,18 @@ class GpxProcessor:
                 gpx_fp.close()
 
         def getBoundingBox(self):
-                b = self.gpx.get_bounds()
+                try:
+                    b = self.gpx.get_bounds()
+                except Exception as e:
+                    LOG.error("Error determining bounding box of GPX file: %s" % e)
                 return BoundingBox(b.min_latitude, b.min_longitude, b.max_latitude, b.max_longitude)
 
         def getTitle(self):
-                return self.gpx.name.strip()
+                try:
+                    return self.gpx.name.strip()
+                except Exception as e:
+                    LOG.warning("Could not determine name of GPX file: %s. Using placeholder instead." % e)
+                    return "GPX Track"
 
         def getAnnotation(self):
                 return None
