@@ -148,7 +148,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         # Prepare the title
         pc = PangoCairo.create_context(ctx)
         layout = PangoCairo.create_layout(ctx)
-        layout.set_width(int(cover_usable_width_pt))
+        layout.set_width(int(cover_usable_width_pt * Pango.SCALE))
         if not self.rc.i18n.isrtl():
             layout.set_alignment(Pango.Alignment.LEFT)
         else:
