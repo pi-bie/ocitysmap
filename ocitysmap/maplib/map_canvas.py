@@ -171,8 +171,8 @@ class MapCanvas:
         # the actual scale depends on the latitude
         lat = self._geo_bbox.get_top_left()[0]
         scale *= math.cos(math.radians(lat))
-        # by convention, the scale denominator uses 90 ppi whereas cairo uses 72 ppi
-        scale *= float(self._dpi) / 90
+        # by convention, the scale denominator uses ~90 ppi whereas cairo uses 72 ppi
+        scale *= float(self._dpi) / (25.4 / 0.28)
         return scale
 
     def _render_shape_file(self, shape_file, color, line_width):
