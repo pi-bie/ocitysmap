@@ -839,8 +839,9 @@ class OCitySMap:
         config.status_update(_("Rendering %s") % config.output_format.upper())
 
         dpi = layoutlib.commons.PT_PER_INCH
+        map_dpi = OCitySMap.DEFAULT_RENDERING_PNG_DPI
 
-        renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
+        renderer = renderer_cls(self._db, config, tmpdir, dpi, map_dpi, file_prefix)
 
         if output_format == 'png':
             try:
@@ -861,7 +862,7 @@ class OCitySMap:
                 LOG.warning("%d DPI to high for this paper size, using 72dpi instead" % dpi)
 
             # as the dpi value may have changed we need to re-create the renderer
-            renderer = renderer_cls(self._db, config, tmpdir, dpi, file_prefix)
+            renderer = renderer_cls(self._db, config, tmpdir, dpi, dpi, file_prefix)
 
             # As strange as it may seem, we HAVE to use a vector
             # device here and not a raster device such as
@@ -871,7 +872,9 @@ class OCitySMap:
             # layout the whole page
             LOG.debug("Rendering PNG into %dpx x %dpx area at %ddpi ..."
                       % (w_px, h_px, dpi))
-            surface = cairo.PDFSurface(None, w_px, h_px)
+            # ~ surface = cairo.PDFSurface(None, w_px, h_px)
+            surface = cairo.ImageSurface(cairo.Format.ARGB32,
+                                      w_px, h_px)
 
         elif output_format == 'svg':
             surface = cairo.SVGSurface(tmp_output_filename,
@@ -918,7 +921,7 @@ class OCitySMap:
             raise ValueError( \
                 'Unsupported output format: %s!' % output_format.upper())
 
-        renderer.render(surface, dpi, osm_date)
+        renderer.render(surface, dpi, map_dpi, osm_date)
 
         LOG.debug('Writing %s...' % output_filename)
 

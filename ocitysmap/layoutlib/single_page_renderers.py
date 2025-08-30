@@ -9,7 +9,7 @@
 # Copyright (C) 2010  Thomas Petazzoni
 # Copyright (C) 2010  Gaël Utard
 # Copyright (c) 2023  Hartmut Holzgraefe
-# Copyright (c) 2024  pi-bie
+# Copyright (c) 2025  pi-bie
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -79,7 +79,7 @@ class SinglePageRenderer(Renderer):
     MAX_INDEX_OCCUPATION_RATIO = 1/3.
     COVER_OCCUPATION_RATIO = 1/4.
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix,
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix,
                  index_position = 'side', foldable = False):
         """
         Create the renderer.
@@ -94,6 +94,8 @@ class SinglePageRenderer(Renderer):
                Path to a temp dir that can hold temp files the renderer creates.
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
            file_prefix : str
                File name refix for all output file formats to be generated
            index_position : str, optional
@@ -104,7 +106,7 @@ class SinglePageRenderer(Renderer):
                in the top left corner
         """
 
-        Renderer.__init__(self, db, rc, tmpdir, dpi)
+        Renderer.__init__(self, db, rc, tmpdir, dpi, map_dpi)
 
         self.file_prefix = file_prefix
         self.foldable = foldable
@@ -514,7 +516,7 @@ class SinglePageRenderer(Renderer):
         PangoCairo.show_layout(ctx, layout)
         ctx.restore()
 
-    def render(self, cairo_surface, dpi, osm_date):
+    def render(self, cairo_surface, dpi, map_dpi, osm_date):
         """ Render the complete map page, including all components
 
         Renders the map, the index and all other visual map features on the
@@ -526,6 +528,8 @@ class SinglePageRenderer(Renderer):
             Cairo destination device surface to render into
         dpi : int
             Dots per inch to use with this surface
+        map_dpi : int
+            Dots per inch to use for map rendering
         osm_date : datetime
             Timestamp of last OSM database update
 
@@ -581,7 +585,7 @@ class SinglePageRenderer(Renderer):
 
         # Draw the rescaled Map
         ctx.save()
-        scale_factor = int(dpi / 72)
+        scale_factor = float(dpi) / map_dpi
         rendered_map = self._map_canvas.get_rendered_map()
         LOG.info('Map:')
         LOG.info('Mapnik scale: 1/%f' % rendered_map.scale_denominator())

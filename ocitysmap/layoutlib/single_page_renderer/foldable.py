@@ -33,7 +33,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
     name = 'single_page_index_foldable'
     description = gettext(u'Full-page layout with title in top left corner and the index on the side.')
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix):
         """
         Create the renderer.
 
@@ -47,10 +47,12 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
                Path to a temp dir that can hold temp files the renderer creates.
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
            file_prefix : str
                File name refix for all output file formats to be generated
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'side', True)
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix, 'side', True)
 
     def _get_map_coords(self, index_position):
         """ Determine actual map output dimensions
@@ -113,8 +115,11 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         w_dots = commons.convert_pt_to_dots(self._cover_width_pt, self.dpi)
         h_dots = commons.convert_pt_to_dots(self._cover_height_pt, self.dpi)
         margin_dots = 0.0625 * min(w_dots, h_dots)
+        margin_pt = 0.0625 * min(self._cover_width_pt, self._cover_height_pt)
         cover_usable_height_dots = h_dots - 2 * margin_dots
+        cover_usable_height_pt = self._cover_height_pt - 2 * margin_pt
         cover_usable_width_dots = w_dots - 2 * margin_dots
+        cover_usable_width_pt = self._cover_width_pt - 2 * margin_pt
 
         # Title background bar
         ctx.save()
@@ -173,8 +178,8 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         # Draw the mini map on the cover
         ctx.save()
         ctx.translate(margin_dots,margin_dots + 0.4 * cover_usable_height_dots)
-        self._prepare_cover_map(cover_usable_width_dots, 0.6 * cover_usable_height_dots)
-        self._render_cover_map(ctx, cover_usable_width_dots, 0.6 * cover_usable_height_dots)
+        self._prepare_cover_map(cover_usable_width_pt, 0.6 * cover_usable_height_pt)
+        self._render_cover_map(ctx, self.dpi, self.map_dpi, cover_usable_width_dots, 0.6 * cover_usable_height_dots)
         ctx.restore()
 
     def _prepare_cover_map(self, w, h):
@@ -206,13 +211,13 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         cover_map.render()
         self._cover_map = cover_map
 
-        self._frontpage_overlay_canvases = []
-        self._frontpage_overlay_effects  = {}
+        self._cover_overlay_canvases = []
+        self._cover_overlay_effects  = {}
         for overlay in self._overlays:
             path = overlay.path.strip()
             if path.startswith('internal:'):
                 plugin_name = path.lstrip('internal:')
-                self._frontpage_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
+                self._cover_overlay_effects[plugin_name] = self.get_plugin(plugin_name)
             else:
                 ov_canvas = MapCanvas(overlay,
                                       self.rc.bounding_box,
@@ -222,9 +227,9 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
                                       extend_bbox_to_ratio=True)
                 self.rc.status_update(_("Preparing front page: %s") % ov_canvas._style_name)
                 ov_canvas.render()
-                self._frontpage_overlay_canvases.append(ov_canvas)
+                self._cover_overlay_canvases.append(ov_canvas)
 
-    def _render_cover_map(self, ctx, w, h):
+    def _render_cover_map(self, ctx, dpi, map_dpi, w, h):
 
         # ~ dpi = self.dpi
 
@@ -237,13 +242,14 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         ctx.clip()
 
         # Render the map !
-        self.rc.status_update(_("Rendering front page: base map"))
-        mapnik.render(self._cover_map.get_rendered_map(), ctx)
+        scale_factor = float(dpi)/map_dpi
+        self.rc.status_update(_("Rendering cover map: base map"))
+        mapnik.render(self._cover_map.get_rendered_map(), ctx, scale_factor, 0, 0)
 
-        for ov_canvas in self._frontpage_overlay_canvases:
-            self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
+        for ov_canvas in self._cover_overlay_canvases:
+            self.rc.status_update(_("Rendering cover map: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
@@ -263,7 +269,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
 
         # ~ ctx.restore()
 
-    def _render_cover(self, ctx, cairo_surface, dpi, osm_date):
+    def _render_cover(self, ctx, cairo_surface, dpi, map_dpi, osm_date):
         self.rc.status_update(_("Rendering cover"))
         ctx.save()
         self._prepare_page(ctx)
@@ -274,7 +280,7 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
         w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
 
-        self._render_cover_map(ctx, dpi, w, h)
+        self._render_cover_map(ctx, dpi, map_dpi, w, h)
         # ~ self._render_cover_header(ctx, w, h)
         # ~ self._render_cover_footer(ctx, w, h, osm_date)
 

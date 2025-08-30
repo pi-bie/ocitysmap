@@ -5,6 +5,7 @@
 # Copyright (C) 2012  Thomas Petazzoni
 # Copyright (C) 2012  Gaël Utard
 # Copyright (C) 2012  Étienne Loks
+# Copyright (C) 2025  pi-bie
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -102,7 +103,7 @@ class MultiPageRenderer(Renderer):
     DEFAULT_MULTIPAGE_SCALE = 4200
     MAX_MULTIPAGE_MAPPAGES  = 50
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix):
         """
         Create the renderer.
 
@@ -116,11 +117,13 @@ class MultiPageRenderer(Renderer):
                Path to a temp dir that can hold temp files the renderer creates.
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
            file_prefix : str
                File name refix for all output file formats to be generated
         """
 
-        Renderer.__init__(self, db, rc, tmpdir, dpi)
+        Renderer.__init__(self, db, rc, tmpdir, dpi, map_dpi)
 
         self.rc.status_update(_("Initializing ..."))
 
@@ -671,7 +674,7 @@ class MultiPageRenderer(Renderer):
                  blue_w, blue_h)
         ctx.restore()
 
-    def _render_front_page_map(self, ctx, dpi, w, h):
+    def _render_front_page_map(self, ctx, dpi, map_dpi, w, h):
         # We will render the map slightly below the title
         ctx.save()
         ctx.translate(0, 0.3 * h + Renderer.PRINT_SAFE_MARGIN_PT)
@@ -681,13 +684,14 @@ class MultiPageRenderer(Renderer):
         ctx.clip()
 
         # Render the map !
+        scale_factor = float(dpi)/map_dpi
         self.rc.status_update(_("Rendering front page: base map"))
-        mapnik.render(self._front_page_map.get_rendered_map(), ctx)
+        mapnik.render(self._front_page_map.get_rendered_map(), ctx, scale_factor, 0, 0)
 
         for ov_canvas in self._frontpage_overlay_canvases:
             self.rc.status_update(_("Rendering front page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
@@ -786,7 +790,7 @@ class MultiPageRenderer(Renderer):
 
         ctx.restore()
 
-    def _render_front_page(self, ctx, cairo_surface, dpi, osm_date):
+    def _render_front_page(self, ctx, cairo_surface, dpi, map_dpi, osm_date):
         self.rc.status_update(_("Rendering front page"))
         ctx.save()
         self._prepare_page(ctx)
@@ -797,7 +801,7 @@ class MultiPageRenderer(Renderer):
         w = self._usable_area_width_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
         h = self._usable_area_height_pt - 2 * Renderer.PRINT_SAFE_MARGIN_PT
 
-        self._render_front_page_map(ctx, dpi, w, h)
+        self._render_front_page_map(ctx, dpi, map_dpi, w, h)
         self._render_front_page_header(ctx, w, h)
         self._render_front_page_footer(ctx, w, h, osm_date)
 
@@ -890,20 +894,21 @@ class MultiPageRenderer(Renderer):
         ctx.restore()
         cairo_surface.show_page()
 
-    def _render_overview_page(self, ctx, cairo_surface, dpi):
+    def _render_overview_page(self, ctx, cairo_surface, dpi, map_dpi):
         self.rc.status_update(_("Rendering overview page"))
 
         ctx.save()
         self._prepare_page(ctx)
 
+        scale_factor = float(dpi)/map_dpi
         rendered_map = self.overview_canvas.get_rendered_map()
         self.rc.status_update(_("Rendering overview page: base map"))
-        mapnik.render(rendered_map, ctx)
+        mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
         for ov_canvas in self.overview_overlay_canvases:
             self.rc.status_update(_("Rendering overview page: %s") % ov_canvas._style_name)
             rendered_map = ov_canvas.get_rendered_map()
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
         # apply effect overlays
         ctx.save()
@@ -1113,12 +1118,12 @@ class MultiPageRenderer(Renderer):
 
 
 
-    def render(self, cairo_surface, dpi, osm_date):
+    def render(self, cairo_surface, dpi, map_dpi, osm_date):
         ctx = cairo.Context(cairo_surface)
 
-        self._render_front_page(ctx, cairo_surface, dpi, osm_date)
+        self._render_front_page(ctx, cairo_surface, dpi, map_dpi, osm_date)
         self._render_contents_page(ctx, cairo_surface, dpi, osm_date)
-        self._render_overview_page(ctx, cairo_surface, dpi)
+        self._render_overview_page(ctx, cairo_surface, dpi, map_dpi)
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
             self.rc.status_update(_("Rendering map page %(page)d of %(total)d")
@@ -1129,6 +1134,7 @@ class MultiPageRenderer(Renderer):
             ctx.save()
             self._prepare_page(ctx)
 
+            scale_factor = float(dpi) / map_dpi
             rendered_map = canvas.get_rendered_map()
             if (map_number == 0):
                 LOG.debug('Mapnik scale: 1/%f' % rendered_map.scale_denominator())
@@ -1144,7 +1150,7 @@ class MultiPageRenderer(Renderer):
                                       'total': len(self.pages),
                                      })
 
-            mapnik.render(rendered_map, ctx)
+            mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
             for overlay_canvas in overlay_canvases:
                 self.rc.status_update(_("Rendering map page %(page)d of %(total)d: %(style)s") %
@@ -1154,7 +1160,7 @@ class MultiPageRenderer(Renderer):
                                        })
 
                 rendered_overlay = overlay_canvas.get_rendered_map()
-                mapnik.render(rendered_overlay, ctx)
+                mapnik.render(rendered_overlay, ctx, scale_factor, 0, 0)
 
             # Place the vertical and horizontal square labels
             ctx.save()

@@ -12,7 +12,7 @@ class SinglePageRendererIndexExtraPage(SinglePageRenderer):
     name = 'single_page_index_extra_page'
     description = gettext(u'Full-page layout with index on extra page (PDF only).')
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix):
         """
         Create the renderer.
 
@@ -28,8 +28,10 @@ class SinglePageRendererIndexExtraPage(SinglePageRenderer):
                File name refix for all output file formats to be generated
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'extra_page')
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix, 'extra_page')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, render_context,

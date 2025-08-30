@@ -11,7 +11,7 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
     name = 'single_page_index_side'
     description = gettext(u'Full-page layout with the index on the side.')
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix):
         """
         Create the renderer.
 
@@ -25,10 +25,12 @@ class SinglePageRendererIndexOnSide(SinglePageRenderer):
                Path to a temp dir that can hold temp files the renderer creates.
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
            file_prefix : str
                File name refix for all output file formats to be generated
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, 'side')
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix, 'side')
 
     @staticmethod
     def get_compatible_paper_sizes(bounding_box, render_context,

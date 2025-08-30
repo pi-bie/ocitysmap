@@ -80,7 +80,7 @@ class Renderer:
     # see entities.xml.inc file from osm style sheet
     DEFAULT_SCALE           = 7000000
 
-    def __init__(self, db, rc, tmpdir, dpi):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi):
         """
         Create the renderer.
 
@@ -89,6 +89,7 @@ class Renderer:
            rc (RenderingConfiguration): rendering parameters.
            tmpdir (os.path): Path to a temp dir that can hold temp files.
            dpi (integer): output resolution for bitmap formats
+           map_dpi (integer): possibly different resolution for the map itself
         """
         # Note: street_index may be None
         self.db           = db
@@ -102,6 +103,7 @@ class Renderer:
                 commons.convert_mm_to_pt(self.rc.paper_height_mm)
         self._title_margin_pt = 0
         self.dpi = dpi
+        self.map_dpi = map_dpi
 
         plugin_path = os.path.abspath(os.path.join(os.path.dirname(__file__), './render_plugins'))
         self.plugin_base = PluginBase(package='ocitysmap.layout_plugins')
@@ -327,13 +329,14 @@ class Renderer:
         return self.plugin_source.load_plugin(plugin_name)
 
     # The next two methods are to be overloaded by the actual renderer.
-    def render(self, cairo_surface, dpi):
+    def render(self, cairo_surface, dpi, map_dpi):
         """Renders the map, the index and all other visual map features on the
         given Cairo surface.
 
         Args:
             cairo_surface (Cairo.Surface): the destination Cairo device.
             dpi (int): dots per inch of the device.
+            map_dpi (int): dots per inch for the map itself
         """
         raise NotImplementedError
 

@@ -14,7 +14,7 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
     name = 'plain'
     description = gettext(u'Full-page layout without index.')
 
-    def __init__(self, db, rc, tmpdir, dpi, file_prefix):
+    def __init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix):
         """
         Create the renderer.
 
@@ -28,10 +28,12 @@ class SinglePageRendererNoIndex(SinglePageRenderer):
                Path to a temp dir that can hold temp files the renderer creates.
            dpi : int
                Output resolution for bitmap formats
+           map_dpi : int
+               Render resolution for the map itself
            file_prefix : str
                File name refix for all output file formats to be generated
         """
-        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, file_prefix, None)
+        SinglePageRenderer.__init__(self, db, rc, tmpdir, dpi, map_dpi, file_prefix, None)
 
 
     @staticmethod
