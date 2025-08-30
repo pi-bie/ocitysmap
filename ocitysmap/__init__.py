@@ -834,9 +834,9 @@ class OCitySMap:
         void
         """
         tmp_output_filename = output_filename + ".tmp"
-        config.output_format = output_format.upper()
-        LOG.debug('Rendering to %s format...' % config.output_format)
-        config.status_update(_("Rendering %s") % config.output_format)
+        config.output_format = output_format
+        LOG.debug('Rendering to %s format...' % config.output_format.upper())
+        config.status_update(_("Rendering %s") % config.output_format.upper())
 
         dpi = layoutlib.commons.PT_PER_INCH
 
