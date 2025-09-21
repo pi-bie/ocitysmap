@@ -251,6 +251,23 @@ class SinglePageRendererIndexFoldable(SinglePageRenderer):
             rendered_map = ov_canvas.get_rendered_map()
             mapnik.render(rendered_map, ctx, scale_factor, 0, 0)
 
+        # Draw a frame around the actual input bounding box
+        bbox = self._cover_map.get_actual_bounding_box()
+        bottom_right, bottom_left, top_left, top_right = bbox.to_mercator()
+        coord_delta_y = top_right.y - bottom_left.y
+        coord_delta_x = top_right.x - bottom_left.x
+        p_bottom_right, p_bottom_left, p_top_left, p_top_right = \
+                                                        self.rc.bounding_box.to_mercator()
+        x0, y0 = int(w*(p_bottom_left.x-bottom_left.x)/coord_delta_x),int(h*(p_bottom_left.y-bottom_left.y)/coord_delta_y)
+        x1, y1 =  int(w*(p_top_right.x-bottom_left.x)/coord_delta_x),int(h*(p_top_right.y-bottom_right.y)/coord_delta_y)
+        LOG.info("actual bounding box starts at (%s,%s) and ends at (%s,%s)." % (x0,y0,x1,y1))
+        ctx.save()
+        ctx.set_line_width(self.rc.stylesheet.grid_line_width)
+        ctx.set_source_rgba(0,0,0,self.rc.stylesheet.grid_line_alpha)
+        ctx.rectangle(x0,y0,x1-x0,y1-y0)
+        ctx.stroke()
+        ctx.restore()
+
         # TODO offsets are not correct here, so we skip overlay plugins for now
         # apply effect overlays
         # ctx.save()
