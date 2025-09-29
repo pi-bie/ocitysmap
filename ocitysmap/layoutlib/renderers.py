@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ocitysmap.layoutlib.single_page_renderer.no_index import SinglePageRendererNoIndex
+from ocitysmap.layoutlib.single_page_renderer.plain_fixedDPI import SinglePageRendererPlainFixedDPI
 from ocitysmap.layoutlib.single_page_renderer.side_index import SinglePageRendererIndexOnSide
 from ocitysmap.layoutlib.single_page_renderer.bottom_index import SinglePageRendererIndexBottom
 from ocitysmap.layoutlib.single_page_renderer.extra_page import SinglePageRendererIndexExtraPage
@@ -16,6 +17,7 @@ _RENDERERS = [
     SinglePageRendererIndexBottom,
     SinglePageRendererIndexExtraPage,
     SinglePageRendererIndexFoldable,
+    SinglePageRendererPlainFixedDPI,
 #    TK25Renderer,
     MultiPageRenderer,
     AtlasRenderer,
