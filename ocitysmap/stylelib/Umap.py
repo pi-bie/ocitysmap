@@ -247,6 +247,8 @@ class UmapStylesheet(Stylesheet):
 
             # now go over the actual geometry features in that layer
             for feature in layer['features']:
+                if not feature['geometry']['coordinates']:
+                    continue
                 try:
                     # feature properties override previous defaults
                     new_props = get_default_properties(feature, layer_defaults)

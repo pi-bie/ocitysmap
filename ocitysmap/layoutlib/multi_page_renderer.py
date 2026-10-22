@@ -1061,7 +1061,8 @@ class MultiPageRenderer(Renderer):
         """
         ctx.save()
 
-        ctx.set_source_rgba(0, 0, 0, 0.7);
+        ctx.set_source_rgba(0, 0, 0, 0.7)
+        ctx.set_operator(cairo.Operator.OVER)
 
         step_horiz = map_area_width_dots / map_grid.horiz_count
         last_horiz_portion = math.modf(map_grid.horiz_count)[0]
@@ -1124,6 +1125,8 @@ class MultiPageRenderer(Renderer):
         self._render_front_page(ctx, cairo_surface, dpi, map_dpi, osm_date)
         self._render_contents_page(ctx, cairo_surface, dpi, osm_date)
         self._render_overview_page(ctx, cairo_surface, dpi, map_dpi)
+
+        map_number = 0
 
         for map_number, (canvas, grid, overlay_canvases, overlay_effects) in enumerate(self.pages):
             self.rc.status_update(_("Rendering map page %(page)d of %(total)d")
@@ -1265,6 +1268,7 @@ class MultiPageRenderer(Renderer):
         """
         ctx.save()
         ctx.set_font_size(14)
+        ctx.set_operator(cairo.Operator.OVER)
 
         bbox = map_canvas.get_actual_bounding_box()
         bottom_right, bottom_left, top_left, top_right = bbox.to_mercator()
